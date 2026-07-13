@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/calculator"/>
+    <item
+        android:id="@+id/nav_display"
+        android:icon="@drawable/ic_display"
+        android:title="@string/bmi"/>
+    <item
+        android:id="@+id/nav_statistics"
+        android:icon="@drawable/ic_statistics"
+        android:title="@string/statistics"/>
+</menu>

@@ -43,4 +43,24 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="calculator">Calculator</string>
+    <string name="weight">Weight</string>
+    <string name="height">Height</string>
+    <string name="_170_0">170.0</string>
+    <string name="_65_00">65.00</string>
+    <string name="lb">lb</string>
+    <string name="kg">kg</string>
+    <string name="ft_in">ft·in</string>
+    <string name="cm">cm</string>
+    <string name="time">Time</string>
+    <string name="noDate">未获取到当前日期</string>
+    <string name="time_period">未获取到当前时间段</string>
+    <string name="age">Age</string>
+    <string name="yinhao">"</string>
+    <string name="danyinhao">\'</string>
+    <string name="cancel">CANCEL</string>
+    <string name="done">DONE</string>
+    <string name="date">DATE</string>
+    <string name="bmi">BMI</string>
+    <string name="statistics">Statistics</string>
 </resources>

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="splash_blue">#4457D8</color>
+    <color name="primary_white">#FFFFFF</color>
+    <color name="splash_blue">#3659CF</color>
+    <color name="bg_gray">#EAEAEE</color>
+    <color name="text_black">#000000</color>
+    <color name="bg_rounded_card">#FFFFFF</color>
+    <color name="bg_rounded_gray">#F1F1F1</color>
+    <color name="bg_rounded_blue">#3659CF</color>
+
 </resources>

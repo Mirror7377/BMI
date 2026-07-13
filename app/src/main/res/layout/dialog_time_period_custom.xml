@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp">
+
+    <!-- 标题：TIME -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/time"
+        android:textSize="20sp"
+        android:textColor="#000000"
+        android:fontFamily="montserrat"
+        android:textStyle="bold"
+        android:letterSpacing="-0.187"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        android:textAllCaps="true" />
+
+    <!-- 单选列表 -->
+    <ListView
+        android:id="@+id/lv_time_period"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:choiceMode="singleChoice"
+        android:paddingVertical="8dp" />
+
+    <!-- 按钮区域（复用日期选择器的按钮样式） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="@string/cancel"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:background="@color/bg_rounded_gray"
+            android:fontFamily="montserrat"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="DONE"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="@color/bg_rounded_blue"
+            android:fontFamily="montserrat"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

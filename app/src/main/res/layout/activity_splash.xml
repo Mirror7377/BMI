@@ -7,13 +7,11 @@
     android:background="@color/splash_blue"
     android:fitsSystemWindows="true">
 
-    <!-- Logo整体（动画作用对象） -->
     <FrameLayout
         android:id="@+id/logoContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <!-- 仪表盘 -->
         <FrameLayout
             android:id="@+id/gaugeContainer"
             android:layout_width="73dp"
@@ -26,7 +24,6 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/gauge" />
 
-            <!-- 指针（8×23） -->
             <ImageView
                 android:id="@+id/imgNeedle"
                 android:layout_width="8dp"
@@ -38,7 +35,6 @@
 
         </FrameLayout>
 
-        <!-- BMI标题 -->
         <ImageView
             android:id="@+id/imgTitle"
             android:layout_width="170dp"
@@ -49,7 +45,6 @@
 
     </FrameLayout>
 
-    <!-- 底部Leap Logo -->
     <ImageView
         android:id="@+id/imgLeap"
         android:layout_width="150dp"
