@@ -67,9 +67,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onWeightChanged(value: Double) {
-        // 用户输入的 value 是当前单位下的值
-        val clamped = value.coerceIn(1.0, 250.0)
-        // 计算对应的 kg 值（用于存储和计算）
+        val (min, max) = when (_state.value.weightUnit) {
+            WeightUnit.KG -> 1.0 to 250.0
+            WeightUnit.LB -> 2.0 to 551.0
+        }
+        val clamped = value.coerceIn(min, max)
         val kgValue = if (_state.value.weightUnit == WeightUnit.KG) {
             clamped
         } else {
@@ -108,56 +110,69 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onHeightChanged(value: Double) {
+        //只限定cm
         val clamped = value.coerceIn(1.0, 250.0)
-        updateState { copy(heightCm = clamped) }
+        updateState {
+            copy(
+                heightCm = clamped,
+                heightInput = clamped
+            )
+        }
         refreshDisplayValues()
     }
 
     private fun onHeightUnitChanged(unit: HeightUnit) {
         val currentCm = _state.value.heightCm
-        val newHeightInput: Double
-        val newFeet: Int
-        val newInches: Int
-
         if (unit == HeightUnit.CM) {
-            newHeightInput = currentCm
-            newFeet = _state.value.feetInput   // 保留原值，但不会显示，可忽略
-            newInches = _state.value.inchesInput
+            updateState { copy(heightUnit = unit, heightInput = currentCm) }
         } else { // FT_IN
-            newFeet = UnitConverter.cmToFeet(currentCm)
-            newInches = UnitConverter.cmToInches(currentCm)
-            newHeightInput = (newFeet * 12 + newInches).toDouble()
-        }
+            val rawFeet = UnitConverter.cmToFeet(currentCm)
+            val rawInches = UnitConverter.cmToInches(currentCm)
 
-        updateState {
-            copy(
-                heightUnit = unit,
-                heightInput = newHeightInput,
-                feetInput = newFeet,
-                inchesInput = newInches
-            )
+            val feet = rawFeet.coerceIn(1, 8)
+            val inches = when {
+                rawFeet < 1 -> 0                 // 不足 1 英尺，强制 1'0"
+                feet == 8  -> rawInches.coerceIn(0, 2)  // 8 英尺时英寸上限 2
+                else       -> rawInches.coerceIn(0, 11)
+            }
+
+            val newHeightCm = UnitConverter.feetInchToCm(feet, inches)
+            updateState {
+                copy(
+                    heightUnit = unit,
+                    feetInput = feet,
+                    inchesInput = inches,
+                    heightInput = (feet * 12 + inches).toDouble(),
+                    heightCm = newHeightCm
+                )
+            }
         }
         refreshDisplayValues()
     }
 
     private fun onFeetChanged(feet: Int) {
         val clamped = feet.coerceIn(1, 8)
-        val currentInches = _state.value.inchesInput
+        var currentInches = _state.value.inchesInput
+        // 若英尺为8且英寸超过2，自动修正为2
+        if (clamped == 8 && currentInches > 2) {
+            currentInches = 2
+        }
         val cm = UnitConverter.feetInchToCm(clamped, currentInches)
-        // 将 totalInches 转为 Double
         val totalInches = (clamped * 12 + currentInches).toDouble()
         updateState {
             copy(
                 feetInput = clamped,
+                inchesInput = currentInches,
                 heightCm = cm,
-                heightInput = totalInches   // 现在类型匹配
+                heightInput = totalInches
             )
         }
     }
 
     private fun onInchesChanged(inches: Int) {
-        val clamped = inches.coerceIn(0, 11)
         val currentFeet = _state.value.feetInput
+        val maxInches = if (currentFeet >= 8) 2 else 11
+        val clamped = inches.coerceIn(0, maxInches)
         val cm = UnitConverter.feetInchToCm(currentFeet, clamped)
         val totalInches = (currentFeet * 12 + clamped).toDouble()
         updateState {
@@ -190,8 +205,36 @@ class HomeViewModel @Inject constructor(
 
     private fun calculate() {
         val state = _state.value
-        val heightM = state.heightCm / 100
-        val bmi = state.weightKg / (heightM * heightM)
+        val bmi: Double
+
+        when {
+            // ① cm + kg：BMI = weightKg / (heightM)^2
+            state.heightUnit == HeightUnit.CM && state.weightUnit == WeightUnit.KG -> {
+                val heightM = state.heightCm / 100.0
+                bmi = state.weightKg / (heightM * heightM)
+            }
+            // ② ft-in + lb：BMI = weightLb / (totalInches)^2 * 703
+            state.heightUnit == HeightUnit.FT_IN && state.weightUnit == WeightUnit.LB -> {
+                val totalInches = state.feetInput * 12.0 + state.inchesInput
+                bmi = state.weightInput / (totalInches * totalInches) * 703.0
+            }
+            // ③ ft-in + kg：BMI = weightKg / (ft*0.3048 + in*0.0254)^2
+            state.heightUnit == HeightUnit.FT_IN && state.weightUnit == WeightUnit.KG -> {
+                val heightM = state.feetInput * 0.3048 + state.inchesInput * 0.0254
+                bmi = state.weightKg / (heightM * heightM)
+            }
+            // ④ cm + lb：BMI = (weightLb * 0.45359237) / (heightM)^2
+            state.heightUnit == HeightUnit.CM && state.weightUnit == WeightUnit.LB -> {
+                val weightKg = state.weightInput * 0.45359237
+                val heightM = state.heightCm / 100.0
+                bmi = weightKg / (heightM * heightM)
+            }
+            else -> {
+                // 兜底：使用标准值计算
+                val heightM = state.heightCm / 100.0
+                bmi = state.weightKg / (heightM * heightM)
+            }
+        }
 
         // 根据年龄分类
         val isAdult = state.age >= 18
@@ -202,17 +245,14 @@ class HomeViewModel @Inject constructor(
         }
 
         val record = BmiRecord(
-            // 原始输入值
             weightInput = state.weightInput,
             weightUnit = state.weightUnit.name,
             heightInput = state.heightInput,
             heightUnit = state.heightUnit.name,
             feetInput = if (state.heightUnit == HeightUnit.FT_IN) state.feetInput else null,
             inchesInput = if (state.heightUnit == HeightUnit.FT_IN) state.inchesInput else null,
-            // 标准换算值
             weightKg = state.weightKg,
             heightCm = state.heightCm,
-            // 其他字段
             timestamp = state.timestamp,
             timeOfDay = state.timeOfDay.name,
             age = state.age,

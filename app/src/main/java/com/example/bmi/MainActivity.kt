@@ -41,7 +41,7 @@ class MainActivity : BaseActivity() {
                         binding.bottomNav.visibility = View.VISIBLE
                         binding.bottomNav.selectedItemId = R.id.nav_display
                         //todo
-                        //navigateToDisplay()
+                        navigateToDisplay()
                     } else {
                         // 无记录 → 隐藏底部导航，跳转到特殊首页
                         binding.bottomNav.visibility = View.GONE
@@ -62,10 +62,10 @@ class MainActivity : BaseActivity() {
                     true
                 }
                 //todo
-//                R.id.nav_display -> {
-//                    navigateToDisplay()
-//                    true
-//                }
+                R.id.nav_display -> {
+                    navigateToDisplay()
+                    true
+                }
 //                R.id.nav_statistics -> {
 //                    navigateToStatistics()
 //                    true
@@ -82,12 +82,12 @@ class MainActivity : BaseActivity() {
             .commit()
     }
     //todo
-//    private fun navigateToDisplay() {
-//        // 如果 DisplayFragment 还未创建，先创建占位
-//        supportFragmentManager.beginTransaction()
-//            .replace(R.id.fragment_container, DisplayFragment(), "Display")
-//            .commit()
-//    }
+    private fun navigateToDisplay() {
+        // 如果 DisplayFragment 还未创建，先创建占位
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, DisplayFragment(), "Display")
+            .commit()
+    }
 //
 //    private fun navigateToStatistics() {
 //        supportFragmentManager.beginTransaction()
