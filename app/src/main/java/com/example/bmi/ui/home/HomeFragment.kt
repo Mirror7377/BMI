@@ -19,6 +19,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bmi.R
+import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentHomeBinding
 import com.example.bmi.ui.adapt.AgeAdapter
 import com.example.bmi.ui.adapt.DatePickerAdapter
@@ -651,21 +653,48 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
-                    if (effect is HomeEffect.NavigateToResult) {
-                        navigateToDisplay()
+                    when (effect) {
+                        is HomeEffect.NavigateToResult -> {
+                            // 把完整记录的原始字段全部传给详情页
+                            navigateToDisplay(effect.record)
+                        }
+                        is HomeEffect.ShowError -> {
+                            showToast(effect.message)
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun navigateToDisplay() {
-        // 使用 FragmentTransaction 跳转到 DisplayFragment
+    private fun navigateToDisplay(record: BmiRecord) {
+        val displayFragment = DisplayFragment().apply {
+            arguments = Bundle().apply {
+                // BMI核心值
+                putDouble("KEY_BMI", record.bmi)
+                // 体重原值 + 单位
+                putDouble("KEY_WEIGHT_INPUT", record.weightInput)
+                putString("KEY_WEIGHT_UNIT", record.weightUnit)
+                // 身高原值 + 单位 + 英尺英寸
+                putDouble("KEY_HEIGHT_INPUT", record.heightInput)
+                putString("KEY_HEIGHT_UNIT", record.heightUnit)
+                putInt("KEY_FEET", record.feetInput ?: 0)
+                putInt("KEY_INCHES", record.inchesInput ?: 0)
+                // 年龄、性别
+                putInt("KEY_AGE", record.age)
+                putString("KEY_GENDER", record.gender)
+                // 标记：这是从计算页跳转来的
+                putBoolean("KEY_FROM_CALCULATE", true)
+            }
+        }
+
+        //跳转fragment
         parentFragmentManager.beginTransaction()
-            .replace(android.R.id.content, DisplayFragment())   // 或者你自己的 fragment_container id
-            .addToBackStack(null)
+            .replace(R.id.fragment_container, displayFragment)
+            .addToBackStack(null)//把 HomeFragment 存入返回栈
             .commit()
     }
+
 
     // 构建月份列表（1-12月）
     private fun buildMonthList(): List<DatePickerItem> {

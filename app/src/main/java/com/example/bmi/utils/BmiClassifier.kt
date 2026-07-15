@@ -1,17 +1,8 @@
 package com.example.bmi.utils
 
+import androidx.annotation.ColorInt
 import com.example.bmi.ui.home.enums.Gender
 
-enum class AdultCategory {
-    VERY_SEVERELY_UNDERWEIGHT,
-    SEVERELY_UNDERWEIGHT,
-    UNDERWEIGHT,
-    NORMAL,
-    OVERWEIGHT,
-    OBESE_CLASS_I,
-    OBESE_CLASS_II,
-    OBESE_CLASS_III
-}
 
 enum class ChildCategory {
     UNDERWEIGHT,
@@ -21,16 +12,16 @@ enum class ChildCategory {
 }
 
 object BmiClassifier {
-    fun classifyAdult(bmi: Double): AdultCategory {
+    fun classifyAdult(bmi: Double): BmiLevel {
         return when {
-            bmi < 16.0 -> AdultCategory.VERY_SEVERELY_UNDERWEIGHT
-            bmi < 17.0 -> AdultCategory.SEVERELY_UNDERWEIGHT
-            bmi < 18.5 -> AdultCategory.UNDERWEIGHT
-            bmi < 25.0 -> AdultCategory.NORMAL
-            bmi < 30.0 -> AdultCategory.OVERWEIGHT
-            bmi < 35.0 -> AdultCategory.OBESE_CLASS_I
-            bmi < 40.0 -> AdultCategory.OBESE_CLASS_II
-            else -> AdultCategory.OBESE_CLASS_III
+            bmi < 16f -> BmiLevel.VERY_SEVERELY_UNDERWEIGHT
+            bmi < 17f -> BmiLevel.SEVERELY_UNDERWEIGHT
+            bmi < 18.5f -> BmiLevel.UNDERWEIGHT
+            bmi < 25f -> BmiLevel.NORMAL
+            bmi < 30f -> BmiLevel.OVERWEIGHT
+            bmi < 35f -> BmiLevel.OBESE_CLASS_I
+            bmi < 40f -> BmiLevel.OBESE_CLASS_II
+            else -> BmiLevel.OBESE_CLASS_III
         }
     }
 
@@ -111,5 +102,53 @@ object BmiClassifier {
         18 to ChildRow(18.3, 25.5, 28.9, 29.0, 17.0, 30.0),
         19 to ChildRow(18.5, 26.3, 29.7, 29.8, 17.0, 31.0),
         20 to ChildRow(18.5, 27.1, 30.6, 30.7, 17.0, 32.0)
+    )
+
+}
+enum class BmiLevel(
+    val statusText: String,
+    @ColorInt val cardBgColor: Int,
+    val descText: String
+) {
+    VERY_SEVERELY_UNDERWEIGHT(
+        statusText = "Very Severely Underweight",
+        cardBgColor = 0xFF4343B8.toInt(),
+        //todo 加表情，删除除了NORMAL
+        descText = "We wish you to show some love to yourself! You need to add healthy fats, go nutrient-dense and seek medical advice to gain weight."
+    ),
+    SEVERELY_UNDERWEIGHT(
+        statusText = "Severely Underweight",
+        cardBgColor = 0xFF1258E1.toInt(),
+        descText = "It’s time to take care of yourself and get rid of the risk of poor immune function and osteoporosis. Treat yourself to a balanced meal and a variety of nutrients."
+    ),
+    UNDERWEIGHT(
+        statusText = "Underweight",
+        cardBgColor = 0xFF0099F2.toInt(),
+        descText = "It seems that your body needs more fuel. Unless you’re naturally very slim, you may need to consider ways of gaining weight as your weight may pose certain health risks."
+    ),
+    NORMAL(
+        statusText = "Normal",
+        cardBgColor = 0xFF54A529.toInt(),
+        descText = "Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight."
+    ),
+    OVERWEIGHT(
+        statusText = "Overweight",
+        cardBgColor = 0xFFFECD2E.toInt(),
+        descText = "Don’t wait any longer! It’s time to take action to reach your weight target. You are carrying excess fat and should balance your diet and physical activity to achieve a healthy weight."
+    ),
+    OBESE_CLASS_I(
+        statusText = "Obese Class I",
+        cardBgColor = 0xFFFFA100.toInt(),
+        descText = "Uh-oh! Your current weight is more than the ideal range and you have an increased risk of developing various health problems. It's time to embrace healthy eating and increase your activity level."
+    ),
+    OBESE_CLASS_II(
+        statusText = "Obese Class II",
+        cardBgColor = 0xFFFF7137.toInt(),
+        descText = "Time to change! You are at high risk of obesity-related diseases. You should increase physical activity and reduce calorie intake slowly but surely. It is also vital to have a health screening."
+    ),
+    OBESE_CLASS_III(
+        statusText = "Obese Class III",
+        cardBgColor = 0xFFD3333B.toInt(),
+        descText = "We are worried about you! Your weight is a serious and imminent threat to your health. Go for health advice and a weight loss plan scientifically."
     )
 }

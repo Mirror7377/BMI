@@ -8,5 +8,6 @@
     <color name="bg_rounded_card">#FFFFFF</color>
     <color name="bg_rounded_gray">#F1F1F1</color>
     <color name="bg_rounded_blue">#3659CF</color>
+    <color name="red">#FF0000</color>
 
 </resources>

@@ -96,7 +96,7 @@ class HomeViewModel @Inject constructor(
         } else {
             UnitConverter.kgToLb(state.weightInput).coerceIn(2.0, 551.0)
         }
-        // 换算后的值用于显示，同时更新 weightKg 和 weightInput
+        // 换算后的值用于显示，同时更新 weightKg 和 weightInput todo不是换算的值进行显示
         val newWeightKg = if (unit == WeightUnit.KG) newWeightInput else UnitConverter.lbToKg(newWeightInput)
 
         updateState {
@@ -205,36 +205,17 @@ class HomeViewModel @Inject constructor(
 
     private fun calculate() {
         val state = _state.value
-        val bmi: Double
 
-        when {
-            // ① cm + kg：BMI = weightKg / (heightM)^2
-            state.heightUnit == HeightUnit.CM && state.weightUnit == WeightUnit.KG -> {
-                val heightM = state.heightCm / 100.0
-                bmi = state.weightKg / (heightM * heightM)
-            }
-            // ② ft-in + lb：BMI = weightLb / (totalInches)^2 * 703
-            state.heightUnit == HeightUnit.FT_IN && state.weightUnit == WeightUnit.LB -> {
-                val totalInches = state.feetInput * 12.0 + state.inchesInput
-                bmi = state.weightInput / (totalInches * totalInches) * 703.0
-            }
-            // ③ ft-in + kg：BMI = weightKg / (ft*0.3048 + in*0.0254)^2
-            state.heightUnit == HeightUnit.FT_IN && state.weightUnit == WeightUnit.KG -> {
-                val heightM = state.feetInput * 0.3048 + state.inchesInput * 0.0254
-                bmi = state.weightKg / (heightM * heightM)
-            }
-            // ④ cm + lb：BMI = (weightLb * 0.45359237) / (heightM)^2
-            state.heightUnit == HeightUnit.CM && state.weightUnit == WeightUnit.LB -> {
-                val weightKg = state.weightInput * 0.45359237
-                val heightM = state.heightCm / 100.0
-                bmi = weightKg / (heightM * heightM)
-            }
-            else -> {
-                // 兜底：使用标准值计算
-                val heightM = state.heightCm / 100.0
-                bmi = state.weightKg / (heightM * heightM)
-            }
-        }
+        // 计算BMI
+        val bmi = UnitConverter.calculateBmi(
+            heightUnit = state.heightUnit,
+            feetInput = state.feetInput,
+            inchesInput = state.inchesInput,
+            heightCm = state.heightCm,
+            weightUnit = state.weightUnit,
+            weightInput = state.weightInput,
+            weightKg = state.weightKg
+        )
 
         // 根据年龄分类
         val isAdult = state.age >= 18
@@ -260,6 +241,8 @@ class HomeViewModel @Inject constructor(
             bmi = bmi,
             category = category.toString()
         )
+
+
 
         viewModelScope.launch {
             repository.saveRecord(record)
