@@ -19,6 +19,8 @@ class BmiGaugeView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var showPointer: Boolean = true
+
     // 扇环尺寸
     private val outerRadiusDp = 153f
     private val innerRadiusDp = 65f
@@ -151,20 +153,27 @@ class BmiGaugeView @JvmOverloads constructor(
             canvas.restore()
         }
 
-        // 绘制指针，使用动画插值displayBmi
-        pointerDrawable?.let { drawable ->
-            val ptrW = dpToPx(pointerWidthDp)
-            val ptrH = dpToPx(pointerHeightDp)
-            val anchorX = dpToPx(pointerAnchorOffsetXDp)
-            val targetAngle = bmiToAngle(displayBmi)
+        if (showPointer) {
+            // 绘制指针，使用动画插值displayBmi
+            pointerDrawable?.let { drawable ->
+                val ptrW = dpToPx(pointerWidthDp)
+                val ptrH = dpToPx(pointerHeightDp)
+                val anchorX = dpToPx(pointerAnchorOffsetXDp)
+                val targetAngle = bmiToAngle(displayBmi)
 
-            canvas.save()
-            canvas.rotate(targetAngle - 180f, cx, cy)
-            val left = cx - anchorX
-            val top = cy - ptrH / 2f
-            drawable.setBounds(left.toInt(), top.toInt(), (left + ptrW).toInt(), (top + ptrH).toInt())
-            drawable.draw(canvas)
-            canvas.restore()
+                canvas.save()
+                canvas.rotate(targetAngle - 180f, cx, cy)
+                val left = cx - anchorX
+                val top = cy - ptrH / 2f
+                drawable.setBounds(
+                    left.toInt(),
+                    top.toInt(),
+                    (left + ptrW).toInt(),
+                    (top + ptrH).toInt()
+                )
+                drawable.draw(canvas)
+                canvas.restore()
+            }
         }
     }
 
@@ -193,5 +202,10 @@ class BmiGaugeView @JvmOverloads constructor(
         isFirstLoad = true
         displayBmi = minBmi
         targetBmi = minBmi
+    }
+
+    fun setShowPointer(show: Boolean) {
+        showPointer = show
+        invalidate()
     }
 }

@@ -9,5 +9,5 @@ interface BmiRepository {
     fun observeLatestRecord(): Flow<BmiRecord?>
     fun observeAllRecords(): Flow<List<BmiRecord>>
     fun observeRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
-    fun hasAnyRecord(): Flow<Boolean>
+    suspend fun hasAnyRecord(): Boolean
 }

@@ -29,7 +29,8 @@ class BmiRepositoryImpl @Inject constructor(
         return dao.getRecordsInRange(start, end)
     }
 
-    override fun hasAnyRecord(): Flow<Boolean> {
-        return dao.getRecordCount().map { it > 0 }
+    // BmiRepository.kt
+    override suspend fun hasAnyRecord(): Boolean {
+        return dao.hasAnyRecord()
     }
 }

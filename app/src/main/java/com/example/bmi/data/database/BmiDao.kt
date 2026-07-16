@@ -24,10 +24,10 @@ interface BmiDao {
     fun getRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
 
     // 获取记录总数
-    @Query("SELECT COUNT(*) FROM bmi_records")
-    fun getRecordCount(): Flow<Int>
+    @Query("SELECT EXISTS(SELECT 1 FROM bmi_records)")
+    suspend fun hasAnyRecord(): Boolean
 
-    // 可选：删除所有记录（用于测试或清空功能）
+    // 删除所有记录（用于测试或清空功能）
     @Query("DELETE FROM bmi_records")
     suspend fun deleteAll()
 }

@@ -6,7 +6,7 @@
     android:background="#FFFFFF"
     android:fitsSystemWindows="true">
 
-    <!-- 固定：Discard 按钮 -->
+    <!-- Discard 按钮 -->
     <TextView
         android:id="@+id/tvDiscard"
         android:layout_width="60dp"
@@ -82,33 +82,49 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- BMI 状态标签 -->
+            <!-- BMI 状态标签容器 -->
+            <LinearLayout
+                android:id="@+id/statusContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="295dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp">
+
             <TextView
                 android:id="@+id/tvBmiStatus"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:paddingStart="27dp"
-                android:paddingEnd="27dp"
-                android:layout_marginTop="295dp"
+                android:layout_height="wrap_content"
                 android:text="Normal"
                 android:textColor="#FFFFFF"
                 android:textSize="19sp"
                 android:fontFamily="@font/montserrat_extrabold"
                 android:gravity="center"
                 android:includeFontPadding="false"
-                android:letterSpacing="-0.0094"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:letterSpacing="-0.0094" />
+
+            <ImageView
+                android:id="@+id/statusIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_info_outline"
+                android:layout_marginStart="8dp"
+                android:visibility="gone" />
+        </LinearLayout>
 
             <!-- BMI 基础信息 -->
             <TextView
                 android:id="@+id/tvBmiInfo"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="17dp"
                 android:layout_marginTop="350dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:text="71 kg | 180 cm | Male | 25 years old"
                 android:textColor="#000000"
                 android:textSize="14sp"
@@ -117,443 +133,634 @@
                 android:includeFontPadding="false"
                 android:letterSpacing="-0.0094"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- BMI 分级图例 -->
+            <!-- ============================================================ -->
+            <!-- 🎯 块 A：无历史记录时显示（图例 + 卡片）                      -->
+            <!-- ============================================================ -->
             <LinearLayout
-                android:id="@+id/llBmiLegend"
-                android:layout_width="375dp"
+                android:id="@+id/groupNoData"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="380dp"
-                android:layout_marginStart="0dp"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
+                android:layout_marginTop="380dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <!-- 8 行图例，内容与原代码一致，此处省略重复内容，直接保留你原有的 8 行布局即可 -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel0"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
+                <!-- ========== BMI 分级图例 ========== -->
+                <LinearLayout
+                    android:id="@+id/llBmiLegend"
+                    android:layout_width="375dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
 
-                    <View
-                        android:id="@+id/dotLevel0"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
+                    <!-- Level 0 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel0"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel0"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Very Severely Underweight"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="＜16"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 1 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel1"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel1"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Severely Underweight"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="16.0-16.9"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 2 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel2"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel2"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Underweight"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="17.0-18.4"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 3 (Normal) -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel3"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel3"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Normal"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="18.5-24.9"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 4 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel4"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel4"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Overweight"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="25.0-29.9"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 5 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel5"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel5"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Obese Class I"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30.0-34.9"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 6 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel6"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp"
+                        android:layout_marginBottom="8dp">
+
+                        <View
+                            android:id="@+id/dotLevel6"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Obese Class II"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="35.0-39.9"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Level 7 -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layoutLevel7"
+                        android:layout_width="345dp"
+                        android:layout_height="27dp">
+
+                        <View
+                            android:id="@+id/dotLevel7"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:background="@drawable/circle_legend_dot"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="8.5dp"
+                            android:layout_marginStart="15dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelName7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Obese Class III"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_regular"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="35dp"/>
+
+                        <TextView
+                            android:id="@+id/tvLevelRange7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="≥40.0"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:includeFontPadding="false"
+                            android:letterSpacing="-0.0094"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginStart="262dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+
+                <!-- ========== 底部灰色提示卡片（无数据版本） ========== -->
+                <LinearLayout
+                    android:id="@+id/llBottomTip"
+                    android:layout_width="315dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="12dp"
+                    android:background="@drawable/bg_tip_card">
 
                     <TextView
-                        android:id="@+id/tvLevelName0"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvTipDesc"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Very Severely Underweight"
+                        android:textColor="#000000"
                         android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
                         android:includeFontPadding="false"
                         android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
+                        android:gravity="center"
+                        app:fontFamily="@font/montserrat_regular"
+                        android:lineSpacingExtra="4dp"/>
 
                     <TextView
-                        android:id="@+id/tvLevelRange0"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvTipMain"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="＜16"
+                        android:textColor="#000000"
                         android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
+                        android:layout_marginTop="16dp"
                         android:includeFontPadding="false"
+                        app:fontFamily="@font/montserrat_regular"
                         android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel1"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel1"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
+                        android:gravity="center"/>
 
                     <TextView
-                        android:id="@+id/tvLevelName1"
+                        android:id="@+id/tvTipRange"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Severely Underweight"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#000000"
                         android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
                         android:includeFontPadding="false"
                         android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
+                        android:singleLine="true"
+                        app:fontFamily="@font/montserrat_extrabold"
+                        android:ellipsize="end"/>
 
                     <TextView
-                        android:id="@+id/tvLevelRange1"
+                        android:id="@+id/tvTipDiff"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="16.0-16.9"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        android:visibility="gone"/>
+                </LinearLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel2"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel2"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Underweight"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="17.0-18.4"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel3"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel3"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Normal"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="18.5-24.9"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel4"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel4"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Overweight"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="25.0-29.9"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel5"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel5"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Obese Class I"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="30.0-34.9"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel6"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp"
-                    android:layout_marginBottom="8dp">
-
-                    <View
-                        android:id="@+id/dotLevel6"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Obese Class II"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="35.0-39.9"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layoutLevel7"
-                    android:layout_width="345dp"
-                    android:layout_height="27dp">
-
-                    <View
-                        android:id="@+id/dotLevel7"
-                        android:layout_width="10dp"
-                        android:layout_height="10dp"
-                        android:background="@drawable/circle_legend_dot"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="8.5dp"
-                        android:layout_marginStart="15dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelName7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Obese Class III"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_regular"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="35dp"/>
-
-                    <TextView
-                        android:id="@+id/tvLevelRange7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="≥40.0"
-                        android:textSize="14sp"
-                        android:fontFamily="@font/montserrat_extrabold"
-                        android:includeFontPadding="false"
-                        android:letterSpacing="-0.0094"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="262dp"/>
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
 
-            <!-- 底部灰色提示卡片 -->
+            <!-- ============================================================ -->
+            <!-- 🎯 块 B：有历史记录时显示（上移卡片 + 广告推荐）              -->
+            <!-- ============================================================ -->
             <LinearLayout
-                android:id="@+id/llBottomTip"
-                android:layout_width="315dp"
+                android:id="@+id/groupHasData"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginStart="30dp"
-                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:paddingVertical="16dp"
-                android:paddingHorizontal="12dp"
-                app:layout_constraintTop_toBottomOf="@id/llBmiLegend"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="380dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <TextView
-                    android:id="@+id/tvTipDesc"
-                    android:layout_width="match_parent"
+                <!-- ========== 底部灰色提示卡片（有数据版本，位置靠上） ========== -->
+                <LinearLayout
+                    android:id="@+id/llBottomTipHasData"
+                    android:layout_width="315dp"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
-                    android:textSize="14sp"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.0094"
-                    android:gravity="center"
-                    app:fontFamily="@font/montserrat_regular"
-                    android:lineSpacingExtra="4dp"/>
+                    android:layout_marginTop="0dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="12dp"
+                    android:background="@drawable/bg_tip_card">
 
-                <TextView
-                    android:id="@+id/tvTipMain"
+                    <TextView
+                        android:id="@+id/tvTipDescHasData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.0094"
+                        android:gravity="center"
+                        app:fontFamily="@font/montserrat_regular"
+                        android:lineSpacingExtra="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvTipMainHasData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:layout_marginTop="16dp"
+                        android:includeFontPadding="false"
+                        app:fontFamily="@font/montserrat_regular"
+                        android:letterSpacing="-0.0094"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tvTipRangeHasData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.0094"
+                        android:singleLine="true"
+                        app:fontFamily="@font/montserrat_extrabold"
+                        android:ellipsize="end"/>
+
+                    <TextView
+                        android:id="@+id/tvTipDiffHasData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
+                <!-- ========== 🎯 广告推荐区域（包含横线、标题、三个灰色卡片） ========== -->
+                <LinearLayout
+                    android:id="@+id/llAdContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="#000000"
-                    android:textSize="14sp"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
                     android:layout_marginTop="16dp"
-                    android:includeFontPadding="false"
-                    app:fontFamily="@font/montserrat_regular"
-                    android:letterSpacing="-0.0094"
-                    android:gravity="center"/>
+                    android:layout_marginBottom="20dp">
 
-                <TextView
-                    android:id="@+id/tvTipRange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="#000000"
-                    android:textSize="14sp"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.0094"
-                    android:singleLine="true"
-                    app:fontFamily="@font/montserrat_extrabold"
-                    android:ellipsize="end"/>
+                    <!-- 横线 -->
+                    <View
+                        android:layout_width="330dp"
+                        android:layout_height="1dp"
+                        android:background="#000000"
+                        android:layout_marginTop="30dp" />
 
-                <TextView
-                    android:id="@+id/tvTipDiff"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
+                    <!-- 标题：Apps you might need -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Apps you might need"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:letterSpacing="-0.009375"
+                        android:layout_marginTop="24.5dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_gravity="start" />
+
+                    <!-- 三个灰色卡片容器 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginTop="30dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <!-- 卡片 1 -->
+                        <LinearLayout
+                            android:id="@+id/adCard1"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:background="#F4F4F4"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="App 1"
+                                android:textColor="#000000"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/montserrat_regular" />
+                        </LinearLayout>
+
+                        <!-- 卡片 2 -->
+                        <LinearLayout
+                            android:id="@+id/adCard2"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:layout_marginTop="10dp"
+                            android:background="#F4F4F4"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="App 2"
+                                android:textColor="#000000"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/montserrat_regular" />
+                        </LinearLayout>
+
+                        <!-- 卡片 3 -->
+                        <LinearLayout
+                            android:id="@+id/adCard3"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:layout_marginTop="10dp"
+                            android:background="#F4F4F4"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="App 3"
+                                android:textColor="#000000"
+                                android:textSize="14sp"
+                                android:fontFamily="@font/montserrat_regular" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- 悬浮 SAVE 按钮 -->
+    <!-- ========== 悬浮 SAVE 按钮 ========== -->
     <TextView
         android:id="@+id/tvSave"
         android:layout_width="315dp"

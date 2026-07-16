@@ -245,7 +245,6 @@ class HomeViewModel @Inject constructor(
 
 
         viewModelScope.launch {
-            repository.saveRecord(record)
             _effect.emit(HomeEffect.NavigateToResult(record))
         }
     }
@@ -290,6 +289,6 @@ class HomeViewModel @Inject constructor(
     }
 }
 sealed class HomeEffect {
-    data class NavigateToResult(val record: com.example.bmi.data.database.BmiRecord) : HomeEffect()
+    data class NavigateToResult(val record: BmiRecord) : HomeEffect()
     data class ShowError(val message: String) : HomeEffect()
 }

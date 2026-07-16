@@ -9,7 +9,6 @@ import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.utils.BmiClassifier
-import com.example.bmi.utils.BmiLevel
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,12 +31,48 @@ class ResultViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<ResultEffect>()
     val effect = _effect.asSharedFlow()
 
-    // 从 Intent 加载数据（计算后跳转）
+    // ====================== 入口 A：从 Intent 加载（计算后跳转） ======================
     fun initData(bundle: Bundle) {
         loadFromArguments(bundle)
+
+        // 异步查询数据库是否有历史记录（不影响当前 BMI 数据加载）
+        viewModelScope.launch {
+            val hasRecord = repository.hasAnyRecord()
+            _state.update { it.copy(hasSavedRecord = hasRecord) }
+        }
     }
 
+    // ====================== 入口 B：从数据库加载（底部导航进入） ======================
+    fun loadLatestRecord() {
+        viewModelScope.launch {
+            repository.observeLatestRecord().collect { record ->
+                record?.let {
+                    _state.update { state ->
+                        state.copy(
+                            bmi = it.bmi,
+                            weightInput = it.weightInput,
+                            weightUnit = it.weightUnit,
+                            heightInput = it.heightInput,
+                            heightUnit = it.heightUnit,
+                            feet = it.feetInput ?: 0,
+                            inches = it.inchesInput ?: 0,
+                            age = it.age,
+                            gender = it.gender,
+                            heightCm = it.heightCm,
+                            // 🎯 能查到记录，说明数据库有数据
+                            hasSavedRecord = true
+                        )
+                    }
+                    updateDerivedState()
+                } ?: run {
+                    // 理论上不会发生，但兜底
+                    _state.update { it.copy(hasSavedRecord = false) }
+                }
+            }
+        }
+    }
 
+    // ====================== 保存记录 ======================
     fun saveRecord() {
         viewModelScope.launch {
             val currentState = _state.value
@@ -76,7 +111,7 @@ class ResultViewModel @Inject constructor(
         }
     }
 
-    // 内部方法
+    // ====================== 内部方法 ======================
     private fun loadFromArguments(args: Bundle) {
         val bmi = args.getDouble("KEY_BMI", 0.0)
         val weightInput = args.getDouble("KEY_WEIGHT_INPUT", 0.0)

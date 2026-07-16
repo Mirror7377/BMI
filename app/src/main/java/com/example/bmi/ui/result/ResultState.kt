@@ -16,5 +16,7 @@ data class ResultState(
     val age: Int = 0,
     val gender: String = Gender.MALE.name,
     val heightCm: Double = 0.0,
-    val bmiLevel: BmiLevel = BmiLevel.NORMAL
+    val bmiLevel: BmiLevel = BmiLevel.NORMAL,
+    // 数据库中是否已有历史记录
+    val hasSavedRecord: Boolean = false
 )
