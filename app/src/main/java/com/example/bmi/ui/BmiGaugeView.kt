@@ -1,5 +1,6 @@
 package com.example.bmi.ui
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -8,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import androidx.core.content.res.ResourcesCompat
 import com.example.bmi.R
 
@@ -51,7 +53,12 @@ class BmiGaugeView @JvmOverloads constructor(
     private val pointerHeightDp = 22f
     private val pointerAnchorOffsetXDp = 79f
     private var pointerDrawable: Drawable? = null
-    private var currentBmi: Float = 22.5f
+    private var targetBmi: Float = minBmi
+    private var displayBmi: Float = minBmi
+
+    // 动画标记：是否是首次加载（首次强制从起点minBmi动画）
+    private var isFirstLoad = true
+    private var gaugeAnimator: ValueAnimator? = null
 
     private lateinit var ringPaint: Paint
 
@@ -73,7 +80,7 @@ class BmiGaugeView @JvmOverloads constructor(
             letterSpacing = (-0.094f / textSizePx)
         }
 
-        // 仅加载layer_8指针，无其他layer资源读取
+        // 仅加载layer_8指针
         val pointerResId = context.resources.getIdentifier("layer_8", "drawable", context.packageName)
         if (pointerResId != 0) {
             pointerDrawable = ResourcesCompat.getDrawable(context.resources, pointerResId, null)
@@ -81,8 +88,26 @@ class BmiGaugeView @JvmOverloads constructor(
     }
 
     fun setBmi(bmi: Float) {
-        currentBmi = bmi.coerceIn(minBmi, maxBmi)
-        invalidate()
+        targetBmi = bmi.coerceIn(minBmi, maxBmi)
+        gaugeAnimator?.cancel()
+
+        // 首次加载：强制从最小起点minBmi开始动画
+        val startValue = if (isFirstLoad) {
+            isFirstLoad = false
+            minBmi
+        } else {
+            displayBmi
+        }
+
+        gaugeAnimator = ValueAnimator.ofFloat(startValue, targetBmi).apply {
+            duration = 800
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            addUpdateListener { anim ->
+                displayBmi = anim.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -126,12 +151,12 @@ class BmiGaugeView @JvmOverloads constructor(
             canvas.restore()
         }
 
-        // 绘制layer_8指针
+        // 绘制指针，使用动画插值displayBmi
         pointerDrawable?.let { drawable ->
             val ptrW = dpToPx(pointerWidthDp)
             val ptrH = dpToPx(pointerHeightDp)
             val anchorX = dpToPx(pointerAnchorOffsetXDp)
-            val targetAngle = bmiToAngle(currentBmi)
+            val targetAngle = bmiToAngle(displayBmi)
 
             canvas.save()
             canvas.rotate(targetAngle - 180f, cx, cy)
@@ -158,5 +183,15 @@ class BmiGaugeView @JvmOverloads constructor(
 
     private fun spToPx(sp: Float): Float {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, resources.displayMetrics)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        gaugeAnimator?.cancel()
+        gaugeAnimator = null
+        // 页面销毁重置首次标记，下次进入页面重新从起点转动
+        isFirstLoad = true
+        displayBmi = minBmi
+        targetBmi = minBmi
     }
 }

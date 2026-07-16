@@ -9,7 +9,7 @@ import com.example.bmi.R
 import com.example.bmi.ui.home.AgeItem
 
 class AgeAdapter(
-    val items: List<AgeItem>,   // 公开，便于外部获取
+    val items: List<AgeItem>,
     private val onAgeClicked: (Int) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 

@@ -1,4 +1,4 @@
-package com.example.bmi.ui.display
+package com.example.bmi.ui.result
 
 import android.animation.ValueAnimator
 import android.app.Dialog
@@ -8,35 +8,30 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.bmi.BottomNavController
-import com.example.bmi.MainActivity
+import com.example.bmi.BaseActivity
 import com.example.bmi.R
+import com.example.bmi.databinding.ActivityResultBinding
 import com.example.bmi.databinding.DialogDiscardConfirmBinding
-import com.example.bmi.databinding.FragmentDisplayBinding
 import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
-import com.example.bmi.utils.BmiClassifier
 import com.example.bmi.utils.BmiLevel
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class DisplayFragment : Fragment() {
-    private var _binding: FragmentDisplayBinding? = null
-    private val binding get() = _binding!!
+class ResultActivity : BaseActivity() {
 
-    private val viewModel: DisplayViewModel by viewModels()
+    private lateinit var binding: ActivityResultBinding
+
+    private val viewModel: ResultViewModel by viewModels()
 
     private var bmiAnimator: ValueAnimator? = null
 
@@ -51,62 +46,51 @@ class DisplayFragment : Fragment() {
         BmiLevel.OBESE_CLASS_III
     )
 
-    // 拦截系统返回键
+    // 返回键回调
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            viewModel.handleIntent(DisplayIntent.BackPressed)
+            showDiscardDialog()
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentDisplayBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityResultBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
 
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner, backPressedCallback
-        )
+        // 初始化数据
+        val bundle = intent.extras ?: Bundle()
+        viewModel.initData(bundle)
 
-        // 如果是从计算页跳转，需要把 arguments 传递给 ViewModel（实际上已经在 init 中通过 SavedStateHandle 获取了）
-        // 但为了保险，也可以再次发送 Intent，但非必须
+        // 点击事件
+        binding.tvDiscard.setOnClickListener { showDiscardDialog() }
+        binding.tvSave.setOnClickListener { viewModel.saveRecord() }
 
-        binding.tvDiscard.setOnClickListener {
-            viewModel.handleIntent(DisplayIntent.Discard)
-        }
-        binding.tvSave.setOnClickListener {
-            viewModel.handleIntent(DisplayIntent.SaveRecord)
-        }
-
-        // 观察 State
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        // 订阅 State
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
                     bindState(state)
                 }
             }
         }
 
-        // 观察 Effect
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        // 订阅 Effect
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        is DisplayEffect.NavigateToHome -> navigateToHome()
-                        is DisplayEffect.ShowDiscardDialog -> showDiscardDialog()
+                        ResultEffect.NavigateToHome -> finish()
+                        ResultEffect.ShowDiscardDialog -> showDiscardDialog()
                     }
                 }
             }
         }
     }
 
-    private fun bindState(state: DisplayState) {
+    private fun bindState(state: ResultState) {
         animateBmiNumber(state.bmi)
         binding.bmiGauge.setBmi(state.bmi.toFloat())
 
@@ -122,7 +106,7 @@ class DisplayFragment : Fragment() {
 
         val heightText = when (state.heightUnit) {
             HeightUnit.CM.name -> String.format("%.1f cm", state.heightInput)
-            HeightUnit.FT_IN.name -> "${state.feet} ft-${state.inches} in"
+            HeightUnit.FT_IN.name -> "${state.feet} ft ${state.inches} in"
             else -> String.format("%.1f cm", state.heightInput)
         }
 
@@ -144,10 +128,11 @@ class DisplayFragment : Fragment() {
         )
     }
 
+    // ---------- bmi值动态效果 ----------
     private fun animateBmiNumber(targetBmi: Double) {
         bmiAnimator?.cancel()
         bmiAnimator = ValueAnimator.ofFloat(0f, targetBmi.toFloat()).apply {
-            duration = 500
+            duration = 800//变化0.8s
             addUpdateListener { animation ->
                 val current = animation.animatedValue as Float
                 binding.tvBmiValue.text = String.format("%.1f", current)
@@ -295,9 +280,10 @@ class DisplayFragment : Fragment() {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
+    // -------- 对话框 ----------
     private fun showDiscardDialog() {
         val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
-        val dialog = Dialog(requireContext())
+        val dialog = Dialog(this)
         dialog.setContentView(dialogBinding.root)
         val window = dialog.window ?: return
 
@@ -310,31 +296,15 @@ class DisplayFragment : Fragment() {
         dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
         dialogBinding.tvDelete.setOnClickListener {
             dialog.dismiss()
-            navigateToHome()
+            finish()
         }
 
         dialog.show()
     }
 
-    private fun navigateToHome() {
-        (requireActivity() as MainActivity).navigateToHome(isEmptyMode = false)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        (requireActivity() as? BottomNavController)?.forceHideBottomNav()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        (requireActivity() as? BottomNavController)?.forceHideBottomNav()
-    }
-
-    override fun onDestroyView() {
-        (requireActivity() as? BottomNavController)?.restoreBottomNavAuto()
+    override fun onDestroy() {
         bmiAnimator?.cancel()
         bmiAnimator = null
-        super.onDestroyView()
-        _binding = null
+        super.onDestroy()
     }
 }
