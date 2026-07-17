@@ -2,6 +2,8 @@ package com.example.bmi.utils
 
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 object UnitConverter {
 
@@ -38,7 +40,8 @@ object UnitConverter {
         weightInput: Double,
         weightKg: Double
     ): Double {
-        return when {
+        // 1. 先计算原始精确结果
+        val rawResult = when {
             // ① cm + kg
             heightUnit == HeightUnit.CM && weightUnit == WeightUnit.KG -> {
                 val heightM = heightCm / 100.0
@@ -66,5 +69,10 @@ object UnitConverter {
                 weightKg / (hM * hM)
             }
         }
+
+        // 2. 四舍五入到 1 位小数，并转换为 Double 返回
+        return BigDecimal(rawResult.toString())
+            .setScale(1, RoundingMode.HALF_UP)
+            .toDouble()
     }
 }

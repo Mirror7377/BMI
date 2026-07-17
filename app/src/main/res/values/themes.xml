@@ -9,4 +9,8 @@
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@android:color/transparent</item>
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">0</item>
     </style>
+    <style name="RoundedImageView12dp" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>

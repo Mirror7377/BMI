@@ -15,8 +15,7 @@ interface BmiDao {
     @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC LIMIT 1")
     fun getLatestRecord(): Flow<BmiRecord?>
 
-    // 获取所有记录（按时间戳降序）
-    @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC")
+    @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC, createTime DESC")
     fun getAllRecords(): Flow<List<BmiRecord>>
 
     // 获取时间段内的记录（按时间戳升序）

@@ -27,5 +27,6 @@ data class BmiRecord(
     val age: Int,
     val gender: String,
     val bmi: Double,
-    val category: String
+    val category: String,
+    val createTime: Long = 0
 ): Serializable

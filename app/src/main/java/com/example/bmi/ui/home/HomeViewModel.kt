@@ -239,7 +239,8 @@ class HomeViewModel @Inject constructor(
             age = state.age,
             gender = state.gender.name,
             bmi = bmi,
-            category = category.toString()
+            category = category.toString(),
+            createTime = System.currentTimeMillis()
         )
 
 

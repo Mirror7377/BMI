@@ -2,7 +2,10 @@ package com.example.bmi.ui.result
 
 import android.animation.ValueAnimator
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -10,15 +13,20 @@ import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmi.BaseActivity
 import com.example.bmi.R
+import com.example.bmi.data.database.RecommendApp
 import com.example.bmi.databinding.ActivityResultBinding
 import com.example.bmi.databinding.DialogBmiLegendBinding
 import com.example.bmi.databinding.DialogDiscardConfirmBinding
@@ -191,6 +199,39 @@ class ResultActivity : BaseActivity() {
         binding.groupNoData.visibility = if (!hasHistory) View.VISIBLE else View.GONE
         binding.groupHasData.visibility = if (hasHistory) View.VISIBLE else View.GONE
         binding.llAdContainer.visibility = if (hasHistory) View.VISIBLE else View.GONE
+
+        if (hasHistory) {
+            val recommendedApps = state.recommendedApps
+            if (recommendedApps.size >= 3) {
+                bindAppToCard(
+                    binding.adCard1,
+                    binding.ivAppIcon1,
+                    binding.tvAppName1,
+                    binding.tvAppCategory1,
+                    binding.rbAppRating1,
+                    binding.tvAppRating1,
+                    recommendedApps[0]
+                )
+                bindAppToCard(
+                    binding.adCard2,
+                    binding.ivAppIcon2,
+                    binding.tvAppName2,
+                    binding.tvAppCategory2,
+                    binding.rbAppRating2,
+                    binding.tvAppRating2,
+                    recommendedApps[1]
+                )
+                bindAppToCard(
+                    binding.adCard3,
+                    binding.ivAppIcon3,
+                    binding.tvAppName3,
+                    binding.tvAppCategory3,
+                    binding.rbAppRating3,
+                    binding.tvAppRating3,
+                    recommendedApps[2]
+                )
+            }
+        }
 
         // ---------- 6. 卡片背景圆角 ----------
         setTipCardRadius(binding.llBottomTip)
@@ -381,14 +422,13 @@ class ResultActivity : BaseActivity() {
         val window = dialog.window
         window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // 🎯 从底部弹出，固定宽度 375dp，高度 538.5dp
         window?.setGravity(Gravity.BOTTOM)
         window?.setLayout(
             dpToPx(375f),
             dpToPx(600f)
         )
 
-        // 可选：添加从底部滑入的动画（需要创建动画资源）
+        // todo 添加从底部滑入的动画（需要创建动画资源）
         // window?.setWindowAnimations(R.style.BottomSheetAnimation)
 
         // 设置扇形图无指针
@@ -490,6 +530,35 @@ class ResultActivity : BaseActivity() {
             finish()
         }
         dialog.show()
+    }
+
+    private fun bindAppToCard(
+        cardView: View,
+        iconView: ImageView,
+        nameView: TextView,
+        categoryView: TextView,
+        ratingBar: RatingBar,
+        ratingTextView: TextView,
+        app: RecommendApp?
+    ) {
+        if (app == null) {
+            cardView.visibility = View.GONE
+            return
+        }
+        cardView.visibility = View.VISIBLE
+
+        iconView.setImageResource(app.iconResId)
+        nameView.text = app.name
+        categoryView.text = app.category
+        ratingBar.rating = app.rating.toFloat()
+        ratingTextView.text = String.format("%.1f", app.rating)
+
+        // 点击跳转
+        cardView.setOnClickListener {
+            val intent =
+                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}"))
+            startActivity(intent)
+        }
     }
 
     override fun onDestroy() {

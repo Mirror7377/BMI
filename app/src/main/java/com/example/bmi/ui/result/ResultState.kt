@@ -1,5 +1,6 @@
 package com.example.bmi.ui.result
 
+import com.example.bmi.data.database.RecommendApp
 import com.example.bmi.utils.BmiLevel
 import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
@@ -18,5 +19,6 @@ data class ResultState(
     val heightCm: Double = 0.0,
     val bmiLevel: BmiLevel = BmiLevel.NORMAL,
     // 数据库中是否已有历史记录
-    val hasSavedRecord: Boolean = false
+    val hasSavedRecord: Boolean = false,
+    val recommendedApps: List<RecommendApp> = emptyList()
 )

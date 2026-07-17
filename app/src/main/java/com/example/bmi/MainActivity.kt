@@ -1,6 +1,5 @@
 package com.example.bmi
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -10,8 +9,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.databinding.ActivityMainBinding
+import com.example.bmi.ui.display.DisplayFragment
 import com.example.bmi.ui.home.HomeFragment
-import com.example.bmi.ui.result.ResultActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -38,7 +37,7 @@ class MainActivity : BaseActivity() {
             ContextCompat.getColor(this, R.color.bg_gray)
         )
 
-        // 监听数据库，同时控制导航栏显隐 + 通知 HomeFragment 更新按钮位置
+        // 监听数据库，控制导航栏显隐 + 通知 HomeFragment 更新按钮位置
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeLatestRecord()
@@ -52,7 +51,7 @@ class MainActivity : BaseActivity() {
 
                         // 同步更新 HomeFragment 的按钮位置
                         val homeFragment = supportFragmentManager.findFragmentByTag("Home") as? HomeFragment
-                        homeFragment?.setEmptyMode(!hasRecord) // 无记录时设为空状态（显示下方按钮）
+                        homeFragment?.setEmptyMode(!hasRecord)
                     }
             }
         }
@@ -71,7 +70,7 @@ class MainActivity : BaseActivity() {
                     true
                 }
                 R.id.nav_display -> {
-                    startActivity(Intent(this, ResultActivity::class.java))
+                    navigateToDisplay()
                     true
                 }
                 else -> false
@@ -80,7 +79,7 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     * 显示 HomeFragment（使用 show/hide 保留状态）
+     * 显示 HomeFragment
      */
     private fun navigateToHome() {
         val fragmentManager = supportFragmentManager
@@ -109,5 +108,37 @@ class MainActivity : BaseActivity() {
         }
 
         currentTag = "Home"
+    }
+
+    /**
+     * 显示 DisplayFragment（历史记录展示页）
+     */
+    private fun navigateToDisplay() {
+        val fragmentManager = supportFragmentManager
+        var displayFragment = fragmentManager.findFragmentByTag("Display") as? DisplayFragment
+        if (displayFragment == null) {
+            displayFragment = DisplayFragment()
+            fragmentManager.beginTransaction()
+                .add(R.id.fragment_container, displayFragment, "Display")
+                .commit()
+        }
+
+        if (currentTag == "Display") return
+
+        fragmentManager.fragments.forEach { fragment ->
+            if (fragment != displayFragment && fragment.isAdded) {
+                fragmentManager.beginTransaction()
+                    .hide(fragment)
+                    .commitNow()
+            }
+        }
+
+        if (!displayFragment.isVisible) {
+            fragmentManager.beginTransaction()
+                .show(displayFragment)
+                .commitNow()
+        }
+
+        currentTag = "Display"
     }
 }

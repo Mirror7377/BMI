@@ -137,7 +137,7 @@
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- ============================================================ -->
-            <!-- 🎯 块 A：无历史记录时显示（图例 + 卡片）                      -->
+            <!--  块 A：无历史记录时显示（图例 + 卡片）                      -->
             <!-- ============================================================ -->
             <LinearLayout
                 android:id="@+id/groupNoData"
@@ -586,7 +586,7 @@
             </LinearLayout>
 
             <!-- ============================================================ -->
-            <!-- 🎯 块 B：有历史记录时显示（上移卡片 + 广告推荐）              -->
+            <!--  块 B：有历史记录时显示（上移卡片 + 广告推荐）              -->
             <!-- ============================================================ -->
             <LinearLayout
                 android:id="@+id/groupHasData"
@@ -663,12 +663,13 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
                     android:layout_marginTop="16dp"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone">
 
                     <!-- 横线 -->
                     <View
                         android:layout_width="330dp"
-                        android:layout_height="1dp"
+                        android:layout_height="0.5dp"
                         android:background="#000000"
                         android:layout_marginTop="30dp" />
 
@@ -700,17 +701,80 @@
                             android:id="@+id/adCard1"
                             android:layout_width="335dp"
                             android:layout_height="79dp"
-                            android:background="#F4F4F4"
-                            android:gravity="center"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon1"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="App 1"
-                                android:textColor="#000000"
-                                android:textSize="14sp"
-                                android:fontFamily="@font/montserrat_regular" />
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating1"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </LinearLayout>
 
                         <!-- 卡片 2 -->
@@ -719,17 +783,80 @@
                             android:layout_width="335dp"
                             android:layout_height="79dp"
                             android:layout_marginTop="10dp"
-                            android:background="#F4F4F4"
-                            android:gravity="center"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon2"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="App 2"
-                                android:textColor="#000000"
-                                android:textSize="14sp"
-                                android:fontFamily="@font/montserrat_regular" />
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating2"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating2"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </LinearLayout>
 
                         <!-- 卡片 3 -->
@@ -738,17 +865,80 @@
                             android:layout_width="335dp"
                             android:layout_height="79dp"
                             android:layout_marginTop="10dp"
-                            android:background="#F4F4F4"
-                            android:gravity="center"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="12dp">
-                            <TextView
-                                android:layout_width="wrap_content"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon3"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="App 3"
-                                android:textColor="#000000"
-                                android:textSize="14sp"
-                                android:fontFamily="@font/montserrat_regular" />
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating3"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating3"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </LinearLayout>
 
                     </LinearLayout>
