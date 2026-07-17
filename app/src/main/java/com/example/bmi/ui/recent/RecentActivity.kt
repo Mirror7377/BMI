@@ -1,5 +1,6 @@
 package com.example.bmi.ui.recent
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -9,6 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bmi.BaseActivity
 import com.example.bmi.databinding.ActivityRecentBinding
+import com.example.bmi.ui.historydetai.HistoryDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -25,7 +27,11 @@ class RecentActivity : BaseActivity() {
         setContentView(binding.root)
 
         // RecyclerView
-        adapter = RecentAdapter { /* 预留点击回调 */ }
+        adapter = RecentAdapter { record ->
+            val intent = Intent(this, HistoryDetailActivity::class.java)
+            intent.putExtra("RECORD_ID", record.id)
+            startActivity(intent)
+        }
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@RecentActivity)
             adapter = this@RecentActivity.adapter

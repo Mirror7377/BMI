@@ -1,16 +1,14 @@
 package com.example.bmi.ui.recent
 
-import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.ItemRecentRecordBinding
-import com.example.bmi.utils.BmiClassifier
+import com.example.bmi.ui.bmigauge.BmiClassifier
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -45,7 +43,11 @@ class RecentAdapter(
             binding.tvBmiValue.text = String.format("%.1f", record.bmi)
 
             // 在 RecentAdapter 的 bind 方法中
-            val bmiLevel = BmiClassifier.classifyAdult(record.bmi)
+            val bmiLevel = if (record.age > 20) {
+                BmiClassifier.classifyAdult(record.bmi)
+            } else {
+                BmiClassifier.classifyChild(record.age, record.gender, record.bmi)
+            }
             binding.tvLevelName.text = bmiLevel.statusText
 
             // 3. 彩色圆点（纯代码动态创建）
@@ -69,12 +71,6 @@ class RecentAdapter(
 
             // 5. 点击事件
             binding.root.setOnClickListener {
-                Toast.makeText(
-                    binding.root.context,
-                    "功能未开发",
-                    Toast.LENGTH_SHORT
-                ).show()
-                // 保留回调以备后续扩展
                 onItemClick(record)
             }
         }

@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.BMI" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-    </style>
+    <style name="Base.Theme.BMI" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
     <style name="Theme.BMI" parent="Base.Theme.BMI" />
     <style name="Theme.BMI.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:navigationBarColor">@color/splash_blue</item>

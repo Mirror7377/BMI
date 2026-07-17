@@ -10,4 +10,9 @@ interface BmiRepository {
     fun observeAllRecords(): Flow<List<BmiRecord>>
     fun observeRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
     suspend fun hasAnyRecord(): Boolean
+
+    suspend fun getRecordById(id: Long): BmiRecord?
+    suspend fun deleteRecord(id: Long)
+
+    suspend fun getRecordCount(): Int
 }

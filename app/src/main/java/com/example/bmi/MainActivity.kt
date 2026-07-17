@@ -83,7 +83,7 @@ class MainActivity : BaseActivity() {
      */
     private fun navigateToHome() {
         val fragmentManager = supportFragmentManager
-        var homeFragment = fragmentManager.findFragmentByTag("Home") as? HomeFragment
+        var homeFragment = fragmentManager.findFragmentByTag("Home")
         if (homeFragment == null) {
             homeFragment = HomeFragment.newInstance()
             fragmentManager.beginTransaction()
@@ -101,7 +101,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        if (homeFragment != null && !homeFragment.isVisible) {
+        if (!homeFragment.isVisible) {
             fragmentManager.beginTransaction()
                 .show(homeFragment)
                 .commitNow()
@@ -115,9 +115,9 @@ class MainActivity : BaseActivity() {
      */
     private fun navigateToDisplay() {
         val fragmentManager = supportFragmentManager
-        var displayFragment = fragmentManager.findFragmentByTag("Display") as? DisplayFragment
+        var displayFragment = fragmentManager.findFragmentByTag("Display")
         if (displayFragment == null) {
-            displayFragment = DisplayFragment()
+            displayFragment = DisplayFragment.newInstance()
             fragmentManager.beginTransaction()
                 .add(R.id.fragment_container, displayFragment, "Display")
                 .commit()

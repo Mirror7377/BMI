@@ -21,12 +21,11 @@ data class BmiRecord(
     val weightKg: Double,             // 统一为 kg（计算用）
     val heightCm: Double,             // 统一为 cm（计算用）
 
-    // ---------- 其他字段 ----------
-    val timestamp: Long,
-    val timeOfDay: String,
+    val timestamp: Long,  //测量时间
+    val timeOfDay: String, //测量时间段
     val age: Int,
     val gender: String,
     val bmi: Double,
-    val category: String,
+    val category: String,   //BMI 对应的等级
     val createTime: Long = 0
 ): Serializable

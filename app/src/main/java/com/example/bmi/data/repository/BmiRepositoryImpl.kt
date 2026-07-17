@@ -33,4 +33,16 @@ class BmiRepositoryImpl @Inject constructor(
     override suspend fun hasAnyRecord(): Boolean {
         return dao.hasAnyRecord()
     }
+
+    override suspend fun getRecordById(id: Long): BmiRecord? {
+        return dao.getRecordById(id)
+    }
+
+    override suspend fun deleteRecord(id: Long) {
+        dao.deleteRecord(id)
+    }
+
+    override suspend fun getRecordCount(): Int {
+        return dao.getRecordCount()
+    }
 }

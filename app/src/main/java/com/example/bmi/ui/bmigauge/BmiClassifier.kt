@@ -1,4 +1,4 @@
-package com.example.bmi.utils
+package com.example.bmi.ui.bmigauge
 
 import androidx.annotation.ColorInt
 import com.example.bmi.ui.home.enums.Gender
@@ -25,14 +25,18 @@ object BmiClassifier {
         }
     }
 
-    fun classifyChild(age: Int, gender: Gender, bmi: Double): ChildCategory {
-        val row = getChildRow(age, gender)
-        return when {
-            bmi < row.underweight -> ChildCategory.UNDERWEIGHT
-            bmi < row.normal -> ChildCategory.NORMAL
-            bmi < row.overweight -> ChildCategory.OVERWEIGHT
-            else -> ChildCategory.OBESE_CLASS_I
-        }
+//    fun classifyChild(age: Int, gender: Gender, bmi: Double): ChildCategory {
+//        val row = getChildRow(age, gender)
+//        return when {
+//            bmi < row.underweight -> ChildCategory.UNDERWEIGHT
+//            bmi < row.normal -> ChildCategory.NORMAL
+//            bmi < row.overweight -> ChildCategory.OVERWEIGHT
+//            else -> ChildCategory.OBESE_CLASS_I
+//        }
+//    }
+
+    fun classifyChild(age: Int, gender: String, bmi: Double): BmiLevel {
+        return BmiConfigProvider.classifyChild(age, gender, bmi)
     }
 
     fun getDialRange(age: Int, gender: Gender): Pair<Double, Double> {

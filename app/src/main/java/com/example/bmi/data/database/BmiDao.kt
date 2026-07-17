@@ -2,6 +2,7 @@ package com.example.bmi.data.database
 
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
@@ -29,4 +30,16 @@ interface BmiDao {
     // 删除所有记录（用于测试或清空功能）
     @Query("DELETE FROM bmi_records")
     suspend fun deleteAll()
+
+    //根据id查询数据
+    @Query("SELECT * FROM bmi_records WHERE id = :id")
+    suspend fun getRecordById(id: Long): BmiRecord?
+
+    //根据id删除数据
+    @Query("DELETE FROM bmi_records WHERE id = :id")
+    suspend fun deleteRecord(id: Long)
+
+    @Query("SELECT COUNT(*) FROM bmi_records")
+    suspend fun getRecordCount(): Int
+
 }

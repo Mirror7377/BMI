@@ -77,8 +77,8 @@ class HomeFragment : Fragment() {
 
     companion object {
         fun newInstance(): HomeFragment {
-            return HomeFragment().apply {
-            }
+            val frag = HomeFragment()
+            return frag
         }
     }
 
@@ -102,16 +102,16 @@ class HomeFragment : Fragment() {
 
         // 根布局点击隐藏键盘
         binding.root.apply {
-            isClickable = true
-            isFocusableInTouchMode = true
+            isClickable = true//根布局可点击
+            isFocusableInTouchMode = true//可获取焦点
             setOnClickListener { root ->
                 root.clearFocus()
                 val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(root.windowToken, 0)
+                imm.hideSoftInputFromWindow(root.windowToken, 0)//隐藏键盘
             }
         }
 
-        // 根据当前 isEmptyMode 更新按钮
+        // 根据当前 isEmptyMode 更新calculate按钮位置
         updateButtonVisibility()
 
         observeState()
@@ -258,9 +258,11 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnCalculateNoNav.setOnClickListener {
+            binding.root.clearFocus()
             viewModel.sendIntent(HomeIntent.Calculate)
         }
         binding.btnCalculateWithNav.setOnClickListener {
+            binding.root.clearFocus()
             viewModel.sendIntent(HomeIntent.Calculate)
         }
     }

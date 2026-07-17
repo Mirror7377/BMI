@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.home.enums.*
-import com.example.bmi.utils.BmiClassifier
+import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,16 +57,18 @@ class HomeViewModel @Inject constructor(
         val timeOfDay = TimeOfDay.fromSystemTime()
         updateState {
             copy(
+                //修正时间
                 timestamp = now,
                 timeOfDay = timeOfDay,
                 timeDisplay = formatTime(now, timeOfDay)
             )
         }
-        // 同步更新派生字段（体重/身高显示）
+        // 同步更新派生字段（体重/身高显示）todo 为什么？
         refreshDisplayValues()
     }
 
     private fun onWeightChanged(value: Double) {
+        //todo 函数限定？
         val (min, max) = when (_state.value.weightUnit) {
             WeightUnit.KG -> 1.0 to 250.0
             WeightUnit.LB -> 2.0 to 551.0
@@ -222,7 +224,7 @@ class HomeViewModel @Inject constructor(
         val category = if (isAdult) {
             BmiClassifier.classifyAdult(bmi)
         } else {
-            BmiClassifier.classifyChild(state.age, state.gender, bmi)
+            BmiClassifier.classifyChild(state.age, state.gender.name, bmi)
         }
 
         val record = BmiRecord(

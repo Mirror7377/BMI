@@ -10,8 +10,8 @@ import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
-import com.example.bmi.utils.BmiClassifier
-import com.example.bmi.utils.BmiLevel
+import com.example.bmi.ui.bmigauge.BmiClassifier
+import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,7 +38,7 @@ class ResultViewModel @Inject constructor(
     fun initData(bundle: Bundle) {
         loadFromArguments(bundle)
 
-        // 异步查询数据库是否有历史记录（不影响当前 BMI 数据加载）
+        // 异步查询数据库是否有历史记录
         viewModelScope.launch {
             val hasRecord = repository.hasAnyRecord()
             _state.update { it.copy(hasSavedRecord = hasRecord) }
@@ -147,7 +147,12 @@ class ResultViewModel @Inject constructor(
 
     private fun updateDerivedState() {
         val currentState = _state.value
-        val level = BmiClassifier.classifyAdult(currentState.bmi)
+        val level = if (currentState.age > 20) {
+            BmiClassifier.classifyAdult(currentState.bmi)
+        } else {
+            // 直接传入 String 性别（state.gender 就是 String）
+            BmiClassifier.classifyChild(currentState.age, currentState.gender, currentState.bmi)
+        }
         val recommendedApps = getRecommendedApps(level, currentState.gender)
         _state.update {
             it.copy(

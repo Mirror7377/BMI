@@ -1,4 +1,4 @@
-package com.example.bmi.ui.result
+package com.example.bmi.ui.historydetai
 
 import android.animation.ValueAnimator
 import android.app.Dialog
@@ -16,18 +16,22 @@ import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmi.BaseActivity
+import com.example.bmi.MainActivity
 import com.example.bmi.R
 import com.example.bmi.data.database.RecommendApp
-import com.example.bmi.databinding.ActivityResultBinding
+import com.example.bmi.databinding.ActivityHistoryDetailBinding
 import com.example.bmi.databinding.DialogBmiLegendBinding
 import com.example.bmi.databinding.DialogDiscardConfirmBinding
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
+import com.example.bmi.ui.historydetail.HistoryDetailEffect
+import com.example.bmi.ui.historydetail.HistoryDetailIntent
+import com.example.bmi.ui.historydetail.HistoryDetailState
+import com.example.bmi.ui.historydetail.HistoryDetailViewModel
 import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
@@ -35,12 +39,15 @@ import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
-class ResultActivity : BaseActivity() {
+class HistoryDetailActivity : BaseActivity() {
 
-    private lateinit var binding: ActivityResultBinding
-    private val viewModel: ResultViewModel by viewModels()
+    private lateinit var binding: ActivityHistoryDetailBinding
+    private val viewModel: HistoryDetailViewModel by viewModels()
     private var bmiAnimator: ValueAnimator? = null
 
     private val legendLevels = listOf(
@@ -54,37 +61,39 @@ class ResultActivity : BaseActivity() {
         BmiLevel.OBESE_CLASS_III
     )
 
-    private val backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            showDiscardDialog()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityResultBinding.inflate(layoutInflater)
+        binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //返回键
-        onBackPressedDispatcher.addCallback(this, backPressedCallback)
+        // 从 Intent 获取 recordId
+        val recordId = intent.getLongExtra("RECORD_ID", 0L)
+        if (recordId == 0L) {
+            Toast.makeText(this, "Invalid record", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
-        val bundle = intent.extras ?: Bundle()
-        viewModel.initData(bundle)
+        viewModel.handleIntent(HistoryDetailIntent.LoadRecord(recordId))
 
-        binding.tvDiscard.setOnClickListener { showDiscardDialog() }
-        binding.tvSave.setOnClickListener { viewModel.saveRecord() }
+        // 返回按钮
+        binding.ivBack.setOnClickListener {
+            viewModel.handleIntent(HistoryDetailIntent.BackPressed)
+        }
 
-        //  状态标签容器点击事件
+        // Delete 按钮
+        binding.tvDelete.setOnClickListener {
+            showDeleteConfirmDialog()
+        }
+
+        // 状态标签点击 → 弹出图例（若年龄≥20）
         binding.statusContainer.setOnClickListener {
             val state = viewModel.state.value
             showBmiLegendDialog(state.bmiLevel, state.age, state.gender)
+
         }
 
-        // 广告占位点击（预留）
-        binding.llAdContainer.setOnClickListener {
-            Toast.makeText(this, "广告推荐功能开发中", Toast.LENGTH_SHORT).show()
-        }
-
+        // 观察状态
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
@@ -93,170 +102,133 @@ class ResultActivity : BaseActivity() {
             }
         }
 
+        // 观察副作用
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        ResultEffect.NavigateToHome -> finish()
-                        ResultEffect.ShowDiscardDialog -> showDiscardDialog()
+                        is HistoryDetailEffect.NavigateBack -> finish()
+                        is HistoryDetailEffect.NavigateToHome -> {
+                            // 跳转到 Home 页面，并清空返回栈
+                            val intent = Intent(this@HistoryDetailActivity, MainActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
+                        is HistoryDetailEffect.ShowError -> Toast.makeText(this@HistoryDetailActivity, effect.message, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
     }
 
-    private fun bindState(state: ResultState) {
-        val hasData = state.bmi > 0
-        val hasHistory = state.hasSavedRecord
+    private fun bindState(state: HistoryDetailState) {
+        if (state.isLoading) return
+        if (state.bmi <= 0) return
 
         // 1. 应用扇形配置（根据年龄性别）
         val config = BmiConfigProvider.getConfig(state.age, state.gender)
         binding.bmiGauge.applyConfig(config)
 
-        // 2. 仪表盘 & 数字动画
-        if (hasData) {
-            animateBmiNumber(state.bmi)
-            binding.bmiGauge.setBmi(state.bmi.toFloat())
-        }
+        // 2. 仪表盘指针：不带动画
+        binding.bmiGauge.setBmi(state.bmi.toFloat(), false)
 
-        // ---------- 2. 状态标签（tvBmiStatus）----------
+        // 3. 数字文本：直接显示，无动画
+        binding.tvBmiValue.text = String.format("%.1f", state.bmi)
+
+        // 2. 状态标签：背景根据 BMI 等级变化，显示问号
         val bmiLevel = state.bmiLevel
         binding.tvBmiStatus.text = bmiLevel.statusText
         val radius = dpToPx(19.75f).toFloat()
-
-        if (hasHistory) {
-            // 有历史记录 → 绿色背景 + 显示图标，可点击
-            val greenBg = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = radius
-                setColor(bmiLevel.cardBgColor) // 绿色
-            }
-            binding.statusContainer.background = greenBg
-            binding.statusIcon.visibility = View.VISIBLE
-            binding.statusContainer.isClickable = true
-            binding.statusContainer.isFocusable = true
-        } else {
-            // 无历史记录 → 使用等级颜色，隐藏图标，不可点击
-            val colorBg = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = radius
-                setColor(bmiLevel.cardBgColor) // 等级颜色
-            }
-            binding.statusContainer.background = colorBg
-            binding.statusIcon.visibility = View.GONE
-            binding.statusContainer.isClickable = false
-            binding.statusContainer.isFocusable = false
+        val levelColor = bmiLevel.cardBgColor  // 动态获取等级颜色
+        val bg = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = radius
+            setColor(levelColor)
         }
+        binding.statusContainer.background = bg
+        binding.statusIcon.visibility = View.VISIBLE
+        binding.statusContainer.isClickable = true
+        binding.statusContainer.isFocusable = true
 
-        // ---------- 3. 个人信息行 ----------
+        // 3. 个人信息行
         val weightText = when (state.weightUnit) {
             WeightUnit.KG.name -> String.format("%.2f kg", state.weightInput)
             WeightUnit.LB.name -> String.format("%.2f lb", state.weightInput)
             else -> String.format("%.2f kg", state.weightInput)
         }
-
         val heightText = when (state.heightUnit) {
             HeightUnit.CM.name -> String.format("%.1f cm", state.heightInput)
             HeightUnit.FT_IN.name -> "${state.feet} ft ${state.inches} in"
             else -> String.format("%.1f cm", state.heightInput)
         }
-
         val genderText = when (state.gender) {
             Gender.MALE.name -> "Male"
             Gender.FEMALE.name -> "Female"
             else -> "Male"
         }
-
         binding.tvBmiInfo.text = "$weightText | $heightText | $genderText | ${state.age} years old"
 
-        // ---------- 4. 图例区域 ----------
-        if (hasHistory) {
-            // 有历史记录：只显示 Normal 行，隐藏其余所有行
-            for (i in 0 until binding.llBmiLegend.childCount) {
-                val child = binding.llBmiLegend.getChildAt(i)
-                if (child.id == R.id.layoutLevel3) {
-                    child.visibility = View.VISIBLE
-                    binding.dotLevel3.visibility = View.GONE
-                    binding.tvLevelRange3.visibility = View.GONE
-                } else {
-                    child.visibility = View.GONE
-                }
-            }
-        } else {
-            // 无历史记录：显示全部图例
-            for (i in 0 until binding.llBmiLegend.childCount) {
-                binding.llBmiLegend.getChildAt(i).visibility = View.VISIBLE
-            }
-            binding.dotLevel3.visibility = View.VISIBLE
-            binding.tvLevelRange3.visibility = View.VISIBLE
-        }
+        // 4. 日期显示
+        // 在 bindState 方法中，设置顶部日期后，再设置横线中间的日期+时段
+        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+        val dateStr = dateFormat.format(Date(state.timestamp))
+        val timeStr = state.timeOfDay
+        // 组合显示，例如 "Mar 15, 2025 Morning"
+        binding.tvDividerDateTime.text = "$dateStr $timeStr"
 
-        // ---------- 5. 双卡片 + 广告位切换 ----------
-        binding.groupNoData.visibility = if (!hasHistory) View.VISIBLE else View.GONE
-        binding.groupHasData.visibility = if (hasHistory) View.VISIBLE else View.GONE
-        binding.llAdContainer.visibility = if (hasHistory) View.VISIBLE else View.GONE
-
-        if (hasHistory) {
-            val recommendedApps = state.recommendedApps
-            if (recommendedApps.size >= 3) {
-                bindAppToCard(
-                    binding.adCard1,
-                    binding.ivAppIcon1,
-                    binding.tvAppName1,
-                    binding.tvAppCategory1,
-                    binding.rbAppRating1,
-                    binding.tvAppRating1,
-                    recommendedApps[0]
-                )
-                bindAppToCard(
-                    binding.adCard2,
-                    binding.ivAppIcon2,
-                    binding.tvAppName2,
-                    binding.tvAppCategory2,
-                    binding.rbAppRating2,
-                    binding.tvAppRating2,
-                    recommendedApps[1]
-                )
-                bindAppToCard(
-                    binding.adCard3,
-                    binding.ivAppIcon3,
-                    binding.tvAppName3,
-                    binding.tvAppCategory3,
-                    binding.rbAppRating3,
-                    binding.tvAppRating3,
-                    recommendedApps[2]
-                )
-            }
-        }
-
-        // ---------- 6. 卡片背景圆角 ----------
-        setTipCardRadius(binding.llBottomTip)
-        setTipCardRadius(binding.llBottomTipHasData)
-
-        // ---------- 7. 卡片内容同步 ----------
+        // 5. 灰色提示卡片
         renderBottomTip(
             bmiLevel = bmiLevel,
             userWeightInput = state.weightInput,
             userWeightUnitStr = state.weightUnit,
             userHeightCm = state.heightCm,
             userHeightDisplayText = heightText,
-            tvDesc = binding.tvTipDesc,
-            tvMain = binding.tvTipMain,
-            tvRange = binding.tvTipRange,
-            tvDiff = binding.tvTipDiff,
-            tvDescHasData = binding.tvTipDescHasData,
-            tvMainHasData = binding.tvTipMainHasData,
-            tvRangeHasData = binding.tvTipRangeHasData,
-            tvDiffHasData = binding.tvTipDiffHasData
+            tvDesc = binding.tvTipDescHasData,
+            tvMain = binding.tvTipMainHasData,
+            tvRange = binding.tvTipRangeHasData,
+            tvDiff = binding.tvTipDiffHasData
         )
 
-        // ---------- 8. 图例高亮（仅在无历史记录时显示） ----------
-        if (!hasHistory) {
-            bindBmiLegend(bmiLevel)
+        // 6. 推荐 App
+        val recommendedApps = state.recommendedApps
+        if (recommendedApps.size >= 3) {
+            bindAppToCard(
+                binding.adCard1,
+                binding.ivAppIcon1,
+                binding.tvAppName1,
+                binding.tvAppCategory1,
+                binding.rbAppRating1,
+                binding.tvAppRating1,
+                recommendedApps[0]
+            )
+            bindAppToCard(
+                binding.adCard2,
+                binding.ivAppIcon2,
+                binding.tvAppName2,
+                binding.tvAppCategory2,
+                binding.rbAppRating2,
+                binding.tvAppRating2,
+                recommendedApps[1]
+            )
+            bindAppToCard(
+                binding.adCard3,
+                binding.ivAppIcon3,
+                binding.tvAppName3,
+                binding.tvAppCategory3,
+                binding.rbAppRating3,
+                binding.tvAppRating3,
+                recommendedApps[2]
+            )
         }
+
+        // 7. 卡片背景圆角
+        setTipCardRadius(binding.llBottomTipHasData)
     }
 
-    // ---------- 辅助方法 ----------
+    // ---------- 辅助方法（从 ResultActivity 复制） ----------
+
     private fun animateBmiNumber(targetBmi: Double) {
         bmiAnimator?.cancel()
         bmiAnimator = ValueAnimator.ofFloat(0f, targetBmi.toFloat()).apply {
@@ -294,11 +266,7 @@ class ResultActivity : BaseActivity() {
         tvDesc: TextView,
         tvMain: TextView,
         tvRange: TextView,
-        tvDiff: TextView,
-        tvDescHasData: TextView,
-        tvMainHasData: TextView,
-        tvRangeHasData: TextView,
-        tvDiffHasData: TextView
+        tvDiff: TextView
     ) {
         val (stdMinKg, stdMaxKg) = getStandardWeightRangeCm(userHeightCm)
         val isUserKg = userWeightUnitStr == WeightUnit.KG.name
@@ -316,18 +284,16 @@ class ResultActivity : BaseActivity() {
         val unitStr = if (isUserKg) "kg" else "lb"
         val descText = bmiLevel.descText
 
-        // 描述文字
-        listOf(tvDesc, tvDescHasData).forEach { it.text = descText; it.visibility = View.VISIBLE }
+        tvDesc.text = descText
+        tvDesc.visibility = View.VISIBLE
 
         if (bmiLevel == BmiLevel.NORMAL) {
-            listOf(tvMain, tvMainHasData).forEach { it.visibility = View.GONE }
-            listOf(tvRange, tvRangeHasData).forEach { it.visibility = View.GONE }
+            tvMain.visibility = View.GONE
+            tvRange.visibility = View.GONE
         } else {
             val mainText = "Normal weight for your height($userHeightDisplayText)"
-            listOf(tvMain, tvMainHasData).forEach {
-                it.text = mainText
-                it.visibility = View.VISIBLE
-            }
+            tvMain.text = mainText
+            tvMain.visibility = View.VISIBLE
 
             val rangeStr = String.format("%.1f%s - %.1f%s", stdMinShow, unitStr, stdMaxShow, unitStr)
             val diffValue = if (userWeightShow < stdMinShow) {
@@ -346,70 +312,13 @@ class ResultActivity : BaseActivity() {
                 fullText.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            listOf(tvRange, tvRangeHasData).forEach {
-                it.text = spannable
-                it.visibility = View.VISIBLE
-            }
+            tvRange.text = spannable
+            tvRange.visibility = View.VISIBLE
         }
-        listOf(tvDiff, tvDiffHasData).forEach { it.visibility = View.GONE }
+        tvDiff.visibility = View.GONE
     }
 
-    private fun bindBmiLegend(currentLevel: BmiLevel) {
-        val radius = dpToPx(15f).toFloat()
-        val whiteColor = 0xFFFFFFFF.toInt()
-        val blackTextColor = 0xFF000000.toInt()
-
-        val boldTypeface = resources.getFont(R.font.montserrat_extrabold)
-        val regularTypeface = resources.getFont(R.font.montserrat_regular)
-
-        val layouts = listOf(
-            binding.layoutLevel0, binding.layoutLevel1, binding.layoutLevel2, binding.layoutLevel3,
-            binding.layoutLevel4, binding.layoutLevel5, binding.layoutLevel6, binding.layoutLevel7
-        )
-        val dots = listOf(
-            binding.dotLevel0, binding.dotLevel1, binding.dotLevel2, binding.dotLevel3,
-            binding.dotLevel4, binding.dotLevel5, binding.dotLevel6, binding.dotLevel7
-        )
-        val nameTvs = listOf(
-            binding.tvLevelName0, binding.tvLevelName1, binding.tvLevelName2, binding.tvLevelName3,
-            binding.tvLevelName4, binding.tvLevelName5, binding.tvLevelName6, binding.tvLevelName7
-        )
-        val rangeTvs = listOf(
-            binding.tvLevelRange0, binding.tvLevelRange1, binding.tvLevelRange2, binding.tvLevelRange3,
-            binding.tvLevelRange4, binding.tvLevelRange5, binding.tvLevelRange6, binding.tvLevelRange7
-        )
-
-        legendLevels.forEachIndexed { index, level ->
-            val levelColor = level.cardBgColor
-            val layout = layouts[index]
-            val dot = dots[index]
-            val nameTv = nameTvs[index]
-            val rangeTv = rangeTvs[index]
-
-            if (level == currentLevel) {
-                val bg = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = radius
-                    setColor(levelColor)
-                }
-                layout.background = bg
-                (dot.background as GradientDrawable).setColor(whiteColor)
-                nameTv.typeface = boldTypeface
-                rangeTv.typeface = boldTypeface
-                nameTv.setTextColor(whiteColor)
-                rangeTv.setTextColor(whiteColor)
-            } else {
-                layout.background = null
-                (dot.background as GradientDrawable).setColor(levelColor)
-                nameTv.typeface = regularTypeface
-                rangeTv.typeface = regularTypeface
-                nameTv.setTextColor(blackTextColor)
-                rangeTv.setTextColor(blackTextColor)
-            }
-        }
-    }
-
-    // ----------  弹出层相关 ----------
+    // ---------- 图例弹窗 ----------
     private fun showBmiLegendDialog(bmiLevel: BmiLevel, age: Int, gender: String) {
         val dialogBinding = DialogBmiLegendBinding.inflate(layoutInflater)
         val dialog = Dialog(this)
@@ -454,9 +363,7 @@ class ResultActivity : BaseActivity() {
         dialog.show()
     }
 
-    /**
-     * 对弹窗中的图例应用高亮 todo 代码复用
-     */
+    //todo 代码复用
     private fun applyLegendHighlight(
         binding: DialogBmiLegendBinding,
         currentLevel: BmiLevel,
@@ -607,31 +514,7 @@ class ResultActivity : BaseActivity() {
         }
     }
 
-    // ---------- 工具方法 ----------
-    private fun dpToPx(dp: Float): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
-
-    private fun showDiscardDialog() {
-        val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
-        val dialog = Dialog(this)
-        dialog.setContentView(dialogBinding.root)
-        val window = dialog.window ?: return
-
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.decorView.setPadding(0, 0, 0, 0)
-        window.setGravity(Gravity.CENTER)
-        window.setLayout(dpToPx(301f), dpToPx(154f))
-        dialog.setCancelable(true)
-
-        dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
-        dialogBinding.tvDelete.setOnClickListener {
-            dialog.dismiss()
-            finish()
-        }
-        dialog.show()
-    }
-
+    // ---------- 绑定 App 卡片 ----------
     private fun bindAppToCard(
         cardView: View,
         iconView: ImageView,
@@ -653,17 +536,44 @@ class ResultActivity : BaseActivity() {
         ratingBar.rating = app.rating.toFloat()
         ratingTextView.text = String.format("%.1f", app.rating)
 
-        // 点击跳转
         cardView.setOnClickListener {
-            val intent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}"))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}"))
             startActivity(intent)
         }
+    }
+
+    // ---------- 工具 ----------
+    private fun dpToPx(dp: Float): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     override fun onDestroy() {
         bmiAnimator?.cancel()
         bmiAnimator = null
         super.onDestroy()
+    }
+
+    private fun showDeleteConfirmDialog() {
+        val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
+        val dialog = Dialog(this)
+        dialog.setContentView(dialogBinding.root)
+        val window = dialog.window ?: return
+
+        window.setBackgroundDrawableResource(android.R.color.transparent)
+        window.decorView.setPadding(0, 0, 0, 0)
+        window.setGravity(Gravity.CENTER)
+        window.setLayout(dpToPx(301f), dpToPx(154f))
+        dialog.setCancelable(true)
+
+        dialogBinding.tvCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.tvDelete.setOnClickListener {
+            dialog.dismiss()
+            viewModel.handleIntent(HistoryDetailIntent.DeleteRecord)
+        }
+
+        dialog.show()
     }
 }

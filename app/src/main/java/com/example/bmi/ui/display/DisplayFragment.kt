@@ -1,15 +1,11 @@
 package com.example.bmi.ui.display
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -22,8 +18,8 @@ import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.ui.recent.RecentActivity
-import com.example.bmi.utils.BmiClassifier
-import com.example.bmi.utils.BmiLevel
+import com.example.bmi.ui.bmigauge.BmiClassifier
+import com.example.bmi.ui.bmigauge.BmiLevel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -36,6 +32,13 @@ class DisplayFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: DisplayViewModel by viewModels()
+
+    companion object {
+        fun newInstance(): DisplayFragment {
+            val frag = DisplayFragment()
+            return frag
+        }
+    }
 
     private val legendLevels = listOf(
         BmiLevel.VERY_SEVERELY_UNDERWEIGHT,
@@ -91,7 +94,7 @@ class DisplayFragment : Fragment() {
         val bmiLevel = BmiClassifier.classifyAdult(record.bmi)
 
         // 仪表盘
-        binding.bmiGauge.setBmi(record.bmi.toFloat())
+        binding.bmiGauge.setBmi(record.bmi.toFloat(),false)
 
         //bmi数值
         binding.tvBmiValueLarge.text = String.format("%.1f", record.bmi)

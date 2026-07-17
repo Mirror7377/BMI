@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
+
+    <!-- ========== 顶部导航栏 ========== -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 返回按钮 -->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_left"
+            android:padding="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Delete 按钮 -->
+        <TextView
+            android:id="@+id/tvDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            android:textSize="14sp"
+            android:fontFamily="@font/montserrat_regular"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- ========== 可滑动内容区 ========== -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:paddingBottom="20dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- BMI 仪表盘 -->
+            <com.example.bmi.ui.bmigauge.BmiGaugeView
+                android:id="@+id/bmiGauge"
+                android:layout_width="340dp"
+                android:layout_height="200dp"
+                android:layout_marginStart="17.5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- BMI 标题 -->
+            <TextView
+                android:id="@+id/tvBmiTitle"
+                android:layout_width="121dp"
+                android:layout_height="22dp"
+                android:layout_marginTop="205dp"
+                android:text="Your BMI is..."
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_extrabold"
+                android:gravity="center_vertical"
+                android:includeFontPadding="false"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- BMI 数值 -->
+            <TextView
+                android:id="@+id/tvBmiValue"
+                android:layout_width="wrap_content"
+                android:layout_height="78dp"
+                android:layout_marginTop="225dp"
+                android:text="0.0"
+                android:textColor="#000000"
+                android:textSize="64sp"
+                android:fontFamily="@font/montserrat_extrabold"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.009"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- BMI 状态标签容器（带问号） -->
+            <LinearLayout
+                android:id="@+id/statusContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="295dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvBmiStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal"
+                    android:textColor="#FFFFFF"
+                    android:textSize="19sp"
+                    android:fontFamily="@font/montserrat_extrabold"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.0094" />
+
+                <ImageView
+                    android:id="@+id/statusIcon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_info_outline"
+                    android:layout_marginStart="8dp"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+            <!-- BMI 基础信息 -->
+            <TextView
+                android:id="@+id/tvBmiInfo"
+                android:layout_width="0dp"
+                android:layout_height="17dp"
+                android:layout_marginTop="350dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="71 kg | 180 cm | Male | 25 years old"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:letterSpacing="-0.0094"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- ============================================================ -->
+            <!--  块 B：有历史记录时显示（上移卡片 + 广告推荐）              -->
+            <!-- ============================================================ -->
+            <LinearLayout
+                android:id="@+id/groupHasData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="380dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <!-- 底部灰色提示卡片 -->
+                <LinearLayout
+                    android:id="@+id/llBottomTipHasData"
+                    android:layout_width="315dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="12dp"
+                    android:background="@drawable/bg_tip_card">
+
+                    <TextView
+                        android:id="@+id/tvTipDescHasData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.0094"
+                        android:gravity="center"
+                        app:fontFamily="@font/montserrat_regular"
+                        android:lineSpacingExtra="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvTipMainHasData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:layout_marginTop="16dp"
+                        android:includeFontPadding="false"
+                        app:fontFamily="@font/montserrat_regular"
+                        android:letterSpacing="-0.0094"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/tvTipRangeHasData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        android:includeFontPadding="false"
+                        android:letterSpacing="-0.0094"
+                        android:singleLine="true"
+                        app:fontFamily="@font/montserrat_extrabold"
+                        android:ellipsize="end"/>
+
+                    <TextView
+                        android:id="@+id/tvTipDiffHasData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
+                <!-- 广告推荐区域 -->
+                <LinearLayout
+                    android:id="@+id/llAdContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="visible">
+
+                    <!-- 横线 -->
+                    <!-- 横线 + 日期时段 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="30dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <!-- 左横线 -->
+                        <View
+                            android:layout_width="88dp"
+                            android:layout_height="0.5dp"
+                            android:background="#000000"
+                            android:layout_weight="1" />
+
+                        <!-- 中间日期+时段 -->
+                        <TextView
+                            android:id="@+id/tvDividerDateTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mar 15, 2025 Morning"
+                            android:textSize="12sp"
+                            android:fontFamily="@font/montserrat_extrabold"
+                            android:textColor="#000"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+
+                        <!-- 右横线 -->
+                        <View
+                            android:layout_width="88dp"
+                            android:layout_height="0.5dp"
+                            android:background="#000000"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <!-- 标题 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Apps you might need"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:letterSpacing="-0.009375"
+                        android:layout_marginTop="24.5dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_gravity="start" />
+
+                    <!-- 三个卡片容器 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:layout_marginTop="30dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp">
+
+                        <!-- 卡片 1 -->
+                        <LinearLayout
+                            android:id="@+id/adCard1"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon1"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating1"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- 卡片 2 -->
+                        <LinearLayout
+                            android:id="@+id/adCard2"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon2"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating2"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating2"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- 卡片 3 -->
+                        <LinearLayout
+                            android:id="@+id/adCard3"
+                            android:layout_width="335dp"
+                            android:layout_height="79dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_recommend_card"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/ivAppIcon3"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/bmi"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@null"
+                                app:shapeAppearanceOverlay="@style/RoundedImageView12dp"/>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvAppName3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="App Name"
+                                    android:textSize="14sp"
+                                    android:textColor="#000000"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:ellipsize="end" />
+
+                                <TextView
+                                    android:id="@+id/tvAppCategory3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Category"
+                                    android:textSize="12sp"
+                                    android:textColor="#666666"
+                                    android:fontFamily="@font/montserrat_regular"
+                                    android:includeFontPadding="false" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center_vertical">
+
+                                    <RatingBar
+                                        android:id="@+id/rbAppRating3"
+                                        style="?android:attr/ratingBarStyleSmall"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:numStars="5"
+                                        android:stepSize="0.5"
+                                        android:isIndicator="true"
+                                        android:rating="0.0"
+                                        android:progressTint="@color/rating_star" />
+
+                                    <TextView
+                                        android:id="@+id/tvAppRating3"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="4dp"
+                                        android:text="0.0"
+                                        android:textSize="12sp"
+                                        android:textColor="#999999"
+                                        android:fontFamily="@font/montserrat_regular" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
