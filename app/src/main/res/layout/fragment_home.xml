@@ -6,7 +6,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="#EAEAEE">
 
-    <!-- ========== 导航栏 ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navBar"
         android:layout_width="0dp"
@@ -24,12 +23,8 @@
             android:text="@string/calculator"
             android:textColor="#000"
             android:textSize="24sp"
-            
             app:fontFamily="@font/montserrat_extrabold"
-            android:lineHeight="22dp"
             android:includeFontPadding="false"
-            android:maxLines="1"
-            android:ellipsize="end"
             android:gravity="start|center_vertical"
             android:layout_marginTop="18dp"
             android:layout_marginStart="15dp"
