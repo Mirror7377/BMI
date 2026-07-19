@@ -42,4 +42,33 @@ interface BmiDao {
     @Query("SELECT COUNT(*) FROM bmi_records")
     suspend fun getRecordCount(): Int
 
+    @Query("""
+    SELECT * FROM bmi_records 
+    ORDER BY
+        CASE timeOfDay
+            WHEN 'Morning' THEN 1
+            WHEN 'Afternoon' THEN 2
+            WHEN 'Evening' THEN 3
+            WHEN 'Night' THEN 4
+            ELSE 0
+        END DESC,
+        timestamp DESC
+""")
+    fun getAllSortedRecords(): Flow<List<BmiRecord>>
+
+    @Query("""
+    SELECT * FROM bmi_records 
+    WHERE timestamp BETWEEN :startTime AND :endTime
+    ORDER BY
+        CASE timeOfDay
+            WHEN 'Morning' THEN 1
+            WHEN 'Afternoon' THEN 2
+            WHEN 'Evening' THEN 3
+            WHEN 'Night' THEN 4
+            ELSE 0
+        END DESC,
+        timestamp DESC
+""")
+    suspend fun getMonthLatestRecords(startTime: Long, endTime: Long): List<BmiRecord>
+
 }

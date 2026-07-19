@@ -11,6 +11,7 @@ import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.databinding.ActivityMainBinding
 import com.example.bmi.ui.display.DisplayFragment
 import com.example.bmi.ui.home.HomeFragment
+import com.example.bmi.ui.statistics.StatisticsFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -41,17 +42,17 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeLatestRecord()
-                    .distinctUntilChanged()
+                    .distinctUntilChanged()//记录发生变化才发射新数据
                     .collect { record ->
                         latestRecord = record
-                        val hasRecord = record != null
+                        val isEmpty = record == null
 
                         // 控制底部导航栏显隐
-                        binding.bottomNav.visibility = if (hasRecord) View.VISIBLE else View.GONE
+                        binding.bottomNav.visibility = if (isEmpty) View.GONE else View.VISIBLE
 
                         // 同步更新 HomeFragment 的按钮位置
                         val homeFragment = supportFragmentManager.findFragmentByTag("Home") as? HomeFragment
-                        homeFragment?.setEmptyMode(!hasRecord)
+                        homeFragment?.setEmptyMode(isEmpty)
                     }
             }
         }
@@ -71,6 +72,10 @@ class MainActivity : BaseActivity() {
                 }
                 R.id.nav_display -> {
                     navigateToDisplay()
+                    true
+                }
+                R.id.nav_statistics ->{
+                    navigateToStatistics()
                     true
                 }
                 else -> false
@@ -140,5 +145,46 @@ class MainActivity : BaseActivity() {
         }
 
         currentTag = "Display"
+    }
+
+    private fun navigateToStatistics() {
+        val fragmentManager = supportFragmentManager
+        var statisticsFragment = fragmentManager.findFragmentByTag("Statistics")
+        if (statisticsFragment == null) {
+            statisticsFragment = StatisticsFragment()
+            fragmentManager.beginTransaction()
+                .add(R.id.fragment_container, statisticsFragment, "Statistics")
+                .commit()
+        }
+
+        // 如果当前已经是 Statistics，则不重复操作
+        if (currentTag == "Statistics") return
+
+        // 隐藏其他已添加的 Fragment
+        fragmentManager.fragments.forEach { fragment ->
+            if (fragment != statisticsFragment && fragment.isAdded) {
+                fragmentManager.beginTransaction()
+                    .hide(fragment)
+                    .commitNow()
+            }
+        }
+
+        // 显示 StatisticsFragment
+        if (!statisticsFragment.isVisible) {
+            fragmentManager.beginTransaction()
+                .show(statisticsFragment)
+                .commitNow()
+        }
+
+        currentTag = "Statistics"
+    }
+
+    // MainActivity.kt
+
+    /**
+     * 供外部调用 切换到 HomeFragment
+     */
+    fun goToHome() {
+        navigateToHome()
     }
 }

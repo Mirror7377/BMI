@@ -625,6 +625,7 @@ class ResultActivity : BaseActivity() {
         dialog.setCancelable(true)
 
         dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
+        //todo 返回到home页面后弹出 toast显示已删除
         dialogBinding.tvDelete.setOnClickListener {
             dialog.dismiss()
             finish()

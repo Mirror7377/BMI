@@ -553,6 +553,7 @@ class HistoryDetailActivity : BaseActivity() {
         super.onDestroy()
     }
 
+    // todo 公共
     private fun showDeleteConfirmDialog() {
         val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
         val dialog = Dialog(this)
@@ -568,7 +569,7 @@ class HistoryDetailActivity : BaseActivity() {
         dialogBinding.tvCancel.setOnClickListener {
             dialog.dismiss()
         }
-
+        //todo 返回到home页面后弹出 toast显示已删除
         dialogBinding.tvDelete.setOnClickListener {
             dialog.dismiss()
             viewModel.handleIntent(HistoryDetailIntent.DeleteRecord)

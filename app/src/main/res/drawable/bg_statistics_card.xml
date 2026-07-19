@@ -1,0 +1,9 @@
+<!-- res/drawable/bg_statistics_card.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="12dp" />
+    <gradient
+        android:startColor="#5077FA"
+        android:endColor="#264CCA"
+        android:angle="0" />   <!-- 0 表示从左到右渐变 -->
+</shape>

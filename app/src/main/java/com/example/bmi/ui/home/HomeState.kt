@@ -23,8 +23,8 @@ data class HomeState(
     // 其他 UI 状态
     val age: Int = 25,
     val gender: Gender = Gender.MALE,
-    val timestamp: Long = System.currentTimeMillis(),
-    val timeOfDay: TimeOfDay = TimeOfDay.fromSystemTime(),
+    val timestamp: Long = System.currentTimeMillis(),//日期
+    val timeOfDay: TimeOfDay = TimeOfDay.fromSystemTime(),//时间段
     val isLoading: Boolean = false,
     val weightDisplay: String = "65.00",
     val heightDisplay: String = "170.0",

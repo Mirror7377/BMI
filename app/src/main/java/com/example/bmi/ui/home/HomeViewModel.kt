@@ -98,7 +98,7 @@ class HomeViewModel @Inject constructor(
         } else {
             UnitConverter.kgToLb(state.weightInput).coerceIn(2.0, 551.0)
         }
-        // 换算后的值用于显示，同时更新 weightKg 和 weightInput todo不是换算的值进行显示
+        // 换算后的值用于显示，同时更新 weightKg 和 weightInput todo 不是换算的值进行显示
         val newWeightKg = if (unit == WeightUnit.KG) newWeightInput else UnitConverter.lbToKg(newWeightInput)
 
         updateState {

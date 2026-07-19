@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -21,9 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentHomeBinding
 import com.example.bmi.ui.adapt.AgeAdapter
-import com.example.bmi.ui.adapt.DatePickerAdapter
-import com.example.bmi.ui.adapt.DatePickerItem
-import com.example.bmi.ui.adapt.DatePickerType
 import com.example.bmi.ui.adapt.TimeOfDayPickerAdapter
 import com.example.bmi.ui.adapt.TimePickerItem
 import com.example.bmi.ui.home.enums.Gender
@@ -53,27 +51,10 @@ class HomeFragment : Fragment() {
     private lateinit var ageAdapter: AgeAdapter
     private val placeholderCount = 2
 
-    // 日期滚轮成员变量
-    private lateinit var monthSnapHelper: LinearSnapHelper
-    private lateinit var daySnapHelper: LinearSnapHelper
-    private lateinit var yearSnapHelper: LinearSnapHelper
-    private val datePlaceholderCount = 3
-    private var currentSelectedYear: Int = 0
-    private var currentSelectedMonth: Int = 0
-    private var currentSelectedDay: Int = 0
-    private val todayCalendar = Calendar.getInstance()
-    private val maxYear = todayCalendar.get(Calendar.YEAR)
-    private val maxMonth = todayCalendar.get(Calendar.MONTH) + 1
-    private val maxDay = todayCalendar.get(Calendar.DAY_OF_MONTH)
-    private lateinit var monthItems: List<DatePickerItem>
-    private lateinit var dayItems: List<DatePickerItem>
-    private lateinit var yearItems: List<DatePickerItem>
-
     // 时段滚轮
-    private lateinit var timeSnapHelper: LinearSnapHelper
-    private val timePlaceholderCount = 2
+    private lateinit var numberPicker: NumberPicker
+    private val timeOptions = arrayOf("Morning", "Afternoon", "Evening", "Night")
     private var currentSelectedTimeIndex: Int = 0
-    private val timeOptions = listOf("Morning", "Afternoon", "Evening", "Night")
 
     companion object {
         fun newInstance(): HomeFragment {
@@ -117,8 +98,8 @@ class HomeFragment : Fragment() {
         observeState()
         setupListeners()
         setupAgeRecyclerView()
-        setupDatePickers()
-        setupTimePicker()
+        initDatePicker()
+        initTimePicker()
         observeEffect()
 
         viewModel.sendIntent(HomeIntent.Init)
@@ -166,7 +147,7 @@ class HomeFragment : Fragment() {
             WeightUnit.LB -> 0
         }
         val weightParams = binding.selectedUnitBg.layoutParams as ConstraintLayout.LayoutParams
-        weightParams.marginStart = dpToPx(weightMarginStart)
+        weightParams.marginStart = dpToPx(weightMarginStart)//布局参数需要使用像素单位
         binding.selectedUnitBg.layoutParams = weightParams
 
         // 身高单位背景偏移
@@ -441,19 +422,34 @@ class HomeFragment : Fragment() {
     }
 
     private fun showDatePicker() {
+        // 先同步当前状态的时间到 DatePicker
+        val timestamp = viewModel.state.value.timestamp
+        val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
+        val today = Calendar.getInstance()
+        if (calendar.after(today)) {
+            calendar.time = today.time
+        }
+        binding.datePicker.init(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH),
+            null
+        )
+
         binding.datePickerMask.visibility = View.VISIBLE
         binding.datePickerBottomSheet.visibility = View.VISIBLE
         binding.datePickerMask.setOnClickListener { dismissDatePicker() }
         binding.btnDateCancel.setOnClickListener { dismissDatePicker() }
         binding.btnDateDone.setOnClickListener {
-            val selectedYear = getSelectedYear()
-            val selectedMonth = getSelectedMonth()
-            val selectedDay = getSelectedDay()
-            val calendar = Calendar.getInstance()
-            calendar.set(selectedYear, selectedMonth, selectedDay)
+            val year = binding.datePicker.year
+            val month = binding.datePicker.month // 0-based
+            val day = binding.datePicker.dayOfMonth
+            val selectedCalendar = Calendar.getInstance()
+            selectedCalendar.set(year, month, day)
+            // 保留当前时段
             viewModel.sendIntent(
                 HomeIntent.TimeChanged(
-                    calendar.timeInMillis,
+                    selectedCalendar.timeInMillis,
                     viewModel.state.value.timeOfDay
                 )
             )
@@ -466,100 +462,39 @@ class HomeFragment : Fragment() {
         binding.datePickerBottomSheet.visibility = View.GONE
     }
 
-    private fun setupDatePickers() {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = viewModel.state.value.timestamp
-        if (calendar.after(todayCalendar)) {
-            calendar.time = todayCalendar.time
+    private fun initDatePicker() {
+        val timestamp = viewModel.state.value.timestamp
+        val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
+        // 限制不能超过今天（与原来逻辑一致）
+        val today = Calendar.getInstance()
+        if (calendar.after(today)) {
+            calendar.time = today.time
         }
-        currentSelectedYear = calendar.get(Calendar.YEAR)
-        currentSelectedMonth = calendar.get(Calendar.MONTH) + 1
-        currentSelectedDay = calendar.get(Calendar.DAY_OF_MONTH)
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) // 注意：DatePicker 的 month 是从0开始的
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        monthItems = buildMonthList(currentSelectedYear)
-        val monthAdapter = DatePickerAdapter(monthItems, 31, DatePickerType.MONTH_TEXT)
-        binding.rvMonthPicker.adapter = monthAdapter
-        binding.rvMonthPicker.layoutManager = LinearLayoutManager(requireContext())
-        monthSnapHelper = LinearSnapHelper()
-        monthSnapHelper.attachToRecyclerView(binding.rvMonthPicker)
-        binding.rvMonthPicker.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val centerView = monthSnapHelper.findSnapView(recyclerView.layoutManager) ?: return
-                    val position = recyclerView.getChildAdapterPosition(centerView)
-                    if (position != RecyclerView.NO_POSITION) {
-                        val item = monthItems[position]
-                        if (item is DatePickerItem.RealValue) {
-                            currentSelectedMonth = item.value
-                            updateDayList()
-                        }
-                    }
-                }
-            }
-        })
-
-        dayItems = buildDayList(currentSelectedYear, currentSelectedMonth)
-        val dayAdapter = DatePickerAdapter(dayItems, 14)
-        binding.rvDayPicker.adapter = dayAdapter
-        binding.rvDayPicker.layoutManager = LinearLayoutManager(requireContext())
-        daySnapHelper = LinearSnapHelper()
-        daySnapHelper.attachToRecyclerView(binding.rvDayPicker)
-        binding.rvDayPicker.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val centerView = daySnapHelper.findSnapView(recyclerView.layoutManager) ?: return
-                    val position = recyclerView.getChildAdapterPosition(centerView)
-                    if (position != RecyclerView.NO_POSITION) {
-                        val item = dayItems[position]
-                        if (item is DatePickerItem.RealValue) {
-                            currentSelectedDay = item.value
-                        }
-                    }
-                }
-            }
-        })
-
-        yearItems = buildYearList()
-        val yearAdapter = DatePickerAdapter(yearItems, 32)
-        binding.rvYearPicker.adapter = yearAdapter
-        binding.rvYearPicker.layoutManager = LinearLayoutManager(requireContext())
-        yearSnapHelper = LinearSnapHelper()
-        yearSnapHelper.attachToRecyclerView(binding.rvYearPicker)
-        binding.rvYearPicker.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val centerView = yearSnapHelper.findSnapView(recyclerView.layoutManager) ?: return
-                    val position = recyclerView.getChildAdapterPosition(centerView)
-                    if (position != RecyclerView.NO_POSITION) {
-                        val item = yearItems[position]
-                        if (item is DatePickerItem.RealValue) {
-                            val newYear = item.value
-                            if (newYear != currentSelectedYear) {
-                                currentSelectedYear = newYear
-                                updateMonthList()
-                            }
-                        }
-                    }
-                }
-            }
-        })
-        scrollDateToCurrent()
+        binding.datePicker.init(year, month, day, null)
     }
 
     private fun showTimeOfDayPicker() {
+        // 同步当前选中值
         currentSelectedTimeIndex = when (viewModel.state.value.timeOfDay) {
             TimeOfDay.MORNING -> 0
             TimeOfDay.AFTERNOON -> 1
             TimeOfDay.EVENING -> 2
             TimeOfDay.NIGHT -> 3
+            else -> 0
         }
-        scrollTimeToCurrent()
+        numberPicker.value = currentSelectedTimeIndex
+
         binding.timePickerMask.visibility = View.VISIBLE
         binding.timePickerBottomSheet.visibility = View.VISIBLE
         binding.timePickerMask.setOnClickListener { dismissTimePicker() }
         binding.btnTimeCancel.setOnClickListener { dismissTimePicker() }
         binding.btnTimeDone.setOnClickListener {
-            val timeOfDay = when (currentSelectedTimeIndex) {
+            val selectedIndex = numberPicker.value
+            val timeOfDay = when (selectedIndex) {
                 0 -> TimeOfDay.MORNING
                 1 -> TimeOfDay.AFTERNOON
                 2 -> TimeOfDay.EVENING
@@ -584,6 +519,7 @@ class HomeFragment : Fragment() {
                         is HomeEffect.NavigateToResult -> {
                             navigateToDisplay(effect.record)
                         }
+                        //todo 未使用
                         is HomeEffect.ShowError -> {
                             showToast(effect.message)
                         }
@@ -612,129 +548,23 @@ class HomeFragment : Fragment() {
         startActivity(intent)
     }
 
-    private fun buildMonthList(): List<DatePickerItem> {
-        val realData = (1..12).map { DatePickerItem.RealValue(it) }
-        val placeholders = List(datePlaceholderCount) { DatePickerItem.Placeholder }
-        return placeholders + realData + placeholders
-    }
+    private fun initTimePicker() {
+        numberPicker = binding.npTimePicker
+        numberPicker.minValue = 0
+        numberPicker.maxValue = timeOptions.size - 1
+        numberPicker.displayedValues = timeOptions
+        numberPicker.wrapSelectorWheel = false
 
-    private fun buildYearList(): List<DatePickerItem> {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        val realData = (1900..currentYear).map { DatePickerItem.RealValue(it) }
-        val placeholders = List(datePlaceholderCount) { DatePickerItem.Placeholder }
-        return placeholders + realData + placeholders
-    }
-
-    private fun getDaysInMonth(year: Int, month: Int): Int {
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month - 1, 1)
-        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-    }
-
-    private fun scrollDateToCurrent() {
-        val monthPos = currentSelectedMonth - 1 + datePlaceholderCount
-        (binding.rvMonthPicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(monthPos, 0)
-        val yearPos = currentSelectedYear - 1900 + datePlaceholderCount
-        (binding.rvYearPicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(yearPos, 0)
-        val dayPos = currentSelectedDay - 1 + datePlaceholderCount
-        (binding.rvDayPicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(dayPos, 0)
-    }
-
-    private fun getSelectedYear(): Int = currentSelectedYear
-    private fun getSelectedMonth(): Int = currentSelectedMonth
-    private fun getSelectedDay(): Int = currentSelectedDay
-
-    private fun buildMonthList(year: Int): List<DatePickerItem> {
-        val maxMonthOfYear = if (year == maxYear) maxMonth else 12
-        val realData = (1..maxMonthOfYear).map { DatePickerItem.RealValue(it) }
-        val placeholders = List(datePlaceholderCount) { DatePickerItem.Placeholder }
-        return placeholders + realData + placeholders
-    }
-
-    private fun buildDayList(year: Int, month: Int): List<DatePickerItem> {
-        val maxDayOfMonth = if (year == maxYear && month == maxMonth) {
-            maxDay
-        } else {
-            getDaysInMonth(year, month)
-        }
-        val realData = (1..maxDayOfMonth).map { DatePickerItem.RealValue(it) }
-        val placeholders = List(datePlaceholderCount) { DatePickerItem.Placeholder }
-        return placeholders + realData + placeholders
-    }
-
-    private fun updateMonthList() {
-        val newMonthItems = buildMonthList(currentSelectedYear)
-        monthItems = newMonthItems
-        val maxMonthOfYear = if (currentSelectedYear == maxYear) maxMonth else 12
-        if (currentSelectedMonth > maxMonthOfYear) {
-            currentSelectedMonth = maxMonthOfYear
-        }
-        (binding.rvMonthPicker.adapter as? DatePickerAdapter)?.updateData(newMonthItems)
-        val targetPosition = currentSelectedMonth - 1 + datePlaceholderCount
-        (binding.rvMonthPicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(targetPosition, 0)
-        updateDayList()
-    }
-
-    private fun updateDayList() {
-        val maxDayOfMonth = if (currentSelectedYear == maxYear && currentSelectedMonth == maxMonth) {
-            maxDay
-        } else {
-            getDaysInMonth(currentSelectedYear, currentSelectedMonth)
-        }
-        if (currentSelectedDay > maxDayOfMonth) {
-            currentSelectedDay = maxDayOfMonth
-        }
-        val newDayItems = buildDayList(currentSelectedYear, currentSelectedMonth)
-        dayItems = newDayItems
-        (binding.rvDayPicker.adapter as? DatePickerAdapter)?.updateData(newDayItems)
-        val targetPosition = currentSelectedDay - 1 + datePlaceholderCount
-        (binding.rvDayPicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(targetPosition, 0)
-    }
-
-    private fun setupTimePicker() {
+        // 同步当前选中值
         currentSelectedTimeIndex = when (viewModel.state.value.timeOfDay) {
             TimeOfDay.MORNING -> 0
             TimeOfDay.AFTERNOON -> 1
             TimeOfDay.EVENING -> 2
             TimeOfDay.NIGHT -> 3
+            else -> 0
         }
-        val timeItems = buildTimeList()
-        val timeAdapter = TimeOfDayPickerAdapter(timeItems)
-        binding.rvTimePicker.adapter = timeAdapter
-        binding.rvTimePicker.layoutManager = LinearLayoutManager(requireContext())
-        timeSnapHelper = LinearSnapHelper()
-        timeSnapHelper.attachToRecyclerView(binding.rvTimePicker)
-        binding.rvTimePicker.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    val centerView = timeSnapHelper.findSnapView(recyclerView.layoutManager) ?: return
-                    val position = recyclerView.getChildAdapterPosition(centerView)
-                    if (position != RecyclerView.NO_POSITION) {
-                        val item = timeItems[position]
-                        if (item is TimePickerItem.RealValue) {
-                            currentSelectedTimeIndex = timeOptions.indexOf(item.text)
-                        }
-                    }
-                }
-            }
-        })
-        scrollTimeToCurrent()
+        numberPicker.value = currentSelectedTimeIndex
+
     }
 
-    private fun buildTimeList(): List<TimePickerItem> {
-        val realData = timeOptions.map { TimePickerItem.RealValue(it) }
-        val placeholders = List(timePlaceholderCount) { TimePickerItem.Placeholder }
-        return placeholders + realData + placeholders
-    }
-
-    private fun scrollTimeToCurrent() {
-        val targetPosition = currentSelectedTimeIndex + timePlaceholderCount
-        (binding.rvTimePicker.layoutManager as LinearLayoutManager)
-            .scrollToPositionWithOffset(targetPosition, 0)
-    }
 }
