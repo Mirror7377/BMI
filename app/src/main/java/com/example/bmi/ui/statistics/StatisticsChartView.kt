@@ -5,59 +5,48 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.View
+import android.widget.OverScroller
 import com.example.bmi.R
 import java.util.Calendar
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
-/**
- * 统计图表自定义 View
- * 支持：
- * - 显示 8 天数据，左右滑动切换
- * - 纵坐标 6 个值，5 等分，标签左对齐，距左边 11dp
- * - 圆点默认白色 6px，选中 8px 并变色
- * - 点击圆点显示 BMI 数值
- * - 月份标签随 1 号位置显隐
- */
 class StatisticsChartView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // ==================== 尺寸常量 ====================
     private companion object {
-        // 卡片尺寸（外部容器已固定，View 撑满）
         const val CARD_WIDTH = 345f
         const val CARD_HEIGHT = 217.5f
 
-        // 纵坐标（Y 轴）
-        const val Y_PADDING_TOP = 29.5f          // 第一个数值距顶部
-        const val Y_PADDING_BOTTOM = 37f         // 最后一个数值距底部
-        const val Y_LABEL_COUNT = 6              // 6 个数值（5 等分）
-        const val Y_LABEL_LEFT_MARGIN = 25f      // 纵坐标标签左边缘距卡片左边距 11dp
+        const val Y_PADDING_TOP = 29.5f
+        const val Y_PADDING_BOTTOM = 37f
+        const val Y_LABEL_COUNT = 6
+        const val Y_LABEL_LEFT_MARGIN = 25f
 
-        // 横坐标（X 轴）
-        const val X_PADDING_RIGHT = 20.5f        // 最后一个日期距右侧
-        const val X_LABEL_COUNT = 8              // 显示 8 个日期
+        const val X_PADDING_RIGHT = 20.5f
+        const val X_LABEL_COUNT = 8
 
-        // 月份标签
-        const val MONTH_TOP_MARGIN = 14.5f       // 距顶部
+        const val MONTH_TOP_MARGIN = 14.5f
 
-        // 圆点
-        const val DOT_RADIUS_DEFAULT = 3f        // 默认 6px 直径 → 3px 半径
-        const val DOT_RADIUS_SELECTED = 4f       // 选中 8px 直径 → 4px 半径
+        // 圆点尺寸（修改）
+        const val DOT_RADIUS_NORMAL = 3f        // 普通直径6px
+        const val DOT_RADIUS_SELECTED = 5.0f    // 选中总直径9px
+        const val DOT_RADIUS_COLOR = 4f         // 选中彩色部分直径8px
 
-        // 选中数值标签
-        const val VALUE_LABEL_TOP_OFFSET = 8f    // 数值在圆点上方偏移
+        const val VALUE_LABEL_TOP_OFFSET = 8f
     }
 
-    // ==================== 画笔 ====================
+    // 画笔（不变）
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textAlign = Paint.Align.LEFT             // 改为左对齐
+        textAlign = Paint.Align.LEFT
         typeface = resources.getFont(R.font.montserrat_extrabold)
         textSize = spToPx(12f)
     }
@@ -72,11 +61,15 @@ class StatisticsChartView @JvmOverloads constructor(
     private val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
-        typeface = Typeface.create("montserrat", Typeface.BOLD)
+        typeface = resources.getFont(R.font.montserrat_extrabold)
         textSize = spToPx(12f)
     }
 
-    private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+    }
+
+    private val dotFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
 
@@ -87,68 +80,60 @@ class StatisticsChartView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val verticalGridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#EEEEEE")
+        style = Paint.Style.STROKE
+        strokeWidth = 0.5f
+    }
+
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        alpha = 0x55
-        strokeWidth = 1.5f
+        alpha = 0x99
+        strokeWidth = 4.0f
         style = Paint.Style.STROKE
     }
 
-    // ==================== 数据 ====================
+    // 数据
     private var allData: List<DayBmiData> = emptyList()
-    private var startIndex: Int = 0
     private val displayCount = X_LABEL_COUNT
+    private var scrollOffset = 0f
+    private var minScrollX = 0f
+    private var maxScrollX = 0f
+    private val visibleStartIndex: Float get() = scrollOffset / xInterval
+    private var yMin = 0f
+    private var yMax = 1f
+    private var yStep = 0.2f
 
-    private val displayData: List<DayBmiData>
-        get() {
-            val end = min(startIndex + displayCount, allData.size)
-            return if (startIndex < allData.size) {
-                allData.subList(startIndex, end)
-            } else {
-                emptyList()
-            }
-        }
-
-    private val validBmiValues: List<Float>
-        get() = displayData.mapNotNull { it.bmi }
-
-    // 纵坐标范围
-    private var yMin: Float = 0f
-    private var yMax: Float = 0f
-    private var yStep: Float = 0f
-
-    // ==================== 选中状态 ====================
-    private var selectedPosition: Int? = null
+    private var selectedDataIndex: Int? = null
     private var selectedBmi: Float? = null
 
-    // ==================== 尺寸 ====================
-    private var viewWidth: Float = 0f
-    private var viewHeight: Float = 0f
+    private var viewWidth = 0f
+    private var viewHeight = 0f
+    private var yPaddingTopPx = 0f
+    private var yPaddingBottomPx = 0f
+    private var yLabelLeftPx = 0f
+    private var xPaddingRightPx = 0f
+    private var yAvailableHeight = 0f
+    private var xAvailableWidth = 0f
+    private var yInterval = 0f
+    private var xInterval = 0f
+    private var xStart = 0f
+    private var monthLabelY = 0f
+    private var showMonthLabel = false
 
-    private var yPaddingTopPx: Float = 0f
-    private var yPaddingBottomPx: Float = 0f
-    private var yLabelLeftPx: Float = 0f          // 纵坐标标签左边缘 X
-    private var xPaddingRightPx: Float = 0f
-    private var yAvailableHeight: Float = 0f
-    private var xAvailableWidth: Float = 0f
-    private var yInterval: Float = 0f
-    private var xInterval: Float = 0f
-    private var xStart: Float = 0f                // 横坐标起始 X
+    private val scroller = OverScroller(context)
+    private var velocityTracker: VelocityTracker? = null
+    private var isDragging = false
+    private var lastTouchX = 0f
+    private val touchSlop = dpToPx(10f)
 
-    // 月份标签位置
-    private var monthLabelY: Float = 0f
-    private var showMonthLabel: Boolean = false
-
-    // ==================== 动画 ====================
     private var animator: ValueAnimator? = null
-
-    // ==================== 监听器 ====================
     var onDataRangeChanged: ((startDate: String, endDate: String) -> Unit)? = null
 
-    // ==================== 初始化 ====================
     init {
         isClickable = true
         isFocusable = true
+        setWillNotDraw(false)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -166,93 +151,135 @@ class StatisticsChartView @JvmOverloads constructor(
 
         monthLabelY = dpToPx(MONTH_TOP_MARGIN) + monthPaint.textSize / 2
 
-        recalculateYAxis()
-        // 初始更新布局指标
-        updateLayoutMetrics()
-        invalidate()
-    }
-
-    // ==================== 数据设置 ====================
-    fun setData(data: List<DayBmiData>) {
-        this.allData = data.sortedBy { it.date.timeInMillis }
-        this.startIndex = 0
-        this.selectedPosition = null
-        this.selectedBmi = null
-        recalculateYAxis()
-        invalidate()
-    }
-
-    fun scrollTo(offset: Int) {
-        val newStart = (startIndex + offset).coerceIn(0, max(0, allData.size - displayCount))
-        if (newStart != startIndex) {
-            startIndex = newStart
-            selectedPosition = null
-            selectedBmi = null
-            recalculateYAxis()
-            invalidate()
-            val startDate = displayData.firstOrNull()?.let { formatDate(it.date) } ?: ""
-            val endDate = displayData.lastOrNull()?.let { formatDate(it.date) } ?: ""
-            onDataRangeChanged?.invoke(startDate, endDate)
-        }
-    }
-
-    fun canScrollLeft(): Boolean = startIndex > 0
-    fun canScrollRight(): Boolean = startIndex + displayCount < allData.size
-
-    // ==================== 纵坐标计算 ====================
-    private fun recalculateYAxis() {
-        val values = validBmiValues
-        if (values.isEmpty()) {
+        if (allData.isNotEmpty()) {
+            computeFixedYAxis(allData)
+        } else {
             yMin = 0f
             yMax = 1f
             yStep = 0.2f
+        }
+
+        updateLayoutMetrics()
+        updateScrollBounds()
+        clampScrollOffset()
+        invalidate()
+    }
+
+    fun setData(data: List<DayBmiData>) {
+        val sorted = data.sortedBy { it.date.timeInMillis }
+        val lastWithBmi = sorted.findLast { it.bmi != null }
+        if (lastWithBmi == null) {
+            allData = emptyList()
+            scrollOffset = 0f
+            selectedDataIndex = null
+            selectedBmi = null
+            computeFixedYAxis(emptyList())
             updateLayoutMetrics()
+            updateScrollBounds()
+            clampScrollOffset()
+            invalidate()
             return
         }
 
-        val minVal = values.minOrNull() ?: 0f
-        val maxVal = values.maxOrNull() ?: 1f
+        val latestDate = lastWithBmi.date
+        val cal = Calendar.getInstance().apply { time = latestDate.time }
+        cal.add(Calendar.DAY_OF_YEAR, -58)
+        val startDate = cal.clone() as Calendar
+        cal.add(Calendar.DAY_OF_YEAR, 59)
+        val endDate = cal
 
-        if (minVal == maxVal) {
-            val half = 1f
-            yMin = max(0f, minVal - half)
-            yMax = minVal + half
-        } else {
-            val range = maxVal - minVal
-            val extendedRange = range / 0.75f
-            val mid = (minVal + maxVal) / 2f
-            val halfRange = extendedRange / 2f
-            yMin = max(0f, mid - halfRange)
-            yMax = mid + halfRange
+        val allDates = mutableListOf<DayBmiData>()
+        var current = startDate.clone() as Calendar
+        while (current <= endDate) {
+            val bmi = sorted.find {
+                val d = it.date
+                d.get(Calendar.YEAR) == current.get(Calendar.YEAR) &&
+                        d.get(Calendar.DAY_OF_YEAR) == current.get(Calendar.DAY_OF_YEAR)
+            }?.bmi
+            allDates.add(DayBmiData(current.clone() as Calendar, bmi))
+            current.add(Calendar.DAY_OF_YEAR, 1)
         }
 
-        val rawStep = (yMax - yMin) / (Y_LABEL_COUNT - 1)
-        yStep = (rawStep * 10).toInt().toFloat() / 10f
-        if (yStep < 0.1f) yStep = 0.1f
+        this.allData = allDates
+        this.selectedDataIndex = null
+        this.selectedBmi = null
 
-        yMin = (yMin / yStep).toInt().toFloat() * yStep
-        yMax = yMin + yStep * (Y_LABEL_COUNT - 1)
-
+        computeFixedYAxis(allDates)
         updateLayoutMetrics()
+
+        val targetStart = (allData.size - displayCount).coerceAtLeast(0)
+        this.scrollOffset = targetStart.toFloat() * xInterval
+
+        updateScrollBounds()
+        clampScrollOffset()
+        invalidate()
+        notifyRangeChanged()
     }
 
-    // ==================== 布局指标更新 ====================
+    private fun computeFixedYAxis(data: List<DayBmiData>) {
+        val bmiList = data.mapNotNull { it.bmi }
+        if (bmiList.isEmpty()) {
+            yMin = 0f
+            yMax = 1f
+            yStep = 0.2f
+            return
+        }
+
+        val minVal = bmiList.minOrNull() ?: 0f
+        val maxVal = bmiList.maxOrNull() ?: 1f
+
+        val span = if (minVal == maxVal) 2f else (maxVal - minVal)
+        val totalSpan = span / 0.75f
+
+        yMin = minVal - totalSpan * 0.10f
+        yMax = maxVal + totalSpan * 0.15f
+
+        var step = (yMax - yMin) / 5f
+        step = (step * 10f).roundToInt() / 10f
+        if (step < 0.1f) step = 0.1f
+        yStep = step
+
+        yMax = yMin + step * 5f
+    }
+
+    private fun updateScrollBounds() {
+        if (allData.isEmpty()) {
+            minScrollX = 0f
+            maxScrollX = 0f
+            return
+        }
+        val totalWidth = (allData.size - 1) * xInterval
+        val visibleWidth = (displayCount - 1) * xInterval
+        maxScrollX = max(0f, totalWidth - visibleWidth)
+        minScrollX = 0f
+    }
+
+    private fun clampScrollOffset() {
+        scrollOffset = scrollOffset.coerceIn(minScrollX, maxScrollX)
+    }
+
+    private fun notifyRangeChanged() {
+        val startIdx = visibleStartIndex.toInt()
+        val endIdx = min(startIdx + displayCount - 1, allData.size - 1)
+        val startDate = if (startIdx < allData.size) allData[startIdx] else null
+        val endDate = if (endIdx < allData.size) allData[endIdx] else null
+        onDataRangeChanged?.invoke(
+            startDate?.let { formatDate(it.date) } ?: "",
+            endDate?.let { formatDate(it.date) } ?: ""
+        )
+    }
+
     private fun updateLayoutMetrics() {
-        // 计算纵坐标标签的最大宽度（左对齐）
         val maxLabelWidth = calculateMaxYLabelWidth()
-        // 纵坐标标签的右边缘 = 左边缘 + 最大宽度
         val yLabelRightX = yLabelLeftPx + maxLabelWidth
-
-        // 横坐标起始 = 纵坐标标签右边缘 + 6dp
         xStart = yLabelRightX + dpToPx(6f)
-
-        // 横坐标可用宽度
         xAvailableWidth = viewWidth - xStart - xPaddingRightPx
         xInterval = if (displayCount > 1) {
             xAvailableWidth / (displayCount - 1)
         } else {
             0f
         }
+        updateScrollBounds()
     }
 
     private fun calculateMaxYLabelWidth(): Float {
@@ -266,7 +293,6 @@ class StatisticsChartView @JvmOverloads constructor(
         return maxWidth
     }
 
-    // ==================== 绘制 ====================
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -275,18 +301,31 @@ class StatisticsChartView @JvmOverloads constructor(
             return
         }
 
-        val display = displayData
-        if (display.isEmpty()) {
-            drawEmptyState(canvas)
-            return
-        }
-
         drawYLabels(canvas)
-        drawXLabels(canvas)
-        drawMonthLabel(canvas)
-        drawDataLine(canvas)
-        drawDots(canvas)
-        drawSelectedValue(canvas)
+
+        val clipLeft = xStart
+        val clipTop = 0f
+        val clipRight = viewWidth
+        val clipBottom = viewHeight
+
+        canvas.save()
+        canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom)
+
+        val startIdx = visibleStartIndex.toInt()
+        val endIdx = min(startIdx + displayCount + 1, allData.size)
+        val visibleSubList = allData.subList(startIdx, endIdx)
+
+        canvas.translate(-scrollOffset, 0f)
+
+        drawVerticalGridLines(canvas, startIdx, visibleSubList)
+        drawFillArea(canvas, startIdx, visibleSubList)
+        drawXLabels(canvas, startIdx, visibleSubList)
+        drawMonthLabel(canvas, startIdx, visibleSubList)
+        drawDataLine(canvas, startIdx, visibleSubList)
+        drawDots(canvas, startIdx, visibleSubList)
+        drawSelectedValue(canvas, startIdx, visibleSubList)
+
+        canvas.restore()
     }
 
     private fun drawEmptyState(canvas: Canvas) {
@@ -299,17 +338,6 @@ class StatisticsChartView @JvmOverloads constructor(
     }
 
     private fun drawYLabels(canvas: Canvas) {
-        val values = validBmiValues
-        if (values.isEmpty()) {
-            // 占位刻度
-            for (i in 0 until Y_LABEL_COUNT) {
-                val y = yPaddingTopPx + i * yInterval
-                val label = String.format("%.1f", yMax - i * yStep)
-                canvas.drawText(label, yLabelLeftPx, y + textPaint.textSize / 3, textPaint)
-            }
-            return
-        }
-
         for (i in 0 until Y_LABEL_COUNT) {
             val value = yMin + i * yStep
             val y = yPaddingTopPx + (Y_LABEL_COUNT - 1 - i) * yInterval
@@ -318,154 +346,286 @@ class StatisticsChartView @JvmOverloads constructor(
         }
     }
 
-    private fun drawXLabels(canvas: Canvas) {
-        val display = displayData
-        for (i in display.indices) {
-            val x = xStart + i * xInterval
-            val day = display[i].dayOfMonth
-            val y = viewHeight - dpToPx(17.5f)
-            canvas.drawText(day.toString(), x, y, textPaint)
+    private fun drawFillArea(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        val points = getDataPoints(startIdx, visibleData)
+        if (points.size < 2) return
+
+        val fillPath = Path()
+        fillPath.moveTo(points[0].x, points[0].y)
+
+        for (i in 1 until points.size) {
+            val p1 = points[i - 1]
+            val p2 = points[i]
+            val dy = kotlin.math.abs(p2.y - p1.y)
+
+            if (dy <= 1f) {
+                fillPath.lineTo(p2.x, p2.y)
+            } else {
+                val midX = p1.x + (p2.x - p1.x) / 2f
+                fillPath.cubicTo(midX, p1.y, midX, p2.y, p2.x, p2.y)
+            }
+        }
+
+        val lastX = points.last().x
+        val firstX = points.first().x
+        val bottomY = viewHeight
+        fillPath.lineTo(lastX, bottomY)
+        fillPath.lineTo(firstX, bottomY)
+        fillPath.close()
+
+        val topColor = Color.argb(102, 255, 255, 255)
+        val midColor = Color.argb(46, 255, 255, 255)
+        val bottomColor = Color.argb(0, 255, 255, 255)
+
+        val shader = LinearGradient(
+            0f, 0f,
+            0f, viewHeight,
+            intArrayOf(topColor, midColor, bottomColor),
+            floatArrayOf(0f, 0.5f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        fillPaint.shader = shader
+        canvas.drawPath(fillPath, fillPaint)
+    }
+
+    private fun drawXLabels(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        val dateY = viewHeight - dpToPx(17.5f)
+        for (i in visibleData.indices) {
+            val dataIndex = startIdx + i
+            if (dataIndex >= allData.size) break
+            val x = xStart + dataIndex * xInterval
+            val day = allData[dataIndex].dayOfMonth
+            canvas.drawText(day.toString(), x, dateY, textPaint)
         }
     }
 
-    private fun drawMonthLabel(canvas: Canvas) {
-        if (!showMonthLabel) return
-        val index = displayData.indexOfFirst { it.dayOfMonth == 1 }
-        if (index == -1) {
+    private fun drawVerticalGridLines(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        val startY = dpToPx(36f)
+        val endY = startY + dpToPx(140f)
+        for (i in visibleData.indices) {
+            val dataIndex = startIdx + i
+            if (dataIndex >= allData.size) break
+            val x = xStart + dataIndex * xInterval
+            canvas.drawLine(x, startY, x, endY, verticalGridPaint)
+        }
+    }
+
+    private fun drawMonthLabel(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        var pos = -1
+        for (i in visibleData.indices) {
+            val dataIndex = startIdx + i
+            if (dataIndex < allData.size && allData[dataIndex].dayOfMonth == 1) {
+                pos = dataIndex
+                break
+            }
+        }
+        if (pos == -1) {
             showMonthLabel = false
             return
         }
-        val x = xStart + index * xInterval
-        val monthName = getMonthAbbr(displayData[index].month)
+        showMonthLabel = true
+        val x = xStart + pos * xInterval
+        val monthName = getMonthAbbr(allData[pos].month)
         canvas.drawText(monthName, x, monthLabelY, monthPaint)
     }
 
-    private fun drawDataLine(canvas: Canvas) {
-        val points = getDataPoints()
+    private fun drawDataLine(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        val points = getDataPoints(startIdx, visibleData)
         if (points.size < 2) return
+
         val path = Path()
-        path.moveTo(points[0].first, points[0].second)
+        path.moveTo(points[0].x, points[0].y)
+
         for (i in 1 until points.size) {
-            path.lineTo(points[i].first, points[i].second)
+            val p1 = points[i - 1]
+            val p2 = points[i]
+            val dy = kotlin.math.abs(p2.y - p1.y)
+
+            if (dy <= 1f) {
+                path.lineTo(p2.x, p2.y)
+            } else {
+                val midX = p1.x + (p2.x - p1.x) / 2f
+                path.cubicTo(midX, p1.y, midX, p2.y, p2.x, p2.y)
+            }
         }
+
         canvas.drawPath(path, linePaint)
     }
 
-    private fun drawDots(canvas: Canvas) {
-        val points = getDataPoints()
-        for (i in points.indices) {
-            val (x, y) = points[i]
-            val isSelected = selectedPosition == i
-            val color = if (isSelected) {
-                val bmi = displayData[i].bmi ?: continue
-                getBmiColor(bmi)
+    private fun drawDots(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        val points = getDataPoints(startIdx, visibleData)
+
+        for (point in points) {
+            val bmi = allData[point.dataIndex].bmi ?: continue
+            val color = getBmiColor(bmi)
+            val isSelected = selectedDataIndex == point.dataIndex
+
+            val normalRadius = dpToPx(DOT_RADIUS_NORMAL)
+            val selectedRadius = dpToPx(DOT_RADIUS_SELECTED)
+            val colorRadius = dpToPx(DOT_RADIUS_COLOR)
+
+            if (isSelected) {
+                // 选中：先画白色实心圆（总直径10px）
+                dotFillPaint.color = Color.WHITE
+                canvas.drawCircle(point.x, point.y, selectedRadius, dotFillPaint)
+                // 再画彩色实心圆（直径9px），形成约0.5px白色边缘
+                dotFillPaint.color = color
+                canvas.drawCircle(point.x, point.y, colorRadius, dotFillPaint)
             } else {
-                Color.WHITE
+                // 普通：纯白色实心圆（直径6px）
+                dotFillPaint.color = Color.WHITE
+                canvas.drawCircle(point.x, point.y, normalRadius, dotFillPaint)
             }
-            dotPaint.color = color
-            val radius = if (isSelected) {
-                dpToPx(DOT_RADIUS_SELECTED)
-            } else {
-                dpToPx(DOT_RADIUS_DEFAULT)
-            }
-            canvas.drawCircle(x, y, radius, dotPaint)
         }
     }
 
-    private fun drawSelectedValue(canvas: Canvas) {
-        if (selectedPosition == null || selectedBmi == null) return
-        val points = getDataPoints()
-        if (selectedPosition!! >= points.size) return
-        val (x, y) = points[selectedPosition!!]
+    private fun drawSelectedValue(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+        if (selectedDataIndex == null || selectedBmi == null) return
+        val points = getDataPoints(startIdx, visibleData)
+        val point = points.find { it.dataIndex == selectedDataIndex } ?: return
         val label = String.format("%.1f", selectedBmi)
-        val labelY = y - dpToPx(DOT_RADIUS_SELECTED) - dpToPx(VALUE_LABEL_TOP_OFFSET)
-        canvas.drawText(label, x, labelY, valuePaint)
+        val labelY = point.y - dpToPx(DOT_RADIUS_SELECTED) - dpToPx(VALUE_LABEL_TOP_OFFSET)
+        canvas.drawText(label, point.x, labelY, valuePaint)
     }
 
-    // ==================== 数据点计算 ====================
-    private fun getDataPoints(): List<Pair<Float, Float>> {
-        val display = displayData
-        val points = mutableListOf<Pair<Float, Float>>()
-        for (i in display.indices) {
-            val data = display[i]
+    // 数据点计算（保持不变）
+    private fun getDataPoints(startIdx: Int, visibleData: List<DayBmiData>): List<ChartPoint> {
+        val points = mutableListOf<ChartPoint>()
+        for (i in visibleData.indices) {
+            val dataIndex = startIdx + i
+            if (dataIndex >= allData.size) break
+            val data = allData[dataIndex]
             if (data.bmi == null) continue
-            val x = xStart + i * xInterval
-            val ratio = (data.bmi - yMin) / (yMax - yMin)
-            val y = yPaddingTopPx + (Y_LABEL_COUNT - 1 - ratio) * yInterval
-            points.add(x to y)
+            val x = xStart + dataIndex * xInterval
+            val y = bmiToY(data.bmi)
+            points.add(ChartPoint(dataIndex, x, y))
         }
         return points
     }
 
-    // ==================== 触摸事件 ====================
-    private var downX: Float = 0f
-    private var downY: Float = 0f
-    private var isDragging = false
-    private val touchSlop = dpToPx(10f)
-
+    // 触摸事件（不变）
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (allData.isEmpty()) return false
+
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                downX = event.x
-                downY = event.y
+                if (!scroller.isFinished) {
+                    scroller.abortAnimation()
+                }
+                lastTouchX = event.x
                 isDragging = false
+                if (velocityTracker == null) {
+                    velocityTracker = VelocityTracker.obtain()
+                } else {
+                    velocityTracker?.clear()
+                }
+                velocityTracker?.addMovement(event)
+                selectedDataIndex = null
+                selectedBmi = null
+                parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
+
             MotionEvent.ACTION_MOVE -> {
-                val dx = event.x - downX
-                if (abs(dx) > touchSlop) {
+                val dx = lastTouchX - event.x
+                velocityTracker?.addMovement(event)
+                if (!isDragging && abs(dx) > touchSlop) {
                     isDragging = true
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                if (isDragging) {
+                    var newOffset = scrollOffset + dx
+                    newOffset = newOffset.coerceIn(minScrollX, maxScrollX)
+                    scrollOffset = newOffset
+                    lastTouchX = event.x
+                    invalidate()
+                    notifyRangeChanged()
                 }
                 return true
             }
-            MotionEvent.ACTION_UP -> {
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                velocityTracker?.addMovement(event)
                 if (isDragging) {
-                    val dx = downX - event.x
-                    if (abs(dx) > touchSlop) {
-                        val direction = if (dx > 0) 1 else -1
-                        scrollTo(direction)
-                        isDragging = false
-                        return true
+                    velocityTracker?.computeCurrentVelocity(1000)
+                    val velocityX = velocityTracker?.xVelocity ?: 0f
+                    if (abs(velocityX) > 500f) {
+                        scroller.fling(
+                            scrollOffset.toInt(), 0,
+                            -velocityX.toInt(), 0,
+                            minScrollX.toInt(), maxScrollX.toInt(),
+                            0, 0,
+                            (xInterval * 0.5f).toInt(), 0
+                        )
+                        postInvalidateOnAnimation()
                     }
-                }
-                if (!isDragging) {
+                    parent?.requestDisallowInterceptTouchEvent(false)
+                } else {
                     handleClick(event.x, event.y)
                 }
                 isDragging = false
+                velocityTracker?.recycle()
+                velocityTracker = null
                 return true
             }
         }
         return super.onTouchEvent(event)
     }
 
+    override fun computeScroll() {
+        if (scroller.computeScrollOffset()) {
+            val newX = scroller.currX.toFloat()
+            val clampedX = newX.coerceIn(minScrollX, maxScrollX)
+            if (scrollOffset != clampedX) {
+                scrollOffset = clampedX
+                invalidate()
+                notifyRangeChanged()
+            }
+            if (!scroller.computeScrollOffset()) {
+                val finalX = scroller.currX.toFloat().coerceIn(minScrollX, maxScrollX)
+                if (scrollOffset != finalX) {
+                    scrollOffset = finalX
+                    invalidate()
+                    notifyRangeChanged()
+                }
+            }
+        }
+    }
+
     private fun handleClick(x: Float, y: Float) {
-        val points = getDataPoints()
+        val dataX = x + scrollOffset
         val radius = dpToPx(DOT_RADIUS_SELECTED) + dpToPx(6f)
-        var hitIndex: Int? = null
-        for (i in points.indices) {
-            val (px, py) = points[i]
-            val dx = x - px
-            val dy = y - py
+
+        val startIdx = visibleStartIndex.toInt()
+        val endIdx = min(startIdx + displayCount + 1, allData.size)
+        val visibleSubList = allData.subList(startIdx, endIdx)
+        val points = getDataPoints(startIdx, visibleSubList)
+
+        var hitPoint: ChartPoint? = null
+        for (point in points) {
+            val dx = dataX - point.x
+            val dy = y - point.y
             if (dx * dx + dy * dy < radius * radius) {
-                hitIndex = i
+                hitPoint = point
                 break
             }
         }
-        if (hitIndex != null) {
-            val bmi = displayData[hitIndex].bmi
+
+        if (hitPoint != null) {
+            val bmi = allData[hitPoint.dataIndex].bmi
             if (bmi != null) {
-                selectedPosition = hitIndex
+                selectedDataIndex = hitPoint.dataIndex
                 selectedBmi = bmi
                 invalidate()
             }
         } else {
-            selectedPosition = null
+            selectedDataIndex = null
             selectedBmi = null
             invalidate()
         }
     }
 
-    // ==================== 工具方法 ====================
+    // 工具方法
     private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density
     private fun spToPx(sp: Float): Float = sp * resources.displayMetrics.scaledDensity
 
@@ -497,16 +657,29 @@ class StatisticsChartView @JvmOverloads constructor(
         animator = null
     }
 
+    private fun bmiToY(bmi: Float): Float {
+        val drawableHeight = viewHeight - yPaddingTopPx - yPaddingBottomPx
+        val ratio = (bmi - yMin) / (yMax - yMin)
+        return yPaddingTopPx + drawableHeight * (1 - ratio)
+    }
+
     fun refresh() {
-        recalculateYAxis()
         invalidate()
     }
 
     fun getStartDate(): String? {
-        return displayData.firstOrNull()?.let { formatDate(it.date) }
+        val startIdx = visibleStartIndex.toInt()
+        return if (startIdx < allData.size) formatDate(allData[startIdx].date) else null
     }
 
     fun getEndDate(): String? {
-        return displayData.lastOrNull()?.let { formatDate(it.date) }
+        val endIdx = min(visibleStartIndex.toInt() + displayCount - 1, allData.size - 1)
+        return if (endIdx >= 0 && endIdx < allData.size) formatDate(allData[endIdx].date) else null
     }
 }
+
+private data class ChartPoint(
+    val dataIndex: Int,
+    val x: Float,
+    val y: Float
+)

@@ -21,8 +21,8 @@ data class BmiRecord(
     val weightKg: Double,             // 统一为 kg（计算用）
     val heightCm: Double,             // 统一为 cm（计算用）
 
-    val timestamp: Long,  //测量时间
-    val timeOfDay: String, //测量时间段
+    val timestamp: Long,  //测量时间 todo 格式化
+    val timeOfDay: String, //测量时间段 todo 格式化
     val age: Int,
     val gender: String,
     val bmi: Double,

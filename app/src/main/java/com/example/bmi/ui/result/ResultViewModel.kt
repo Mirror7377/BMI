@@ -34,7 +34,7 @@ class ResultViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<ResultEffect>()
     val effect = _effect.asSharedFlow()
 
-    // ====================== 入口 A：从 Intent 加载（计算后跳转） ======================
+    // ====================== 入口 从 Intent 加载（计算后跳转） ======================
     fun initData(bundle: Bundle) {
         loadFromArguments(bundle)
 
@@ -45,35 +45,6 @@ class ResultViewModel @Inject constructor(
         }
     }
 
-    // ====================== 入口 B：从数据库加载（底部导航进入） ======================
-    fun loadLatestRecord() {
-        viewModelScope.launch {
-            repository.observeLatestRecord().collect { record ->
-                record?.let {
-                    _state.update { state ->
-                        state.copy(
-                            bmi = it.bmi,
-                            weightInput = it.weightInput,
-                            weightUnit = it.weightUnit,
-                            heightInput = it.heightInput,
-                            heightUnit = it.heightUnit,
-                            feet = it.feetInput ?: 0,
-                            inches = it.inchesInput ?: 0,
-                            age = it.age,
-                            gender = it.gender,
-                            heightCm = it.heightCm,
-                            // 🎯 能查到记录，说明数据库有数据
-                            hasSavedRecord = true
-                        )
-                    }
-                    updateDerivedState()
-                } ?: run {
-                    // 理论上不会发生，但兜底
-                    _state.update { it.copy(hasSavedRecord = false) }
-                }
-            }
-        }
-    }
 
     // ====================== 保存记录 ======================
     fun saveRecord() {
@@ -85,13 +56,8 @@ class ResultViewModel @Inject constructor(
                 UnitConverter.lbToKg(currentState.weightInput)
             }
             val bmiLevel = BmiClassifier.classifyAdult(currentState.bmi)
-            val currentTs = System.currentTimeMillis()
-            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            val timeOfDay = when (hour) {
-                in 6..11 -> "Morning"
-                in 12..17 -> "Afternoon"
-                else -> "Evening"
-            }
+            val currentTs = currentState.timestamp
+            val timeOfDay = currentState.timeOfDay
 
             val record = BmiRecord(
                 weightInput = currentState.weightInput,
@@ -127,6 +93,8 @@ class ResultViewModel @Inject constructor(
         val age = args.getInt("KEY_AGE", 0)
         val gender = args.getString("KEY_GENDER") ?: Gender.MALE.name
         val heightCm = args.getDouble("KEY_HEIGHT_CM", 0.0)
+        val timestamp = args.getLong("KEY_TIMESTAMP", 0L)
+        val timeOfDay = args.getString("KEY_TIMEOFDAY", "Morning")
 
         _state.update {
             it.copy(
@@ -139,7 +107,9 @@ class ResultViewModel @Inject constructor(
                 inches = inches,
                 age = age,
                 gender = gender,
-                heightCm = heightCm
+                heightCm = heightCm,
+                timestamp =timestamp,
+                timeOfDay = timeOfDay
             )
         }
         updateDerivedState()

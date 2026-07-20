@@ -23,10 +23,26 @@ class StatisticsViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    /**
-     * 加载指定年月的每天最新 BMI 数据
-     */
+    // 当前加载的年月
+    private var currentYear: Int = 0
+    private var currentMonth: Int = 0
+
+    init {
+        // 监听数据库变化，自动重新加载数据
+        viewModelScope.launch {
+            repository.observeLatestRecord()
+                .collect { _ ->
+                    // 只要有新增/修改/删除记录，就重新加载当前月份数据
+                    if (currentYear != 0 || currentMonth != 0) {
+                        loadMonthData(currentYear, currentMonth)
+                    }
+                }
+        }
+    }
+
     fun loadMonthData(year: Int, month: Int) {
+        this.currentYear = year
+        this.currentMonth = month
         viewModelScope.launch {
             _isLoading.value = true
             try {
@@ -41,22 +57,16 @@ class StatisticsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 构建该月每天的数据（1 号 ~ 最后一天）
-     */
     private fun buildDayData(year: Int, month: Int, records: List<BmiRecord>): List<DayBmiData> {
-        // 获取该月天数
         val calendar = Calendar.getInstance().apply {
             set(year, month, 1)
         }
         val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-        // 按天分组，取每天最新的一条记录
         val latestByDay = records.groupBy { record ->
             val cal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
             cal.get(Calendar.DAY_OF_MONTH)
         }.mapValues { entry ->
-            // 按时间排序，取最新的一条
             entry.value.maxByOrNull { it.timestamp }
         }
 

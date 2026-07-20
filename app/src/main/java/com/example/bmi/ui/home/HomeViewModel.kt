@@ -237,7 +237,7 @@ class HomeViewModel @Inject constructor(
             weightKg = state.weightKg,
             heightCm = state.heightCm,
             timestamp = state.timestamp,
-            timeOfDay = state.timeOfDay.name,
+            timeOfDay = state.timeOfDay.displayName,
             age = state.age,
             gender = state.gender.name,
             bmi = bmi,

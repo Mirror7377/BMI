@@ -80,10 +80,6 @@ class ResultActivity : BaseActivity() {
             showBmiLegendDialog(state.bmiLevel, state.age, state.gender)
         }
 
-        // 广告占位点击（预留）
-        binding.llAdContainer.setOnClickListener {
-            Toast.makeText(this, "广告推荐功能开发中", Toast.LENGTH_SHORT).show()
-        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

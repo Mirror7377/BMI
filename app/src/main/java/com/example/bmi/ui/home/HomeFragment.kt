@@ -501,6 +501,7 @@ class HomeFragment : Fragment() {
                 3 -> TimeOfDay.NIGHT
                 else -> TimeOfDay.MORNING
             }
+            println(timeOfDay)
             viewModel.sendIntent(HomeIntent.TimeChanged(viewModel.state.value.timestamp, timeOfDay))
             dismissTimePicker()
         }
@@ -541,6 +542,8 @@ class HomeFragment : Fragment() {
             putInt("KEY_AGE", record.age)
             putString("KEY_GENDER", record.gender)
             putDouble("KEY_HEIGHT_CM", record.heightCm)
+            putLong("KEY_TIMESTAMP",record.timestamp)
+            putString("KEY_TIMEOFDAY",record.timeOfDay)
         }
         val intent = Intent(requireContext(), ResultActivity::class.java).apply {
             putExtras(bundle)
@@ -552,11 +555,11 @@ class HomeFragment : Fragment() {
         numberPicker = binding.npTimePicker
         numberPicker.minValue = 0
         numberPicker.maxValue = timeOptions.size - 1
-        numberPicker.displayedValues = timeOptions
+        numberPicker.displayedValues = timeOptions//timeOptions 数组直接绑定到滚轮控件上
         numberPicker.wrapSelectorWheel = false
-
         // 同步当前选中值
         currentSelectedTimeIndex = when (viewModel.state.value.timeOfDay) {
+
             TimeOfDay.MORNING -> 0
             TimeOfDay.AFTERNOON -> 1
             TimeOfDay.EVENING -> 2

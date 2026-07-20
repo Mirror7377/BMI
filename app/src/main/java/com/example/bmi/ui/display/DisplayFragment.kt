@@ -66,16 +66,17 @@ class DisplayFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        bindClick(binding.root)
+
+        binding.tvRecent.setOnClickListener {
+            startActivity(Intent(requireContext(), RecentActivity::class.java))
+        }
+
         // 点击除 Recent 按钮外的任意位置，返回 Home 页面
         binding.root.setOnClickListener {
             (requireActivity() as? MainActivity)?.goToHome()
         }
 
-        // Recent 按钮点击事件
-        binding.tvRecent.setOnClickListener {
-            val intent = Intent(requireContext(), RecentActivity::class.java)
-            startActivity(intent)
-        }
 
         // 观察最新记录
         viewLifecycleOwner.lifecycleScope.launch {
@@ -288,5 +289,19 @@ class DisplayFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun bindClick(view: View) {
+        if (view.id == R.id.tvRecent) return
+
+        view.setOnClickListener {
+            (requireActivity() as? MainActivity)?.goToHome()
+        }
+
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                bindClick(view.getChildAt(i))
+            }
+        }
     }
 }

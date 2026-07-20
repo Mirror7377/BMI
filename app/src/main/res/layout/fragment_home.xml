@@ -1013,21 +1013,22 @@
                 android:layout_height="match_parent"
                 android:descendantFocusability="blocksDescendants" />
 
-            <!-- 上横线（选中指示） -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#3659CF"
-                android:layout_gravity="center"
-                android:layout_marginTop="-15dp" />
+<!--            &lt;!&ndash; 上横线（选中指示） &ndash;&gt;-->
+<!--            todo 去掉黑线-->
+<!--            <View-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="1dp"-->
+<!--                android:background="#3659CF"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_marginTop="-15dp" />-->
 
-            <!-- 下横线（选中指示） -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#3659CF"
-                android:layout_gravity="center"
-                android:layout_marginBottom="-15dp" />
+<!--            &lt;!&ndash; 下横线（选中指示） &ndash;&gt;-->
+<!--            <View-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="1dp"-->
+<!--                android:background="#3659CF"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_marginBottom="-15dp" />-->
 
         </FrameLayout>
 

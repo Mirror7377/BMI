@@ -24,7 +24,7 @@ data class HomeState(
     val age: Int = 25,
     val gender: Gender = Gender.MALE,
     val timestamp: Long = System.currentTimeMillis(),//日期
-    val timeOfDay: TimeOfDay = TimeOfDay.fromSystemTime(),//时间段
+    val timeOfDay: TimeOfDay = TimeOfDay.fromSystemTime(),//根据函数获取时间段
     val isLoading: Boolean = false,
     val weightDisplay: String = "65.00",
     val heightDisplay: String = "170.0",

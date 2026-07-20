@@ -18,6 +18,8 @@ data class ResultState(
     val gender: String = Gender.MALE.name,
     val heightCm: Double = 0.0,
     val bmiLevel: BmiLevel = BmiLevel.NORMAL,
+    val timestamp: Long = 0L,  //测量时间 todo 格式化
+    val timeOfDay: String = "Morning", //测量时间段 todo 格式化
     // 数据库中是否已有历史记录
     val hasSavedRecord: Boolean = false,
     val recommendedApps: List<RecommendApp> = emptyList()

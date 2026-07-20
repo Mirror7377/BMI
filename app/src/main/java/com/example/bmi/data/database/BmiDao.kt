@@ -19,7 +19,7 @@ interface BmiDao {
     @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC, createTime DESC")
     fun getAllRecords(): Flow<List<BmiRecord>>
 
-    // 获取时间段内的记录（按时间戳升序）
+    // 获取时间段内的记录（按时间戳升序）    //todo 确定历史记录排序顺序
     @Query("SELECT * FROM bmi_records WHERE timestamp >= :start AND timestamp < :end ORDER BY timestamp ASC")
     fun getRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
 

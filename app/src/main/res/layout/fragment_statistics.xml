@@ -130,7 +130,7 @@
         android:id="@+id/chartView"
         android:layout_width="345dp"
         android:layout_height="217.5dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/bg_statistics_card"
         app:layout_constraintTop_toBottomOf="@id/tvUpdate"
         app:layout_constraintStart_toStartOf="parent"

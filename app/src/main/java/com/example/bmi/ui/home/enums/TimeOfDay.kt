@@ -4,7 +4,7 @@ package com.example.bmi.ui.home.enums
 import java.util.Calendar
 
 enum class TimeOfDay(val displayName: String) {
-    MORNING("Morning"),
+    MORNING("Morning"),//displayName属性
     AFTERNOON("Afternoon"),
     EVENING("Evening"),
     NIGHT("Night");
