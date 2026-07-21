@@ -1,139 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="#EAEAEE"
     android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/tvStatisticsTitle"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Statistics"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:fontFamily="@font/montserrat_extrabold"
-        android:letterSpacing="-0.009375"
-        android:lineHeight="22sp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="18dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:paddingBottom="20dp">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/periodContainer"
-        android:layout_width="345dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="63dp"
-        android:layout_marginStart="15dp"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="0dp"
-        android:layout_marginEnd="15dp"
-        android:backgroundTint="#F5F5F7"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        <!-- Statistics 标题 -->
+        <TextView
+            android:id="@+id/tvStatisticsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Statistics"
+            android:textColor="#000000"
+            android:textSize="24sp"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:letterSpacing="-0.009375"
+            android:lineHeight="22sp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <!-- Period Switcher -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/periodContainer"
+            android:layout_width="345dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            android:backgroundTint="#F5F5F7"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvStatisticsTitle"
+            android:layout_marginTop="20dp">
 
-            <View
-                android:id="@+id/selectedPeriodBg"
-                android:layout_width="115dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_white_selected"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tvDay"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Day"
-                android:gravity="center"
-                android:textColor="#000000"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/tvWeek"
-                android:fontFamily="@font/montserrat_extrabold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="1"/>
+                <View
+                    android:id="@+id/selectedPeriodBg"
+                    android:layout_width="115dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_white_selected"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <TextView
-                android:id="@+id/tvWeek"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Week"
-                android:gravity="center"
-                android:textColor="#000000"
-                android:fontFamily="@font/montserrat_extrabold"
-                app:layout_constraintStart_toEndOf="@id/tvDay"
-                app:layout_constraintEnd_toStartOf="@id/tvMonth"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="1"/>
+                <TextView
+                    android:id="@+id/tvDay"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="Day"
+                    android:gravity="center"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/montserrat_extrabold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tvWeek"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_weight="1"/>
 
-            <TextView
-                android:id="@+id/tvMonth"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:text="Month"
-                android:gravity="center"
-                android:textColor="#000000"
-                android:fontFamily="@font/montserrat_extrabold"
-                app:layout_constraintStart_toEndOf="@id/tvWeek"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="1"/>
+                <TextView
+                    android:id="@+id/tvWeek"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="Week"
+                    android:gravity="center"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/montserrat_extrabold"
+                    app:layout_constraintStart_toEndOf="@id/tvDay"
+                    app:layout_constraintEnd_toStartOf="@id/tvMonth"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_weight="1"/>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/tvMonth"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="Month"
+                    android:gravity="center"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/montserrat_extrabold"
+                    app:layout_constraintStart_toEndOf="@id/tvWeek"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_weight="1"/>
 
-    <!-- BMI -->
-    <TextView
-        android:id="@+id/tvBmi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="BMI"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:fontFamily="@font/montserrat_extrabold"
-        android:letterSpacing="-0.0094"
-        android:lineHeight="22sp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="119dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
 
-    <!-- Update -->
-    <TextView
-        android:id="@+id/tvUpdate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update"
-        android:textColor="#3659CF"
-        android:textSize="16sp"
-        android:fontFamily="@font/montserrat_regular"
-        android:letterSpacing="-0.015"
-        android:layout_marginStart="299dp"
-        android:layout_marginTop="121dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        <!-- BMI 标题 -->
+        <TextView
+            android:id="@+id/tvBmi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BMI"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:letterSpacing="-0.0094"
+            android:lineHeight="22sp"
+            android:layout_marginStart="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/periodContainer"
+            android:layout_marginTop="20dp" />
 
-    <!-- 替换原来的 statisticsCard -->
-    <com.example.bmi.ui.statistics.StatisticsChartView
-        android:id="@+id/chartView"
-        android:layout_width="345dp"
-        android:layout_height="217.5dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/bg_statistics_card"
-        app:layout_constraintTop_toBottomOf="@id/tvUpdate"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- BMI Update -->
+        <TextView
+            android:id="@+id/tvBmiUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:textColor="#3659CF"
+            android:textSize="16sp"
+            android:fontFamily="@font/montserrat_regular"
+            android:letterSpacing="-0.015"
+            android:layout_marginStart="299dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvBmi"
+            app:layout_constraintBottom_toBottomOf="@id/tvBmi" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- BMI 图表 -->
+        <com.example.bmi.ui.statistics.BmiChartView
+            android:id="@+id/chartView"
+            android:layout_width="345dp"
+            android:layout_height="237.5dp"
+            android:background="@drawable/bg_statistics_card"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvBmiUpdate"
+            android:layout_marginTop="10dp" />
+
+        <!-- Weight 标题 -->
+        <TextView
+            android:id="@+id/tvWeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weight"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:letterSpacing="-0.0094"
+            android:lineHeight="22sp"
+            android:layout_marginStart="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chartView"
+            android:layout_marginTop="25dp" />
+
+        <!-- Weight Update -->
+        <TextView
+            android:id="@+id/tvWeightUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:textColor="#3659CF"
+            android:textSize="16sp"
+            android:fontFamily="@font/montserrat_regular"
+            android:letterSpacing="-0.015"
+            android:layout_marginStart="299.5dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvWeight"
+            app:layout_constraintBottom_toBottomOf="@id/tvWeight" />
+
+        <!-- Weight 图表 -->
+        <com.example.bmi.ui.statistics.WeightChartView
+            android:id="@+id/weightChartView"
+            android:layout_width="345dp"
+            android:layout_height="237.5dp"
+            android:background="@drawable/bg_weight_statistics_card"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWeightUpdate"
+            android:layout_marginTop="10dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

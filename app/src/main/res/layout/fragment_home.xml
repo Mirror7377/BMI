@@ -544,7 +544,7 @@
         android:layout_marginStart="25dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        app:cardBackgroundColor="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -606,7 +606,7 @@
         android:layout_marginStart="200dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        app:cardBackgroundColor="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -664,7 +664,7 @@
         android:id="@+id/btnCalculateNoNav"
         android:layout_width="345dp"
         android:layout_height="57.5dp"
-        android:layout_marginTop="672.5dp"
+        android:layout_marginTop="750dp"
         android:layout_marginStart="15dp"
         app:cardCornerRadius="28.75dp"
         app:cardElevation="0dp"
@@ -697,7 +697,7 @@
         android:id="@+id/btnCalculateWithNav"
         android:layout_width="345dp"
         android:layout_height="57.5dp"
-        android:layout_marginTop="640dp"
+        android:layout_marginTop="700dp"
         android:layout_marginStart="15dp"
         app:cardCornerRadius="28.75dp"
         app:cardElevation="0dp"

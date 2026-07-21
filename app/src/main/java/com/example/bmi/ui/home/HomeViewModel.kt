@@ -63,12 +63,11 @@ class HomeViewModel @Inject constructor(
                 timeDisplay = formatTime(now, timeOfDay)
             )
         }
-        // 同步更新派生字段（体重/身高显示）todo 为什么？
+        // 初始化时进行 更新派生字段（体重/身高显示）
         refreshDisplayValues()
     }
 
     private fun onWeightChanged(value: Double) {
-        //todo 函数限定？
         val (min, max) = when (_state.value.weightUnit) {
             WeightUnit.KG -> 1.0 to 250.0
             WeightUnit.LB -> 2.0 to 551.0
@@ -77,12 +76,13 @@ class HomeViewModel @Inject constructor(
         val kgValue = if (_state.value.weightUnit == WeightUnit.KG) {
             clamped
         } else {
+            //todo 为什么转换？
             UnitConverter.lbToKg(clamped)
         }
         updateState {
             copy(
                 weightInput = clamped,
-                weightKg = kgValue,
+                weightKg = kgValue,//如果为lb呢？那
                 weightDisplay = String.format("%.2f", clamped)
             )
         }

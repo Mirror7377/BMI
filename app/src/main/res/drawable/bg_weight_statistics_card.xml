@@ -1,0 +1,9 @@
+<!-- res/drawable/bg_weight_statistics_card.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="12dp" />
+    <gradient
+        android:startColor="#FF931E"
+        android:endColor="#FF8537"
+        android:angle="0" />
+</shape>

@@ -21,4 +21,7 @@ interface BmiRepository {
      * 按 timeOfDay 优先级（Morning > Afternoon > Evening > Night）和 timestamp 降序取最新一条
      */
     suspend fun getMonthLatestRecords(year: Int, month: Int): List<BmiRecord>
+
+
+    suspend fun getRecordsBetween(startTime: Long, endTime: Long): List<BmiRecord>
 }

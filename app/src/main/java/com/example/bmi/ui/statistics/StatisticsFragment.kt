@@ -24,6 +24,12 @@ class StatisticsFragment : Fragment() {
 
     private val viewModel: StatisticsViewModel by viewModels()
 
+    private enum class ChartMode { DAY, WEEK, MONTH }
+    private var currentMode = ChartMode.DAY
+
+    private var currentYear = 0
+    private var currentMonth = 0
+
     private companion object {
         private const val OFFSET_DAY = 0.0f
         private const val OFFSET_WEEK = 115.0f
@@ -43,58 +49,142 @@ class StatisticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupPeriodSwitcher()
 
-        // 点击 Update 按钮，切换回 HomeFragment
-        binding.tvUpdate.setOnClickListener {
+        binding.tvBmiUpdate.setOnClickListener {
+            (requireActivity() as? MainActivity)?.goToHome()
+        }
+        binding.tvWeightUpdate.setOnClickListener {
             (requireActivity() as? MainActivity)?.goToHome()
         }
 
-        // 获取当前年月，加载数据
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        viewModel.loadMonthData(year, month)
+        currentYear = calendar.get(Calendar.YEAR)
+        currentMonth = calendar.get(Calendar.MONTH)
 
-        // 观察数据
+        // 默认加载 Day 数据
+        viewModel.loadMonthData(currentYear, currentMonth)
+        viewModel.loadWeightMonthData(currentYear, currentMonth)
+
+        // ========== Flow 观察者（保留，用于数据库更新后自动刷新） ==========
+        // BMI Day 数据
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.monthData.collect { data ->
-                    if (data.isNotEmpty()) {
+                    if (currentMode == ChartMode.DAY && data.isNotEmpty()) {
+                        binding.chartView.setMode(BmiChartView.ChartMode.DAY)
                         binding.chartView.setData(data)
                     }
                 }
             }
         }
 
-        // 观察加载状态（可选）
+        // Weight Day 数据
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isLoading.collect { loading ->
-                    // 可显示加载进度
+                viewModel.weightData.collect { data ->
+                    if (currentMode == ChartMode.DAY && data.isNotEmpty()) {
+                        binding.weightChartView.setMode(WeightChartView.ChartMode.DAY)
+                        binding.weightChartView.setData(data)
+                    }
                 }
             }
         }
 
-        // 图表范围变化回调（可选）
-        binding.chartView.onDataRangeChanged = { start, end ->
-            // 可以更新顶部的日期范围显示
+        // BMI Week 数据
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.weekBmiData.collect { data ->
+                    if (currentMode == ChartMode.WEEK && data.isNotEmpty()) {
+                        binding.chartView.setMode(BmiChartView.ChartMode.WEEK)
+                        binding.chartView.setData(data)
+                    }
+                }
+            }
+        }
+
+        // Weight Week 数据
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.weekWeightData.collect { data ->
+                    if (currentMode == ChartMode.WEEK && data.isNotEmpty()) {
+                        binding.weightChartView.setMode(WeightChartView.ChartMode.WEEK)
+                        binding.weightChartView.setData(data)
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.monthBmiData.collect { data ->
+                    if (currentMode == ChartMode.MONTH && data.isNotEmpty()) {
+                        binding.chartView.setMode(BmiChartView.ChartMode.MONTH)
+                        binding.chartView.setData(data)
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.monthWeightData.collect { data ->
+                    if (currentMode == ChartMode.MONTH && data.isNotEmpty()) {
+                        binding.weightChartView.setMode(WeightChartView.ChartMode.MONTH)
+                        binding.weightChartView.setData(data)
+                    }
+                }
+            }
         }
     }
 
     private fun setupPeriodSwitcher() {
-        // 默认选中 Day
         moveBgTo(OFFSET_DAY)
 
         binding.tvDay.setOnClickListener {
             moveBgTo(OFFSET_DAY)
-            // TODO: 后续实现 Day 数据切换
+            currentMode = ChartMode.DAY
+
+            // 1. 立即用缓存数据刷新图表
+            binding.chartView.setMode(BmiChartView.ChartMode.DAY)
+            binding.chartView.setData(viewModel.getCurrentDayBmiData())
+
+            binding.weightChartView.setMode(WeightChartView.ChartMode.DAY)
+            binding.weightChartView.setData(viewModel.getCurrentDayWeightData())
+
+            // 2. 后台重新加载最新数据（完成后 Flow 会自动再次刷新）
+            viewModel.loadMonthData(currentYear, currentMonth)
+            viewModel.loadWeightMonthData(currentYear, currentMonth)
         }
+
         binding.tvWeek.setOnClickListener {
             moveBgTo(OFFSET_WEEK)
-            // TODO: 后续实现 Week 数据切换
+            currentMode = ChartMode.WEEK
+
+            // 1. 立即用缓存数据刷新图表
+            binding.chartView.setMode(BmiChartView.ChartMode.WEEK)
+            binding.chartView.setData(viewModel.getCurrentWeekBmiData())
+
+            binding.weightChartView.setMode(WeightChartView.ChartMode.WEEK)
+            binding.weightChartView.setData(viewModel.getCurrentWeekWeightData())
+
+            // 2. 后台重新加载最新数据（完成后 Flow 会自动再次刷新）
+            viewModel.loadWeekData()
         }
+
         binding.tvMonth.setOnClickListener {
             moveBgTo(OFFSET_MONTH)
-            // TODO: 后续实现 Month 数据切换
+            currentMode = ChartMode.MONTH
+
+            // BMI Month
+            binding.chartView.setMode(BmiChartView.ChartMode.MONTH)
+            binding.chartView.setData(viewModel.getCurrentMonthBmiData())
+
+            // Weight Month
+            binding.weightChartView.setMode(WeightChartView.ChartMode.MONTH)
+            binding.weightChartView.setData(viewModel.getCurrentMonthWeightData())
+
+            // 后台加载最新数据
+            viewModel.loadMonthStatistics()
+            viewModel.loadMonthWeightStatistics()
         }
     }
 

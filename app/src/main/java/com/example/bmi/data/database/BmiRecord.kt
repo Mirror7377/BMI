@@ -1,11 +1,12 @@
 package com.example.bmi.data.database
 
-
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.io.Serializable
 
 @Entity(tableName = "bmi_records")
+@Parcelize
 data class BmiRecord(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
 
@@ -27,5 +28,5 @@ data class BmiRecord(
     val gender: String,
     val bmi: Double,
     val category: String,   //BMI 对应的等级
-    val createTime: Long = 0
-): Serializable
+    val createTime: Long = 0 //todo 格式化
+) : Parcelable

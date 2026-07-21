@@ -71,4 +71,6 @@ interface BmiDao {
 """)
     suspend fun getMonthLatestRecords(startTime: Long, endTime: Long): List<BmiRecord>
 
+    @Query("SELECT * FROM bmi_records WHERE timestamp BETWEEN :start AND :end ORDER BY timestamp ASC")
+    suspend fun getRecordsBetween(start: Long, end: Long): List<BmiRecord>
 }

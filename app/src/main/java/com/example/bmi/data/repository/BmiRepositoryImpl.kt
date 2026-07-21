@@ -60,4 +60,11 @@ class BmiRepositoryImpl @Inject constructor(
         val endTime = cal.timeInMillis
         return dao.getMonthLatestRecords(startTime, endTime)
     }
+
+    override suspend fun getRecordsBetween(
+        startTime: Long,
+        endTime: Long
+    ): List<BmiRecord> {
+        return dao.getRecordsBetween(startTime, endTime)
+    }
 }

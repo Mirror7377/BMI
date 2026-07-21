@@ -34,9 +34,7 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.root.setBackgroundColor(
-            ContextCompat.getColor(this, R.color.bg_gray)
-        )
+
 
         // 监听数据库，控制导航栏显隐 + 通知 HomeFragment 更新按钮位置
         lifecycleScope.launch {
@@ -186,5 +184,6 @@ class MainActivity : BaseActivity() {
      */
     fun goToHome() {
         navigateToHome()
+        binding.bottomNav.selectedItemId = R.id.nav_home
     }
 }

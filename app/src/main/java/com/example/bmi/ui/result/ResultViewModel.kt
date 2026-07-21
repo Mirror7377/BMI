@@ -8,7 +8,6 @@ import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.database.RecommendApp
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiLevel
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -83,33 +81,22 @@ class ResultViewModel @Inject constructor(
 
     // ====================== 内部方法 ======================
     private fun loadFromArguments(args: Bundle) {
-        val bmi = args.getDouble("KEY_BMI", 0.0)
-        val weightInput = args.getDouble("KEY_WEIGHT_INPUT", 0.0)
-        val weightUnit = args.getString("KEY_WEIGHT_UNIT") ?: WeightUnit.KG.name
-        val heightInput = args.getDouble("KEY_HEIGHT_INPUT", 0.0)
-        val heightUnit = args.getString("KEY_HEIGHT_UNIT") ?: HeightUnit.CM.name
-        val feet = args.getInt("KEY_FEET", 0)
-        val inches = args.getInt("KEY_INCHES", 0)
-        val age = args.getInt("KEY_AGE", 0)
-        val gender = args.getString("KEY_GENDER") ?: Gender.MALE.name
-        val heightCm = args.getDouble("KEY_HEIGHT_CM", 0.0)
-        val timestamp = args.getLong("KEY_TIMESTAMP", 0L)
-        val timeOfDay = args.getString("KEY_TIMEOFDAY", "Morning")
+        val record = args.getParcelable("BMI_RECORD", BmiRecord::class.java) ?: return
 
         _state.update {
             it.copy(
-                bmi = bmi,
-                weightInput = weightInput,
-                weightUnit = weightUnit,
-                heightInput = heightInput,
-                heightUnit = heightUnit,
-                feet = feet,
-                inches = inches,
-                age = age,
-                gender = gender,
-                heightCm = heightCm,
-                timestamp =timestamp,
-                timeOfDay = timeOfDay
+                bmi = record.bmi,
+                weightInput = record.weightInput,
+                weightUnit = record.weightUnit,
+                heightInput = record.heightInput,
+                heightUnit = record.heightUnit,
+                feet = record.feetInput ?: 0,
+                inches = record.inchesInput ?: 0,
+                age = record.age,
+                gender = record.gender,
+                heightCm = record.heightCm,
+                timestamp = record.timestamp,
+                timeOfDay = record.timeOfDay
             )
         }
         updateDerivedState()

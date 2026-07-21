@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentHomeBinding
 import com.example.bmi.ui.adapt.AgeAdapter
@@ -178,9 +180,8 @@ class HomeFragment : Fragment() {
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         binding.tvDateDisplay.text = dateFormat.format(Date(state.timestamp))
         binding.tvTimeOfDayDisplay.text = state.timeOfDay.displayName
-
-        binding.genderCheck1.visibility = if (state.gender == Gender.MALE) View.VISIBLE else View.GONE
-        binding.genderCheck2.visibility = if (state.gender == Gender.FEMALE) View.VISIBLE else View.GONE
+        //性别选择
+        updateGenderUI(state.gender)
     }
 
     private fun setupListeners() {
@@ -274,23 +275,17 @@ class HomeFragment : Fragment() {
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
             }
             raw.toDoubleOrNull() == null -> {
+                //todo 当用户把输入框的数据都删除时，还原为删除前的数据
                 editText.setText(viewModel.state.value.weightDisplay)
                 showToast("Please input a valid weight (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
             }
             else -> {
                 val value = raw.toDouble()
-                val clamped = when {
-                    value < min -> min
-                    value > max -> max
-                    else -> value
-                }
-                val formatted = if (raw.contains('.')) {
-                    String.format("%.2f", clamped)
-                } else {
-                    String.format("%.2f", clamped)
-                }
+                val clamped = value.coerceIn(min, max)
+                val formatted = String.format("%.2f", clamped)
                 editText.setText(formatted)
                 if (value != clamped || raw != formatted) {
+                    //todo 修改标签
                     showToast("Please input a valid weight (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
                 }
                 viewModel.sendIntent(HomeIntent.WeightChanged(clamped))
@@ -531,22 +526,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToDisplay(record: BmiRecord) {
-        val bundle = Bundle().apply {
-            putDouble("KEY_BMI", record.bmi)
-            putDouble("KEY_WEIGHT_INPUT", record.weightInput)
-            putString("KEY_WEIGHT_UNIT", record.weightUnit)
-            putDouble("KEY_HEIGHT_INPUT", record.heightInput)
-            putString("KEY_HEIGHT_UNIT", record.heightUnit)
-            putInt("KEY_FEET", record.feetInput ?: 0)
-            putInt("KEY_INCHES", record.inchesInput ?: 0)
-            putInt("KEY_AGE", record.age)
-            putString("KEY_GENDER", record.gender)
-            putDouble("KEY_HEIGHT_CM", record.heightCm)
-            putLong("KEY_TIMESTAMP",record.timestamp)
-            putString("KEY_TIMEOFDAY",record.timeOfDay)
-        }
         val intent = Intent(requireContext(), ResultActivity::class.java).apply {
-            putExtras(bundle)
+            putExtra("BMI_RECORD", record) // 直接塞整个对象
         }
         startActivity(intent)
     }
@@ -568,6 +549,26 @@ class HomeFragment : Fragment() {
         }
         numberPicker.value = currentSelectedTimeIndex
 
+    }
+
+    private fun updateGenderUI(gender: Gender) {
+        val selectedColor = ContextCompat.getColor(requireContext(), R.color.white)
+        val unSelectedColor = ContextCompat.getColor(requireContext(), R.color.gender)
+
+        val maleSelected = gender == Gender.MALE
+
+        binding.genderCheck1.visibility =
+            if (maleSelected) View.VISIBLE else View.GONE
+        binding.genderCheck2.visibility =
+            if (!maleSelected) View.VISIBLE else View.GONE
+
+        binding.genderContainer1.setCardBackgroundColor(
+            if (maleSelected) selectedColor else unSelectedColor
+        )
+
+        binding.genderContainer2.setCardBackgroundColor(
+            if (maleSelected) unSelectedColor else selectedColor
+        )
     }
 
 }
