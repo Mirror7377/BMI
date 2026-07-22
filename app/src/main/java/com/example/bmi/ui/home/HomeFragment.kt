@@ -25,12 +25,11 @@ import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentHomeBinding
 import com.example.bmi.ui.adapt.AgeAdapter
-import com.example.bmi.ui.adapt.TimeOfDayPickerAdapter
-import com.example.bmi.ui.adapt.TimePickerItem
 import com.example.bmi.ui.home.enums.Gender
 import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.TimeOfDay
 import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.ui.profile.ProfileActivity
 import com.example.bmi.ui.result.ResultActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -250,6 +249,11 @@ class HomeFragment : Fragment() {
             binding.root.clearFocus()
             viewModel.sendIntent(HomeIntent.Calculate)
         }
+
+        binding.ivPerson.setOnClickListener {
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {
@@ -420,33 +424,43 @@ class HomeFragment : Fragment() {
     }
 
     private fun showDatePicker() {
-        //隐藏导航栏
         (activity as? MainActivity)?.hideBottomNav()
-        // 先同步当前状态的时间到 DatePicker
+
+        // 获取当前时间戳，若超过今天则强制为今天
         val timestamp = viewModel.state.value.timestamp
         val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
         val today = Calendar.getInstance()
         if (calendar.after(today)) {
             calendar.time = today.time
         }
-        binding.datePicker.init(
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH),
-            null
-        )
 
+        // 移除监听器，避免设置值时触发回调
+        binding.npMonth.setOnValueChangedListener(null)
+        binding.npYear.setOnValueChangedListener(null)
+
+        // 设置当前值
+        binding.npYear.value = calendar.get(Calendar.YEAR)
+        binding.npMonth.value = calendar.get(Calendar.MONTH)
+        // 先更新 Day 的最大值，再设置 Day 值（自动修正）
+        updateDayMax()
+        binding.npDay.value = calendar.get(Calendar.DAY_OF_MONTH).coerceAtMost(binding.npDay.maxValue)
+
+        // 添加监听器，月份或年份变化时自动调整 Day 范围
+        binding.npMonth.setOnValueChangedListener { _, _, _ -> updateDayMax() }
+        binding.npYear.setOnValueChangedListener { _, _, _ -> updateDayMax() }
+
+        // 显示弹窗
         binding.datePickerMask.visibility = View.VISIBLE
         binding.datePickerBottomSheet.visibility = View.VISIBLE
         binding.datePickerMask.setOnClickListener { dismissDatePicker() }
         binding.btnDateCancel.setOnClickListener { dismissDatePicker() }
         binding.btnDateDone.setOnClickListener {
-            val year = binding.datePicker.year
-            val month = binding.datePicker.month // 0-based
-            val day = binding.datePicker.dayOfMonth
-            val selectedCalendar = Calendar.getInstance()
-            selectedCalendar.set(year, month, day)
-            // 保留当前时段
+            val year = binding.npYear.value
+            val month = binding.npMonth.value
+            val day = binding.npDay.value
+            val selectedCalendar = Calendar.getInstance().apply {
+                set(year, month, day) // 时间默认为 0:00:00
+            }
             viewModel.sendIntent(
                 HomeIntent.TimeChanged(
                     selectedCalendar.timeInMillis,
@@ -465,18 +479,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun initDatePicker() {
-        val timestamp = viewModel.state.value.timestamp
-        val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
-        // 限制不能超过今天
-        val today = Calendar.getInstance()
-        if (calendar.after(today)) {
-            calendar.time = today.time
-        }
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) // 注意：DatePicker 的 month 是从0开始的
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        // Month：显示英文名称，值 0~11
+        //todo 月份名修改
+        val monthNames = arrayOf(
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        )
+        binding.npMonth.minValue = 0
+        binding.npMonth.maxValue = 11
+        binding.npMonth.displayedValues = monthNames
+        binding.npMonth.wrapSelectorWheel = false
 
-        binding.datePicker.init(year, month, day, null)
+        // Year：1900 ~ 当前年份
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        binding.npYear.minValue = 1900
+        binding.npYear.maxValue = currentYear
+        binding.npYear.wrapSelectorWheel = false
+
+        // Day：最小值 1，最大值暂设 31，在 showDatePicker 中动态调整
+        binding.npDay.minValue = 1
+        binding.npDay.maxValue = 31
+        binding.npDay.wrapSelectorWheel = false
+
+        // 隐藏系统默认的选中分隔线（上下横线）
+        binding.npMonth.selectionDividerHeight = 0
+        binding.npDay.selectionDividerHeight = 0
+        binding.npYear.selectionDividerHeight = 0
     }
 
     private fun showTimeOfDayPicker() {
@@ -579,5 +607,15 @@ class HomeFragment : Fragment() {
             if (maleSelected) unSelectedColor else selectedColor
         )
     }
-
+    private fun updateDayMax() {
+        val year = binding.npYear.value
+        val month = binding.npMonth.value
+        val calendar = Calendar.getInstance()
+        calendar.set(year, month, 1) // 设置为该月第一天
+        val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        binding.npDay.maxValue = maxDay
+        if (binding.npDay.value > maxDay) {
+            binding.npDay.value = maxDay
+        }
+    }
 }

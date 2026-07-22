@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 开启状态：浅蓝色 -->
+    <item android:state_checked="true" android:color="#9AA4EB" />
+    <!-- 关闭状态：浅灰色 -->
+    <item android:color="#E0E0E0" />
+</selector>

@@ -1,0 +1,465 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAEAEE">
+
+    <!-- 顶部导航栏 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_left"
+            android:scaleType="centerInside"
+            android:layout_marginStart="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/tvMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ME"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:fontFamily="@font/montserrat_extrabold"
+            android:layout_marginStart="10dp"
+            app:layout_constraintStart_toEndOf="@id/ivBack"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 第一个容器 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profileContainer"
+        android:layout_width="345dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        android:backgroundTint="#FFFFFF"
+        android:clipChildren="false"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false">
+
+            <!-- ====== 未登录状态视图 ====== -->
+            <TextView
+                android:id="@+id/tvBackupRestore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Backup &amp; Restore"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_extrabold"
+                android:textStyle="bold"
+                android:includeFontPadding="false"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ivBackupIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/group"
+                android:scaleType="centerInside"
+                android:layout_marginStart="5dp"
+                app:layout_constraintStart_toEndOf="@id/tvBackupRestore"
+                app:layout_constraintTop_toTopOf="@id/tvBackupRestore"
+                app:layout_constraintBottom_toBottomOf="@id/tvBackupRestore" />
+
+            <TextView
+                android:id="@+id/tvSync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Synchronize your data"
+                android:textColor="#444444"
+                android:textSize="14sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:includeFontPadding="false"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvBackupRestore" />
+
+            <!-- 头像 -->
+            <ImageView
+                android:id="@+id/ivAvatarLogin"
+                android:layout_width="55dp"
+                android:layout_height="65dp"
+                android:src="@drawable/utx"
+                android:scaleType="centerCrop"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 姓名 -->
+            <TextView
+                android:id="@+id/tvNameLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cassie"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_extrabold"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/ivAvatarLogin"
+                app:layout_constraintTop_toTopOf="@id/ivAvatarLogin" />
+
+            <!-- 邮箱 -->
+            <TextView
+                android:id="@+id/tvEmailLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cassiexiao@gmail.com"
+                android:textColor="#888888"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toEndOf="@id/ivAvatarLogin"
+                app:layout_constraintTop_toBottomOf="@id/tvNameLogin" />
+
+            <!-- Group 控制登录组显隐 -->
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/loginGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:constraint_referenced_ids="ivAvatarLogin, tvNameLogin, tvEmailLogin" />
+
+            <!-- ====== 固定图标（无论登录与否都显示） ====== -->
+            <ImageView
+                android:id="@+id/ivExtraIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_autorenew_black"
+                android:scaleType="centerInside"
+                android:layout_marginTop="28dp"
+                android:layout_marginStart="306dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 第二个容器（保持不变） -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/languageContainer"
+        android:layout_width="345dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="20dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        android:backgroundTint="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/profileContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/ivLangIcon1"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/thumbnail"
+                android:scaleType="centerInside"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ivLangIcon2"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/bitmap"
+                android:scaleType="centerInside"
+                android:layout_marginTop="84dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 分隔线：位于两个图标之间，居中 -->
+            <View
+                android:id="@+id/dividerLang"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="#DDDDDD"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivLangIcon1"
+                app:layout_constraintBottom_toTopOf="@id/ivLangIcon2"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <TextView
+                android:id="@+id/tvLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Language"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/ivLangIcon1"
+                app:layout_constraintTop_toTopOf="@id/ivLangIcon1"
+                app:layout_constraintBottom_toBottomOf="@id/ivLangIcon1"/>
+
+            <TextView
+                android:id="@+id/tvLanguageValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect to Google Fit"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/ivLangIcon2"
+                app:layout_constraintTop_toTopOf="@id/ivLangIcon2"
+                app:layout_constraintBottom_toBottomOf="@id/ivLangIcon2"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchSync"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                app:thumbTint="@color/switch_thumb_color"
+                app:trackTint="@color/switch_track_color"
+                android:layout_marginStart="60dp"
+                app:layout_constraintStart_toEndOf="@id/tvLanguageValue"
+                app:layout_constraintTop_toTopOf="@id/tvLanguageValue"
+                app:layout_constraintBottom_toBottomOf="@id/tvLanguageValue"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 第三个容器 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/moreContainer"
+        android:layout_width="345dp"
+        android:layout_height="250.5dp"
+        android:layout_marginTop="20dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        android:backgroundTint="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/languageContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- 图标1 带背景 -->
+            <ImageView
+                android:id="@+id/ivIcon1"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon"
+                android:background="@drawable/icon_bg"
+                android:padding="4dp"
+                android:scaleType="centerInside"
+                android:layout_marginTop="18dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 分隔线 1-2 -->
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="#DDDDDD"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivIcon1"
+                app:layout_constraintBottom_toTopOf="@id/ivIcon2"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <!-- 图标2 -->
+            <ImageView
+                android:id="@+id/ivIcon2"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_2"
+                android:background="@drawable/icon_bg"
+                android:padding="4dp"
+                android:scaleType="centerInside"
+                android:layout_marginTop="78dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 分隔线 2-3 -->
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="#DDDDDD"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivIcon2"
+                app:layout_constraintBottom_toTopOf="@id/ivIcon3"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <!-- 图标3 -->
+            <ImageView
+                android:id="@+id/ivIcon3"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_3"
+                android:background="@drawable/icon_bg"
+                android:padding="4dp"
+                android:scaleType="centerInside"
+                android:layout_marginTop="138dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 分隔线 3-4 -->
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="#DDDDDD"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivIcon3"
+                app:layout_constraintBottom_toTopOf="@id/ivIcon4"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <!-- 图标4 -->
+            <ImageView
+                android:id="@+id/ivIcon4"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_4"
+                android:background="@drawable/icon_bg"
+                android:padding="4dp"
+                android:scaleType="centerInside"
+                android:layout_marginTop="198dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 文本1 -->
+            <TextView
+                android:id="@+id/tvRemoveAds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remove Ads"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toEndOf="@id/ivIcon1"
+                app:layout_constraintTop_toTopOf="@id/ivIcon1"
+                app:layout_constraintBottom_toBottomOf="@id/ivIcon1" />
+
+            <!-- 文本2 -->
+            <TextView
+                android:id="@+id/tvRateUs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rate us"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toEndOf="@id/ivIcon2"
+                app:layout_constraintTop_toTopOf="@id/ivIcon2"
+                app:layout_constraintBottom_toBottomOf="@id/ivIcon2" />
+
+            <!-- 文本3 -->
+            <TextView
+                android:id="@+id/tvFeedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Feedback"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toEndOf="@id/ivIcon3"
+                app:layout_constraintTop_toTopOf="@id/ivIcon3"
+                app:layout_constraintBottom_toBottomOf="@id/ivIcon3" />
+
+            <!-- 文本4 -->
+            <TextView
+                android:id="@+id/tvPrivacyPolicy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Privacy policy"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:fontFamily="@font/montserrat_regular"
+                android:fontWeight="400"
+                android:lineHeight="21dp"
+                android:letterSpacing="-0.009375"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toEndOf="@id/ivIcon4"
+                app:layout_constraintTop_toTopOf="@id/ivIcon4"
+                app:layout_constraintBottom_toBottomOf="@id/ivIcon4" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 版本号 -->
+    <TextView
+        android:id="@+id/tvVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Version 1.0.0"
+        android:textColor="#000000"
+        android:textSize="14sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:fontWeight="400"
+        android:letterSpacing="-0.009"
+        app:layout_constraintTop_toBottomOf="@id/moreContainer"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

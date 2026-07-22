@@ -27,6 +27,7 @@
         <activity android:name=".ui.result.ResultActivity"/>
         <activity android:name=".ui.recent.RecentActivity"/>
         <activity android:name=".ui.historydetai.HistoryDetailActivity"/>
+        <activity android:name=".ui.profile.ProfileActivity"/>
     </application>
 
 </manifest>
