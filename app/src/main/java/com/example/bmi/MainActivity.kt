@@ -29,12 +29,18 @@ class MainActivity : BaseActivity() {
     // 当前显示的 Fragment 标签
     private var currentTag: String? = null
 
+    private var bottomNavHeight = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
+        // 获取 BottomNavigationView 高度（布局完成后）
+        binding.bottomNav.post {
+            bottomNavHeight = binding.bottomNav.height
+        }
 
         // 监听数据库，控制导航栏显隐 + 通知 HomeFragment 更新按钮位置
         lifecycleScope.launch {
@@ -59,6 +65,10 @@ class MainActivity : BaseActivity() {
 
         // 初始显示 HomeFragment
         navigateToHome()
+    }
+
+    fun getBottomNavHeight(): Int {
+        return bottomNavHeight
     }
 
     private fun setupBottomNav() {
@@ -185,5 +195,16 @@ class MainActivity : BaseActivity() {
     fun goToHome() {
         navigateToHome()
         binding.bottomNav.selectedItemId = R.id.nav_home
+    }
+
+    fun hideBottomNav() {
+        binding.bottomNav.visibility = View.GONE
+    }
+
+    fun showBottomNav() {
+        //有数据
+        if (latestRecord != null) {
+            binding.bottomNav.visibility = View.VISIBLE
+        }
     }
 }

@@ -659,70 +659,30 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 无导航栏时的 Calculate 按钮 ========== -->
+    <!-- ========== Calculate 按钮 ========== -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/btnCalculateNoNav"
+        android:id="@+id/btnCalculate"
         android:layout_width="345dp"
         android:layout_height="57.5dp"
-        android:layout_marginTop="750dp"
         android:layout_marginStart="15dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#3659CF"
         app:cardCornerRadius="28.75dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#3659CF"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="visible">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
-            android:id="@+id/tvCalculateNoNav"
-            android:layout_width="125dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="16.5dp"
-            android:layout_marginStart="110dp"
+            android:id="@+id/tvCalculate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="CALCULATE"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
-            
-            app:fontFamily="@font/montserrat_extrabold"
-            android:letterSpacing="-0.00935"
-            android:textAlignment="center"
             android:gravity="center"
             android:includeFontPadding="false"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- ========== 有导航栏时的 Calculate 按钮 ========== -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/btnCalculateWithNav"
-        android:layout_width="345dp"
-        android:layout_height="57.5dp"
-        android:layout_marginTop="700dp"
-        android:layout_marginStart="15dp"
-        app:cardCornerRadius="28.75dp"
-        app:cardElevation="0dp"
-        android:backgroundTint="#3659CF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tvCalculateWithNav"
-            android:layout_width="125dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="16.5dp"
-            android:layout_marginStart="110dp"
-            android:text="CALCULATE"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            
-            app:fontFamily="@font/montserrat_extrabold"
-            android:letterSpacing="-0.00935"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:fontFamily="@font/montserrat_extrabold"/>
     </androidx.cardview.widget.CardView>
 
     <!-- ========== 导航栏（有数据时显示） ========== -->
@@ -730,11 +690,11 @@
         android:id="@+id/bottomNavBar"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:layout_marginTop="690dp"
         android:background="#FFFFFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone">
 
         <!-- drawable1 -->

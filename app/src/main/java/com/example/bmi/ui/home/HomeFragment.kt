@@ -20,6 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bmi.MainActivity
 import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentHomeBinding
@@ -111,6 +112,7 @@ class HomeFragment : Fragment() {
      * 供 MainActivity 调用，动态更新空状态
      */
     fun setEmptyMode(isEmpty: Boolean) {
+        //isEmptyMode默认为false
         if (this.isEmptyMode != isEmpty) {
             this.isEmptyMode = isEmpty
             if (_binding != null) {
@@ -119,17 +121,22 @@ class HomeFragment : Fragment() {
         }
     }
 
-    /**
-     * 根据 isEmptyMode 切换按钮显隐
-     */
     private fun updateButtonVisibility() {
+        val params = binding.btnCalculate.layoutParams as ConstraintLayout.LayoutParams
+
+        val margin20 = dpToPx(20)
+
         if (isEmptyMode) {
-            binding.btnCalculateNoNav.visibility = View.VISIBLE
-            binding.btnCalculateWithNav.visibility = View.GONE
+            // 没有导航栏
+            params.bottomMargin = margin20
         } else {
-            binding.btnCalculateNoNav.visibility = View.GONE
-            binding.btnCalculateWithNav.visibility = View.VISIBLE
+            // 有导航栏
+            val navHeight = (activity as? MainActivity)?.getBottomNavHeight() ?: 0
+
+            params.bottomMargin = navHeight + margin20
         }
+
+        binding.btnCalculate.layoutParams = params
     }
 
     private fun observeState() {
@@ -239,11 +246,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.btnCalculateNoNav.setOnClickListener {
-            binding.root.clearFocus()
-            viewModel.sendIntent(HomeIntent.Calculate)
-        }
-        binding.btnCalculateWithNav.setOnClickListener {
+        binding.btnCalculate.setOnClickListener {
             binding.root.clearFocus()
             viewModel.sendIntent(HomeIntent.Calculate)
         }
@@ -417,6 +420,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun showDatePicker() {
+        //隐藏导航栏
+        (activity as? MainActivity)?.hideBottomNav()
         // 先同步当前状态的时间到 DatePicker
         val timestamp = viewModel.state.value.timestamp
         val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
@@ -455,12 +460,14 @@ class HomeFragment : Fragment() {
     private fun dismissDatePicker() {
         binding.datePickerMask.visibility = View.GONE
         binding.datePickerBottomSheet.visibility = View.GONE
+        //显示导航栏
+        (activity as? MainActivity)?.showBottomNav()
     }
 
     private fun initDatePicker() {
         val timestamp = viewModel.state.value.timestamp
         val calendar = Calendar.getInstance().apply { timeInMillis = timestamp }
-        // 限制不能超过今天（与原来逻辑一致）
+        // 限制不能超过今天
         val today = Calendar.getInstance()
         if (calendar.after(today)) {
             calendar.time = today.time
@@ -473,6 +480,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun showTimeOfDayPicker() {
+        (activity as? MainActivity)?.hideBottomNav()
         // 同步当前选中值
         currentSelectedTimeIndex = when (viewModel.state.value.timeOfDay) {
             TimeOfDay.MORNING -> 0
@@ -505,6 +513,7 @@ class HomeFragment : Fragment() {
     private fun dismissTimePicker() {
         binding.timePickerMask.visibility = View.GONE
         binding.timePickerBottomSheet.visibility = View.GONE
+        (activity as? MainActivity)?.showBottomNav()
     }
 
     private fun observeEffect() {
