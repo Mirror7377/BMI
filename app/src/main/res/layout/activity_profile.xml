@@ -124,9 +124,10 @@
                 android:textSize="16sp"
                 android:fontFamily="@font/montserrat_extrabold"
                 android:textStyle="bold"
-                android:layout_marginStart="10dp"
-                app:layout_constraintStart_toEndOf="@id/ivAvatarLogin"
-                app:layout_constraintTop_toTopOf="@id/ivAvatarLogin" />
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="85dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- 邮箱 -->
             <TextView
@@ -137,9 +138,9 @@
                 android:textColor="#888888"
                 android:textSize="16sp"
                 android:fontFamily="@font/montserrat_regular"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="85dp"
                 android:layout_marginTop="4dp"
-                app:layout_constraintStart_toEndOf="@id/ivAvatarLogin"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvNameLogin" />
 
             <!-- Group 控制登录组显隐 -->
@@ -251,8 +252,10 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchSync"
-                android:layout_width="50dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:switchMinWidth="35dp"
+                android:switchPadding="0dp"
                 android:checked="true"
                 app:thumbTint="@color/switch_thumb_color"
                 app:trackTint="@color/switch_track_color"

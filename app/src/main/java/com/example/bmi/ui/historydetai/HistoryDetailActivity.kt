@@ -301,7 +301,7 @@ class HistoryDetailActivity : BaseActivity() {
             } else {
                 stdMaxShow - userWeightShow
             }
-            val diffSign = if (userWeightShow < stdMinShow) "+" else ""
+            val diffSign = if (userWeightShow < stdMinShow) "+" else "-"
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
             val fullText = "$rangeStr$diffText"
             val spannable = SpannableString(fullText)

@@ -2,6 +2,6 @@ package com.example.bmi.ui.result
 
 
 sealed class ResultEffect {
-    object NavigateToHome : ResultEffect()
+    data class NavigateToHome(val isFirstSave: Boolean) : ResultEffect()
     object ShowDiscardDialog : ResultEffect()
 }

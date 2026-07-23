@@ -26,9 +26,7 @@ class MainActivity : BaseActivity() {
     private lateinit var binding: ActivityMainBinding
     private var latestRecord: BmiRecord? = null
 
-    // 当前显示的 Fragment 标签
     private var currentTag: String? = null
-
     private var bottomNavHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +34,7 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        // 获取 BottomNavigationView 高度（布局完成后）
+        // 获取底部导航高度
         binding.bottomNav.post {
             bottomNavHeight = binding.bottomNav.height
         }
@@ -46,15 +43,12 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeLatestRecord()
-                    .distinctUntilChanged()//记录发生变化才发射新数据
+                    .distinctUntilChanged()
                     .collect { record ->
                         latestRecord = record
                         val isEmpty = record == null
-
-                        // 控制底部导航栏显隐
                         binding.bottomNav.visibility = if (isEmpty) View.GONE else View.VISIBLE
 
-                        // 同步更新 HomeFragment 的按钮位置
                         val homeFragment = supportFragmentManager.findFragmentByTag("Home") as? HomeFragment
                         homeFragment?.setEmptyMode(isEmpty)
                     }
@@ -63,13 +57,20 @@ class MainActivity : BaseActivity() {
 
         setupBottomNav()
 
-        // 初始显示 HomeFragment
-        navigateToHome()
+        // 根据 SplashActivity 传递的标志决定初始显示
+        val hasData = intent.getBooleanExtra("hasData", false)
+        if (hasData) {
+            // 有数据：显示 DisplayFragment，并高亮底部导航第二项（index 1）
+            navigateToDisplay()
+            binding.bottomNav.selectedItemId = R.id.nav_display
+        } else {
+            // 无数据：显示 HomeFragment
+            navigateToHome()
+            binding.bottomNav.selectedItemId = R.id.nav_home
+        }
     }
 
-    fun getBottomNavHeight(): Int {
-        return bottomNavHeight
-    }
+    fun getBottomNavHeight(): Int = bottomNavHeight
 
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -82,7 +83,7 @@ class MainActivity : BaseActivity() {
                     navigateToDisplay()
                     true
                 }
-                R.id.nav_statistics ->{
+                R.id.nav_statistics -> {
                     navigateToStatistics()
                     true
                 }
@@ -91,9 +92,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    /**
-     * 显示 HomeFragment
-     */
     private fun navigateToHome() {
         val fragmentManager = supportFragmentManager
         var homeFragment = fragmentManager.findFragmentByTag("Home")
@@ -123,9 +121,6 @@ class MainActivity : BaseActivity() {
         currentTag = "Home"
     }
 
-    /**
-     * 显示 DisplayFragment（历史记录展示页）
-     */
     private fun navigateToDisplay() {
         val fragmentManager = supportFragmentManager
         var displayFragment = fragmentManager.findFragmentByTag("Display")
@@ -165,10 +160,8 @@ class MainActivity : BaseActivity() {
                 .commit()
         }
 
-        // 如果当前已经是 Statistics，则不重复操作
         if (currentTag == "Statistics") return
 
-        // 隐藏其他已添加的 Fragment
         fragmentManager.fragments.forEach { fragment ->
             if (fragment != statisticsFragment && fragment.isAdded) {
                 fragmentManager.beginTransaction()
@@ -177,7 +170,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        // 显示 StatisticsFragment
         if (!statisticsFragment.isVisible) {
             fragmentManager.beginTransaction()
                 .show(statisticsFragment)
@@ -187,11 +179,6 @@ class MainActivity : BaseActivity() {
         currentTag = "Statistics"
     }
 
-    // MainActivity.kt
-
-    /**
-     * 供外部调用 切换到 HomeFragment
-     */
     fun goToHome() {
         navigateToHome()
         binding.bottomNav.selectedItemId = R.id.nav_home
@@ -202,9 +189,34 @@ class MainActivity : BaseActivity() {
     }
 
     fun showBottomNav() {
-        //有数据
         if (latestRecord != null) {
             binding.bottomNav.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkPostSaveNavigation()
+    }
+
+    /**
+     * 检查是否有保存后的导航标记，若有则执行跳转并清除
+     */
+    private fun checkPostSaveNavigation() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val target = prefs.getString("post_save_target", null) ?: return
+        //删除键名
+        prefs.edit().remove("post_save_target").apply()
+
+        when (target) {
+            "display" -> {
+                navigateToDisplay()
+                binding.bottomNav.selectedItemId = R.id.nav_display
+            }
+            "statistics" -> {
+                navigateToStatistics()
+                binding.bottomNav.selectedItemId = R.id.nav_statistics
+            }
         }
     }
 }

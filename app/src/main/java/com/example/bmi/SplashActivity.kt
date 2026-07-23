@@ -11,11 +11,18 @@ import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.bmi.databinding.ActivitySplashBinding
+import com.example.bmi.data.repository.BmiRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var repository: BmiRepository
 
     companion object {
         private const val DESIGN_WIDTH = 375f
@@ -37,7 +44,6 @@ class SplashActivity : AppCompatActivity() {
             initState()
             startAnimation()
         }
-
     }
 
     private fun initState() {
@@ -68,15 +74,15 @@ class SplashActivity : AppCompatActivity() {
                     ObjectAnimator.ofFloat(binding.logoContainer, View.TRANSLATION_Y, 100f * scale, 0f),
                     ObjectAnimator.ofFloat(binding.logoContainer, View.ALPHA, 0f, 1f)
                 )
-                duration = 1000
+                duration = 800
             }
 
             val firstNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, -30f, 45f).apply {
-                duration = 1000
+                duration = 800
             }
 
             val secondNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, 45f, -45f).apply {
-                duration = 1000
+                duration = 800
                 interpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
             }
 
@@ -84,7 +90,7 @@ class SplashActivity : AppCompatActivity() {
                 playTogether(logoMove, firstNeedle)
             }
 
-            val hold = ValueAnimator.ofFloat(0f, 1f).apply { duration = 1000 }
+            val hold = ValueAnimator.ofFloat(0f, 1f).apply { duration = 100 }
 
             val all = AnimatorSet().apply {
                 playSequentially(firstStage, secondNeedle, hold)
@@ -92,8 +98,15 @@ class SplashActivity : AppCompatActivity() {
 
             all.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                    finish()
+                    // 动画结束后，查询是否有数据
+                    lifecycleScope.launch {
+                        val hasData = repository.getRecordCount() != 0
+                        val intent = Intent(this@SplashActivity, MainActivity::class.java).apply {
+                            putExtra("hasData", hasData)
+                        }
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             })
             all.start()
@@ -109,7 +122,4 @@ class SplashActivity : AppCompatActivity() {
         lp.topMargin = (top * scale + offsetY).toInt()
         view.layoutParams = lp
     }
-
-
-
 }
