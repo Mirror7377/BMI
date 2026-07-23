@@ -101,6 +101,11 @@ class BmiChartView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val valueBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#2C2C2E")
+        style = Paint.Style.FILL
+    }
+
     // ===== 数据 =====
     private var allData: List<DayBmiData> = emptyList()
     private val displayCount = X_LABEL_COUNT
@@ -648,13 +653,88 @@ class BmiChartView @JvmOverloads constructor(
         }
     }
 
-    private fun drawSelectedValue(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
+    private fun drawSelectedValue(
+        canvas: Canvas,
+        startIdx: Int,
+        visibleData: List<DayBmiData>
+    ) {
         if (selectedDataIndex == null || selectedBmi == null) return
+
         val points = getDataPoints(startIdx, visibleData)
         val point = points.find { it.dataIndex == selectedDataIndex } ?: return
+
         val label = String.format("%.1f", selectedBmi)
-        val labelY = point.y - dpToPx(DOT_RADIUS_SELECTED) - dpToPx(VALUE_LABEL_TOP_OFFSET)
-        canvas.drawText(label, point.x, labelY, valuePaint)
+
+        //=====================
+        // 容器参数
+        //=====================
+        val paddingHorizontal = dpToPx(8f)
+        val paddingTop = dpToPx(6f)
+        val paddingBottom = dpToPx(6f)
+
+        val textWidth = valuePaint.measureText(label)
+
+        val textHeight =
+            valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
+
+        val bgWidth = textWidth + paddingHorizontal * 2
+        val bgHeight = textHeight + paddingTop + paddingBottom
+
+        // 背景距离圆点9dp
+        val gap = dpToPx(9f)
+
+        val bgLeft = point.x - bgWidth / 2
+        val bgBottom = point.y - dpToPx(DOT_RADIUS_SELECTED) - gap
+        val bgTop = bgBottom - bgHeight
+        val bgRight = bgLeft + bgWidth
+
+        //=====================
+        // 绘制背景
+        //=====================
+        canvas.drawRoundRect(
+            bgLeft,
+            bgTop,
+            bgRight,
+            bgBottom,
+            dpToPx(5f),
+            dpToPx(5f),
+            valueBgPaint
+        )
+
+        //=====================
+        // 绘制文字
+        //=====================
+        val fm = valuePaint.fontMetrics
+
+        val textX = point.x
+
+        val textY =
+            bgTop +
+                    paddingTop -
+                    fm.ascent
+
+        canvas.drawText(
+            label,
+            textX,
+            textY,
+            valuePaint
+        )
+
+        val triangleHeight = dpToPx(3f)
+        val triangleHalfWidth = dpToPx(5f)
+
+        val triangleTop = bgBottom
+        val triangleBottom = bgBottom + triangleHeight
+        val triangleCenterX = point.x
+
+        val trianglePath = Path().apply {
+            moveTo(triangleCenterX - triangleHalfWidth, triangleTop)
+            lineTo(triangleCenterX + triangleHalfWidth, triangleTop)
+            lineTo(triangleCenterX, triangleBottom)
+            close()
+        }
+
+        canvas.drawPath(trianglePath, valueBgPaint)
     }
 
     // ===== 数据点提取（自动过滤 null） =====

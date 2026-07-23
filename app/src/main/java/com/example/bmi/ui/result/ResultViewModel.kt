@@ -47,6 +47,10 @@ class ResultViewModel @Inject constructor(
     // ====================== 保存记录 ======================
     fun saveRecord() {
         viewModelScope.launch {
+            // 先获取当前记录数，判断是否第一次保存
+            val countBefore = repository.getRecordCount()
+            val isFirstSave = countBefore == 0
+
             val currentState = _state.value
             val finalWeightKg = if (currentState.weightUnit == WeightUnit.KG.name) {
                 currentState.weightInput
@@ -75,7 +79,7 @@ class ResultViewModel @Inject constructor(
                 createTime = System.currentTimeMillis()
             )
             repository.saveRecord(record)
-            _effect.emit(ResultEffect.NavigateToHome)
+            _effect.emit(ResultEffect.NavigateToHome(isFirstSave))
         }
     }
 

@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="#EAEAEE">
 
+    <!-- ========== 顶部导航栏（未改动） ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navBar"
         android:layout_width="0dp"
@@ -14,7 +15,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Calculator 标题 -->
         <TextView
             android:id="@+id/tvCalculator"
             android:layout_width="135dp"
@@ -30,7 +30,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 个人信息图标 -->
         <ImageView
             android:id="@+id/ivPerson"
             android:layout_width="24dp"
@@ -46,7 +45,15 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ========== Weight 标签 ========== -->
+    <!-- ========== 中轴线（50% 位置） ========== -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_middle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <!-- ========== Weight 标签（左半区居中） ========== -->
     <TextView
         android:id="@+id/tvWeight"
         android:layout_width="56.5dp"
@@ -56,14 +63,14 @@
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
-        android:textAlignment="textEnd"
-        android:gravity="end|center_vertical"
+        android:gravity="center"
         android:layout_marginTop="102dp"
-        android:layout_marginStart="72dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_middle"
+        app:layout_constraintHorizontal_bias="0.5" />
 
-    <!-- ========== Height 标签 ========== -->
+    <!-- ========== Height 标签（右半区居中） ========== -->
     <TextView
         android:id="@+id/tvHeight"
         android:layout_width="48dp"
@@ -73,27 +80,28 @@
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
-        android:textAlignment="textEnd"
-        android:gravity="end|center_vertical"
+        android:gravity="center"
         android:layout_marginTop="102dp"
-        android:layout_marginStart="251dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideline_middle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5" />
 
-    <!-- ========== 体重容器（CardView 实现圆角白底） ========== -->
+    <!-- ========== 体重容器（与身高组构成链条） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/weightContainer"
         android:layout_width="160dp"
         android:layout_height="68dp"
         android:layout_marginTop="134dp"
-        android:layout_marginStart="20dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         android:backgroundTint="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/heightGroupContainer"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.5">
 
-        <!-- 内部数值文本 -->
         <EditText
             android:id="@+id/etWeightValue"
             android:layout_width="91dp"
@@ -112,180 +120,183 @@
             android:maxLength="6"
             android:imeOptions="actionDone"
             android:importantForAutofill="no" />
-
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 身高区域 ========== -->
-
-    <!-- 模式1：ft-in（英尺-英寸） -->
+    <!-- ========== 身高组父容器（包裹两种模式） ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/heightFtInGroup"
-        android:layout_width="wrap_content"
+        android:id="@+id/heightGroupContainer"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="134dp"
-        android:layout_marginStart="195dp"
+        android:layout_marginStart="15dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="visible">
+        app:layout_constraintStart_toEndOf="@+id/weightContainer"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- ft 容器 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/ftContainer"
-            android:layout_width="70dp"
+        <!-- 模式1：ft-in -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/heightFtInGroup"
+            android:layout_width="match_parent"
             android:layout_height="68dp"
+            android:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/ftContainer"
+                android:layout_width="70dp"
+                android:layout_height="68dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                android:backgroundTint="#FFFFFF"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/etFtValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5"
+                        android:textColor="#000000"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:background="@null"
+                        android:inputType="number"
+                        android:maxLength="1"
+                        android:imeOptions="actionDone"
+                        android:paddingEnd="2dp"
+                        android:minWidth="20dp" />
+
+                    <TextView
+                        android:id="@+id/tvFtSymbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/etFtValue"
+                        android:layout_alignBaseline="@id/etFtValue"
+                        android:text="'"
+                        android:textColor="#000000"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:includeFontPadding="false"
+                        android:paddingStart="2dp" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/inContainer"
+                android:layout_width="84.5dp"
+                android:layout_height="68dp"
+                android:layout_marginStart="5.5dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="0dp"
+                android:backgroundTint="#FFFFFF"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ftContainer">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/etInValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="7"
+                        android:textColor="#000000"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:background="@null"
+                        android:inputType="number"
+                        android:maxLength="2"
+                        android:imeOptions="actionDone"
+                        android:paddingEnd="2dp"
+                        android:minWidth="30dp" />
+
+                    <TextView
+                        android:id="@+id/tvInSymbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/etInValue"
+                        android:layout_alignBaseline="@id/etInValue"
+                        android:text="&quot;"
+                        android:textColor="#000000"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/montserrat_extrabold"
+                        android:includeFontPadding="false"
+                        android:paddingStart="2dp" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 模式2：cm -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/heightCmGroup"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:visibility="gone"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp"
             android:backgroundTint="#FFFFFF"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical">
-
-                <EditText
-                    android:id="@+id/etFtValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5"
-                    android:textColor="#000000"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/montserrat_extrabold"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:background="@null"
-                    android:inputType="number"
-                    android:maxLength="1"
-                    android:imeOptions="actionDone"
-                    android:paddingEnd="2dp"
-                    android:minWidth="20dp" />
-
-                <TextView
-                    android:id="@+id/tvFtSymbol"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/etFtValue"
-                    android:layout_alignBaseline="@id/etFtValue"
-                    android:text="'"
-                    android:textColor="#000000"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/montserrat_extrabold"
-                    android:includeFontPadding="false"
-                    android:paddingStart="2dp" />
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- in 容器 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/inContainer"
-            android:layout_width="84.5dp"
-            android:layout_height="68dp"
-            android:layout_marginStart="5.5dp"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            android:backgroundTint="#FFFFFF"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ftContainer">
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_vertical">
-
-                <EditText
-                    android:id="@+id/etInValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="7"
-                    android:textColor="#000000"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/montserrat_extrabold"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:background="@null"
-                    android:inputType="number"
-                    android:maxLength="2"
-                    android:imeOptions="actionDone"
-                    android:paddingEnd="2dp"
-                    android:minWidth="30dp" />
-
-                <TextView
-                    android:id="@+id/tvInSymbol"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/etInValue"
-                    android:layout_alignBaseline="@id/etInValue"
-                    android:text="&quot;"
-                    android:textColor="#000000"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/montserrat_extrabold"
-                    android:includeFontPadding="false"
-                    android:paddingStart="2dp" />
-            </RelativeLayout>
+            <EditText
+                android:id="@+id/etCmValue"
+                android:layout_width="83dp"
+                android:layout_height="37dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="41.5dp"
+                android:text="170.0"
+                android:textColor="#000000"
+                android:textSize="30sp"
+                android:fontFamily="@font/montserrat_extrabold"
+                android:letterSpacing="-0.00937"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:background="@null"
+                android:inputType="numberDecimal"
+                android:maxLength="5"
+                android:imeOptions="actionDone" />
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- 模式2：cm（厘米） -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/heightCmGroup"
-        android:layout_width="160dp"
-        android:layout_height="68dp"
-        android:layout_marginTop="134dp"
-        android:layout_marginStart="195dp"
-        app:cardCornerRadius="15dp"
-        app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone">
-
-        <EditText
-            android:id="@+id/etCmValue"
-            android:layout_width="83dp"
-            android:layout_height="37dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="41.5dp"
-            android:text="170.0"
-            android:textColor="#000000"
-            android:textSize="30sp"
-            
-            android:fontFamily="@font/montserrat_extrabold"
-            android:letterSpacing="-0.00937"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:background="@null"
-            android:inputType="numberDecimal"
-            android:maxLength="5"
-            android:imeOptions="actionDone" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- ========== 单位切换容器（lb/kg） ========== -->
+    <!-- ========== 单位切换容器（链条居中） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/unitSwitchContainer"
         android:layout_width="160dp"
         android:layout_height="36dp"
         android:layout_marginTop="212dp"
-        android:layout_marginStart="20dp"
         app:cardCornerRadius="18dp"
         app:cardElevation="0dp"
         android:backgroundTint="#F5F5F7"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/heightUnitSwitchContainer"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.5">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 选中背景容器 -->
             <View
                 android:id="@+id/selectedUnitBg"
                 android:layout_width="90dp"
@@ -296,7 +307,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="0dp" />
 
-            <!-- lb 文本 -->
             <TextView
                 android:id="@+id/tvUnitLb"
                 android:layout_width="40dp"
@@ -306,7 +316,6 @@
                 android:text="lb"
                 android:textColor="#000000"
                 android:textSize="16sp"
-                
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
                 android:textAlignment="center"
@@ -315,7 +324,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- kg 文本 -->
             <TextView
                 android:id="@+id/tvUnitKg"
                 android:layout_width="40dp"
@@ -325,7 +333,6 @@
                 android:text="kg"
                 android:textColor="#000000"
                 android:textSize="16sp"
-                
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
                 android:textAlignment="center"
@@ -337,24 +344,23 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 身高单位切换容器（ft-in / cm）- 已修改 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/heightUnitSwitchContainer"
         android:layout_width="160dp"
         android:layout_height="36dp"
         android:layout_marginTop="212dp"
-        android:layout_marginStart="195dp"
+        android:layout_marginStart="15dp"
         app:cardCornerRadius="18dp"
         app:cardElevation="0dp"
         android:backgroundTint="#F5F5F7"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toEndOf="@+id/unitSwitchContainer"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 选中背景容器（默认在 ft-in 位置） -->
             <View
                 android:id="@+id/selectedUnitBgHeight"
                 android:layout_width="90dp"
@@ -365,7 +371,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="0dp" />
 
-            <!-- ft-in 文本 -->
             <TextView
                 android:id="@+id/tvUnitFtIn"
                 android:layout_width="40dp"
@@ -375,7 +380,6 @@
                 android:text="ft-in"
                 android:textColor="#000000"
                 android:textSize="16sp"
-                
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
                 android:textAlignment="center"
@@ -384,7 +388,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- cm 文本 -->
             <TextView
                 android:id="@+id/tvUnitCm"
                 android:layout_width="30dp"
@@ -394,7 +397,6 @@
                 android:text="cm"
                 android:textColor="#000000"
                 android:textSize="16sp"
-                
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
                 android:textAlignment="center"
@@ -406,20 +408,22 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 日期选择容器 ========== -->
+    <!-- ========== 日期 / 时段选择容器（链条居中） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/datePickerContainer"
         android:layout_width="160dp"
         android:layout_height="60dp"
         android:layout_marginTop="310dp"
-        android:layout_marginStart="20dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         android:backgroundTint="#FFFFFF"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/timeOfDayPickerContainer"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.5">
 
         <TextView
             android:id="@+id/tvDateDisplay"
@@ -432,20 +436,20 @@
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 时段选择容器 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/timeOfDayPickerContainer"
         android:layout_width="160dp"
         android:layout_height="60dp"
         android:layout_marginTop="310dp"
-        android:layout_marginStart="195dp"
+        android:layout_marginStart="15dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         android:backgroundTint="#FFFFFF"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toEndOf="@+id/datePickerContainer"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/tvTimeOfDayDisplay"
@@ -458,7 +462,7 @@
             android:fontFamily="@font/montserrat_extrabold" />
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== Time 标签 ========== -->
+    <!-- ========== Time 标签（已居中，保持不变） ========== -->
     <TextView
         android:id="@+id/tvTime"
         android:layout_width="35dp"
@@ -470,10 +474,9 @@
         android:textStyle="normal"
         android:gravity="center"
         android:layout_marginTop="278dp"
-        android:layout_marginStart="170dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- ========== Age 标签 ========== -->
     <TextView
@@ -488,71 +491,69 @@
         android:textAlignment="textEnd"
         android:gravity="end|center_vertical"
         android:layout_marginTop="400dp"
-        android:layout_marginStart="178.5dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 年龄滚轮容器 ========== -->
+    <!-- ========== 年龄滚轮容器（已居中） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/valuesContainer"
         android:layout_width="335dp"
         android:layout_height="72dp"
         android:layout_marginTop="432dp"
-        android:layout_marginStart="25dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         android:backgroundTint="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <FrameLayout
             android:layout_width="307dp"
             android:layout_height="39dp"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="16dp">
+            android:layout_gravity="center">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvAgePicker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
-                android:overScrollMode="never"
                 android:clipToPadding="false"
-                android:paddingLeft="130dp"
-                android:paddingRight="130dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 纯色图形（drawable） ========== -->
+    <!-- ========== 蓝色三角（已居中） ========== -->
     <View
         android:id="@+id/colorBlock"
         android:layout_width="15dp"
         android:layout_height="11dp"
         android:background="@drawable/ic_triangle_blue"
         android:layout_marginTop="493dp"
-        android:layout_marginStart="185dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 性别容器 1（Male，默认选中） ========== -->
+    <!-- ========== 性别容器（链条居中，已实现） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/genderContainer1"
         android:layout_width="160dp"
         android:layout_height="90dp"
         android:layout_marginTop="519dp"
-        android:layout_marginStart="25dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/genderContainer2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0.5">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 图标 -->
             <View
                 android:id="@+id/genderIcon1"
                 android:layout_width="34dp"
@@ -563,7 +564,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- 文字 -->
             <TextView
                 android:id="@+id/genderText1"
                 android:layout_width="34dp"
@@ -582,7 +582,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- 选中标记（默认显示） -->
             <ImageView
                 android:id="@+id/genderCheck1"
                 android:layout_width="18dp"
@@ -593,28 +592,26 @@
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 性别容器 2（Female，默认未选中） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/genderContainer2"
         android:layout_width="160dp"
         android:layout_height="90dp"
         android:layout_marginTop="519dp"
-        android:layout_marginStart="200dp"
+        android:layout_marginStart="15dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         app:cardBackgroundColor="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toEndOf="@+id/genderContainer1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 图标 -->
             <View
                 android:id="@+id/genderIcon2"
                 android:layout_width="34dp"
@@ -625,7 +622,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- 文字（Female） -->
             <TextView
                 android:id="@+id/genderText2"
                 android:layout_width="52dp"
@@ -644,7 +640,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- 选中标记（默认隐藏） -->
             <ImageView
                 android:id="@+id/genderCheck2"
                 android:layout_width="18dp"
@@ -655,16 +650,14 @@
                 android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== Calculate 按钮 ========== -->
+    <!-- ========== Calculate 按钮（已居中） ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnCalculate"
         android:layout_width="345dp"
         android:layout_height="57.5dp"
-        android:layout_marginStart="15dp"
         android:layout_marginBottom="20dp"
         android:backgroundTint="#3659CF"
         app:cardCornerRadius="28.75dp"
@@ -682,10 +675,10 @@
             android:textSize="20sp"
             android:gravity="center"
             android:includeFontPadding="false"
-            app:fontFamily="@font/montserrat_extrabold"/>
+            app:fontFamily="@font/montserrat_extrabold" />
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 导航栏（有数据时显示） ========== -->
+    <!-- ========== 底部导航栏（未改动，保留） ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomNavBar"
         android:layout_width="0dp"
@@ -697,7 +690,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone">
 
-        <!-- drawable1 -->
         <View
             android:id="@+id/navIcon1"
             android:layout_width="24dp"
@@ -708,7 +700,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- drawable2 -->
         <View
             android:id="@+id/navIcon2"
             android:layout_width="24dp"
@@ -719,7 +710,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- drawable3 -->
         <View
             android:id="@+id/navIcon3"
             android:layout_width="24dp"
@@ -730,7 +720,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 文字：Calculator -->
         <TextView
             android:id="@+id/navTextCalculator"
             android:layout_width="60dp"
@@ -750,7 +739,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 文字：BMI -->
         <TextView
             android:id="@+id/navTextBMI"
             android:layout_width="24dp"
@@ -770,7 +758,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 文字：Statistics -->
         <TextView
             android:id="@+id/navTextStatistics"
             android:layout_width="53dp"
@@ -791,7 +778,7 @@
             app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ========== 底部日期选择弹窗 - 半透明遮罩 ========== -->
+    <!-- ========== 底部日期弹窗（未改动） ========== -->
     <View
         android:id="@+id/datePickerMask"
         android:layout_width="match_parent"
@@ -805,7 +792,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 底部日期选择弹窗主体 ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/datePickerBottomSheet"
         android:layout_width="375dp"
@@ -818,7 +804,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- DATE 标题 -->
         <TextView
             android:id="@+id/tvDatePickerTitle"
             android:layout_width="wrap_content"
@@ -847,92 +832,37 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <FrameLayout
+            <!-- 月份 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMonth"
                 android:layout_width="0dp"
-                android:layout_height="180dp"
-                android:layout_weight="1">
+                android:layout_height="315dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
 
-                <NumberPicker
-                    android:id="@+id/npMonth"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:descendantFocusability="blocksDescendants" />
-
-                <!-- 上横线 -->
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="18dp"
-                    android:background="#3659CF" />
-
-                <!-- 下横线 -->
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="18dp"
-                    android:background="#3659CF" />
-
-            </FrameLayout>
-
-            <FrameLayout
+            <!-- 日期 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDay"
                 android:layout_width="0dp"
-                android:layout_height="180dp"
-                android:layout_weight="1">
+                android:layout_height="315dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
 
-                <NumberPicker
-                    android:id="@+id/npDay"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:descendantFocusability="blocksDescendants" />
-
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="18dp"
-                    android:background="#3659CF" />
-
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="18dp"
-                    android:background="#3659CF" />
-
-            </FrameLayout>
-
-            <FrameLayout
+            <!-- 年份 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvYear"
                 android:layout_width="0dp"
-                android:layout_height="180dp"
-                android:layout_weight="1">
-
-                <NumberPicker
-                    android:id="@+id/npYear"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:descendantFocusability="blocksDescendants" />
-
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="18dp"
-                    android:background="#3659CF" />
-
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="0.5dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="18dp"
-                    android:background="#3659CF" />
-
-            </FrameLayout>
-
+                android:layout_height="315dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
         </LinearLayout>
 
-        <!-- Cancel 按钮 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/btnDateCancel"
             android:layout_width="0dp"
@@ -948,7 +878,6 @@
             app:layout_constraintTop_toBottomOf="@id/datePickerPickerContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnDateDone">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -962,7 +891,6 @@
                 android:layout_gravity="center" />
         </androidx.cardview.widget.CardView>
 
-        <!-- Done 按钮 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/btnDateDone"
             android:layout_width="0dp"
@@ -978,7 +906,6 @@
             app:layout_constraintTop_toBottomOf="@id/datePickerPickerContainer"
             app:layout_constraintStart_toEndOf="@id/btnDateCancel"
             app:layout_constraintEnd_toEndOf="parent">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -991,10 +918,9 @@
                 android:gravity="center"
                 android:layout_gravity="center" />
         </androidx.cardview.widget.CardView>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ========== 底部时段选择弹窗 - 半透明遮罩 ========== -->
+    <!-- ========== 底部时段弹窗（未改动） ========== -->
     <View
         android:id="@+id/timePickerMask"
         android:layout_width="match_parent"
@@ -1008,7 +934,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 底部时段选择弹窗主体 ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/timePickerBottomSheet"
         android:layout_width="match_parent"
@@ -1021,7 +946,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- TIME 标题 -->
         <TextView
             android:id="@+id/tvTimePickerTitle"
             android:layout_width="wrap_content"
@@ -1038,43 +962,28 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- 时段滚轮容器 -->
         <FrameLayout
             android:id="@+id/timePickerContainer"
             android:layout_width="120dp"
-            android:layout_height="150dp"
+            android:layout_height="315dp"
             android:clipChildren="false"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/tvTimePickerTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <NumberPicker
-                android:id="@+id/npTimePicker"
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTimePicker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:descendantFocusability="blocksDescendants" />
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
 
-<!--            &lt;!&ndash; 上横线（选中指示） &ndash;&gt;-->
-<!--            todo 去掉黑线-->
-<!--            <View-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="1dp"-->
-<!--                android:background="#3659CF"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:layout_marginTop="-15dp" />-->
-
-<!--            &lt;!&ndash; 下横线（选中指示） &ndash;&gt;-->
-<!--            <View-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="1dp"-->
-<!--                android:background="#3659CF"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:layout_marginBottom="-15dp" />-->
 
         </FrameLayout>
 
-        <!-- Cancel 按钮 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/btnTimeCancel"
             android:layout_width="0dp"
@@ -1090,7 +999,6 @@
             app:layout_constraintTop_toBottomOf="@id/timePickerContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnTimeDone">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -1104,7 +1012,6 @@
                 android:layout_gravity="center" />
         </androidx.cardview.widget.CardView>
 
-        <!-- Done 按钮 -->
         <androidx.cardview.widget.CardView
             android:id="@+id/btnTimeDone"
             android:layout_width="0dp"
@@ -1120,7 +1027,6 @@
             app:layout_constraintTop_toBottomOf="@id/timePickerContainer"
             app:layout_constraintStart_toEndOf="@id/btnTimeCancel"
             app:layout_constraintEnd_toEndOf="parent">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -1133,7 +1039,6 @@
                 android:gravity="center"
                 android:layout_gravity="center" />
         </androidx.cardview.widget.CardView>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

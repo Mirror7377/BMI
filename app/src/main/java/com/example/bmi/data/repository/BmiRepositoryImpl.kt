@@ -43,6 +43,7 @@ class BmiRepositoryImpl @Inject constructor(
         dao.deleteRecord(id)
     }
 
+    //获取数据总条数
     override suspend fun getRecordCount(): Int {
         return dao.getRecordCount()
     }

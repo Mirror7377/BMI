@@ -93,7 +93,14 @@ class ResultActivity : BaseActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        ResultEffect.NavigateToHome -> finish()
+                        is ResultEffect.NavigateToHome -> {
+                            //  保存目标到 SharedPreferences
+                            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                            val target = if (effect.isFirstSave) "display" else "statistics"
+                            prefs.edit().putString("post_save_target", target).apply()
+                            // 2. 关闭当前页面
+                            finish()
+                        }
                         ResultEffect.ShowDiscardDialog -> showDiscardDialog()
                     }
                 }
@@ -331,7 +338,7 @@ class ResultActivity : BaseActivity() {
             } else {
                 stdMaxShow - userWeightShow
             }
-            val diffSign = if (userWeightShow < stdMinShow) "+" else ""
+            val diffSign = if (userWeightShow < stdMinShow) "+" else "-"
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
             val fullText = "$rangeStr$diffText"
             val spannable = SpannableString(fullText)
