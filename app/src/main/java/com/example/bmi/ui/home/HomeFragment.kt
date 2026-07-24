@@ -2,20 +2,18 @@ package com.example.bmi.ui.home
 
 import android.animation.ArgbEvaluator
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.NumberPicker
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -38,6 +36,7 @@ import com.example.bmi.ui.home.enums.TimeOfDay
 import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.ui.profile.ProfileActivity
 import com.example.bmi.ui.result.ResultActivity
+import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -216,17 +215,21 @@ class HomeFragment : Fragment() {
             viewModel.sendIntent(HomeIntent.HeightUnitChanged(HeightUnit.FT_IN))
         }
         binding.datePickerContainer.setOnClickListener {
+            binding.root.clearFocus()
             showDatePicker()
         }
         binding.timeOfDayPickerContainer.setOnClickListener {
+            binding.root.clearFocus()
             showTimeOfDayPicker()
         }
         binding.genderContainer1.setOnClickListener {
+            binding.root.clearFocus()
             binding.genderCheck1.visibility = View.VISIBLE
             binding.genderCheck2.visibility = View.GONE
             viewModel.sendIntent(HomeIntent.GenderSelected(Gender.MALE))
         }
         binding.genderContainer2.setOnClickListener {
+            binding.root.clearFocus()
             binding.genderCheck1.visibility = View.GONE
             binding.genderCheck2.visibility = View.VISIBLE
             viewModel.sendIntent(HomeIntent.GenderSelected(Gender.FEMALE))
@@ -280,6 +283,8 @@ class HomeFragment : Fragment() {
             WeightUnit.LB -> 2.0 to 551.0
             WeightUnit.KG -> 1.0 to 250.0
         }
+        val errorMsg = "Please input a valid weight (${min.toInt()}-${max.toInt()}) to calculate your BMI accurately"
+
         when {
             raw.isEmpty() -> {
                 val default = when (unit) {
@@ -287,20 +292,20 @@ class HomeFragment : Fragment() {
                     WeightUnit.KG -> 65.00
                 }
                 editText.setText(String.format("%.2f", default))
-                showToast("Please input a valid weight (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
             }
             raw.toDoubleOrNull() == null -> {
                 editText.setText(viewModel.state.value.weightDisplay)
-                showToast("Please input a valid weight (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
                 val value = raw.toDouble()
                 val clamped = value.coerceIn(min, max)
                 val formatted = String.format("%.2f", clamped)
                 editText.setText(formatted)
-                if (value != clamped || raw != formatted) {
-                    showToast("Please input a valid weight (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
+                if (value != clamped) {
+                    CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 }
                 viewModel.sendIntent(HomeIntent.WeightChanged(clamped))
             }
@@ -311,25 +316,27 @@ class HomeFragment : Fragment() {
         val raw = editText.text.toString().trim()
         val min = 1.0
         val max = 250.0
+        val errorMsg = "Please input a valid height (1-250 cm) to calculate your BMI accurately"
+
         when {
             raw.isEmpty() -> {
                 editText.setText("170.0")
-                showToast("Please input a valid height (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
-                viewModel.sendIntent(HomeIntent.HeightChanged(170.0))
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
+                viewModel.sendIntent(HomeIntent.HeightCmChanged(170.0))
             }
             raw.toDoubleOrNull() == null -> {
                 editText.setText(viewModel.state.value.heightDisplay)
-                showToast("Please input a valid height (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
                 val value = raw.toDouble()
                 val clamped = value.coerceIn(min, max)
                 val formatted = String.format("%.1f", clamped)
                 editText.setText(formatted)
-                if (value != clamped || raw != formatted) {
-                    showToast("Please input a valid height (${String.format("%.0f", min)}-${String.format("%.0f", max)}) to calculate your BMI accurately")
+                if (value != clamped) {
+                    CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 }
-                viewModel.sendIntent(HomeIntent.HeightChanged(clamped))
+                viewModel.sendIntent(HomeIntent.HeightCmChanged(clamped))
             }
         }
     }
@@ -338,22 +345,24 @@ class HomeFragment : Fragment() {
         val raw = editText.text.toString().trim()
         val min = 1
         val max = 8
+        val errorMsg = "Please input a valid height (1' - 8' ft) to calculate your BMI accurately"
+
         when {
             raw.isEmpty() -> {
                 editText.setText("5")
-                showToast("Please input a valid height (${min}' - ${max}'2'') to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 viewModel.sendIntent(HomeIntent.FeetChanged(5))
             }
             raw.toIntOrNull() == null -> {
                 editText.setText(viewModel.state.value.feetInput.toString())
-                showToast("Please input a valid height (${min}' - ${max}'2'') to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
                 val value = raw.toInt()
                 val clamped = value.coerceIn(min, max)
                 editText.setText(clamped.toString())
                 if (value != clamped) {
-                    showToast("Please input a valid height (${min}' - ${max}'2'') to calculate your BMI accurately")
+                    CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 }
                 viewModel.sendIntent(HomeIntent.FeetChanged(clamped))
             }
@@ -366,30 +375,37 @@ class HomeFragment : Fragment() {
         val feet = feetRaw.toIntOrNull() ?: 5
         val min = 0
         val max = if (feet >= 8) 2 else 11
+
+        // 定义两种错误信息
+        val errorMsgInches = "Please input a valid height (0 - 11 in) to calculate your BMI accurately"
+        val errorMsgFull = "Please input a valid height (1' - 8'2'') to calculate your BMI accurately"
+
         when {
             raw.isEmpty() -> {
+                // 清空输入时，自动置 0，不显示提示
                 editText.setText("0")
                 viewModel.sendIntent(HomeIntent.InchesChanged(0))
             }
             raw.toIntOrNull() == null -> {
+                // 非法字符（如字母），恢复到上次有效值，显示常规英寸错误
                 editText.setText(viewModel.state.value.inchesInput.toString())
-                showToast("Please input a valid height (1' - 8'2'') to calculate your BMI accurately")
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsgInches)
             }
             else -> {
                 val value = raw.toInt()
                 val clamped = value.coerceIn(min, max)
                 editText.setText(clamped.toString())
+
                 if (value != clamped) {
-                    showToast("Please input a valid height (1' - 8'2'') to calculate your BMI accurately")
+                    // 数值被修正（超出范围），根据条件选择不同的错误信息
+                    val msg = if (feet == 8 && value > 2) errorMsgFull else errorMsgInches
+                    CommonBanner.show(requireActivity(), R.drawable.warning, msg)
                 }
                 viewModel.sendIntent(HomeIntent.InchesChanged(clamped))
             }
         }
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
 
     // ---------- Age RecyclerView (unchanged) ----------
     private fun setupAgeRecyclerView() {
@@ -871,7 +887,6 @@ class HomeFragment : Fragment() {
                 viewModel.effect.collect { effect ->
                     when (effect) {
                         is HomeEffect.NavigateToResult -> navigateToDisplay(effect.record)
-                        is HomeEffect.ShowError -> showToast(effect.message)
                     }
                 }
             }
@@ -966,5 +981,17 @@ class HomeFragment : Fragment() {
             }
         }
         return points.last().second
+    }
+    override fun onResume() {
+        super.onResume()
+        val prefs = requireContext().getSharedPreferences("app_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("show_delete_success", false)) {
+            prefs.edit().remove("show_delete_success").apply()
+            CommonBanner.show(
+                requireActivity(),
+                R.drawable.check_circle,
+                "Deleted successfully."
+            )
+        }
     }
 }

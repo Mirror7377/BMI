@@ -2,6 +2,7 @@ package com.example.bmi
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import com.example.bmi.databinding.ActivityMainBinding
 import com.example.bmi.ui.display.DisplayFragment
 import com.example.bmi.ui.home.HomeFragment
 import com.example.bmi.ui.statistics.StatisticsFragment
+import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch

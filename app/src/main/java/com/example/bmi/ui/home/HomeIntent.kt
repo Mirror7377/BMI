@@ -14,7 +14,7 @@ sealed class HomeIntent {
     data class WeightUnitChanged(val unit: WeightUnit) : HomeIntent()
 
     // 身高相关
-    data class HeightChanged(val value: Double) : HomeIntent()           // 用户手动输入（cm）
+    data class HeightCmChanged(val value: Double) : HomeIntent()           // 用户手动输入（cm）
     data class HeightUnitChanged(val unit: HeightUnit) : HomeIntent()
     data class FeetChanged(val feet: Int) : HomeIntent()                 // ft-in 模式修改英尺
     data class InchesChanged(val inches: Int) : HomeIntent()             // ft-in 模式修改英寸

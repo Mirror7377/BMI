@@ -158,7 +158,7 @@ class StatisticsViewModel @Inject constructor(
                 set(Calendar.MILLISECOND, 0)
             }
             val record = latestByDay[day]
-            val weight = record?.weightInput?.toFloat()
+            val weight = record?.weightKg?.toFloat()
             result.add(DayWeightData(date, weight))
         }
         return result
@@ -227,7 +227,7 @@ class StatisticsViewModel @Inject constructor(
                                 sumBmi += it
                                 validDays++
                             }
-                            record.weightInput?.toFloat()?.let {
+                            record.weightKg?.toFloat()?.let {
                                 sumWeight += it
                             }
                         }
@@ -242,8 +242,8 @@ class StatisticsViewModel @Inject constructor(
                     while (currentDay <= weekEnd) {
                         val key = currentDay.get(Calendar.YEAR) to currentDay.get(Calendar.DAY_OF_YEAR)
                         val record = dayMap[key]
-                        if (record?.weightInput != null) {
-                            weightSum += record.weightInput.toFloat()
+                        if (record?.weightKg != null) {
+                            weightSum += record.weightKg.toFloat()
                             weightValidDays++
                         }
                         currentDay.add(Calendar.DAY_OF_YEAR, 1)
@@ -369,7 +369,7 @@ class StatisticsViewModel @Inject constructor(
                     record?.let {
                         val cal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
                         val key = cal.get(Calendar.YEAR) to cal.get(Calendar.MONTH)
-                        it.weightInput?.toFloat()?.let { weight ->
+                        it.weightKg?.toFloat()?.let { weight ->
                             monthMap.getOrPut(key) { mutableListOf() }.add(weight)
                         }
                     }

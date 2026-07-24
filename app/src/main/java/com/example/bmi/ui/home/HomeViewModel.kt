@@ -39,7 +39,7 @@ class HomeViewModel @Inject constructor(
             HomeIntent.Init -> init()
             is HomeIntent.WeightChanged -> onWeightChanged(intent.value)
             is HomeIntent.WeightUnitChanged -> onWeightUnitChanged(intent.unit)
-            is HomeIntent.HeightChanged -> onHeightChanged(intent.value)
+            is HomeIntent.HeightCmChanged -> onHeightCmChanged(intent.value)
             is HomeIntent.HeightUnitChanged -> onHeightUnitChanged(intent.unit)
             is HomeIntent.FeetChanged -> onFeetChanged(intent.feet)
             is HomeIntent.InchesChanged -> onInchesChanged(intent.inches)
@@ -111,8 +111,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun onHeightChanged(value: Double) {
-        //只限定cm
+    private fun onHeightCmChanged(value: Double) {
+        //限定cm
         val clamped = value.coerceIn(1.0, 250.0)
         updateState {
             copy(
@@ -120,6 +120,7 @@ class HomeViewModel @Inject constructor(
                 heightInput = clamped
             )
         }
+        //todo 什么意思？
         refreshDisplayValues()
     }
 
@@ -268,7 +269,7 @@ class HomeViewModel @Inject constructor(
         }
 
 
-        // 更新时间显示
+        // 更新时间显示 todo什么?
         val timeDisplay = formatTime(state.timestamp, state.timeOfDay)
 
         updateState {
@@ -293,5 +294,4 @@ class HomeViewModel @Inject constructor(
 }
 sealed class HomeEffect {
     data class NavigateToResult(val record: BmiRecord) : HomeEffect()
-    data class ShowError(val message: String) : HomeEffect()
 }

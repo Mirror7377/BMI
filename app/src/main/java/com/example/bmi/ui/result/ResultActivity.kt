@@ -9,9 +9,11 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
@@ -33,6 +35,8 @@ import com.example.bmi.ui.home.enums.HeightUnit
 import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.utils.UnitConverter
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -415,22 +419,23 @@ class ResultActivity : BaseActivity() {
     // ----------  弹出层相关 ----------
     private fun showBmiLegendDialog(bmiLevel: BmiLevel, age: Int, gender: String) {
         val dialogBinding = DialogBmiLegendBinding.inflate(layoutInflater)
-        val dialog = Dialog(this)
+        val dialog = BottomSheetDialog(this)
         dialog.setContentView(dialogBinding.root)
 
-        val window = dialog.window
-        window?.setBackgroundDrawableResource(android.R.color.transparent)
-        window?.setGravity(Gravity.BOTTOM)
-        // 宽度固定 375dp，高度自适应 wrap_content
-        window?.setLayout(dpToPx(375f), WindowManager.LayoutParams.WRAP_CONTENT)
+        // Window 配置
+        dialog.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setGravity(Gravity.BOTTOM)
+            setLayout(dpToPx(375f), WindowManager.LayoutParams.WRAP_CONTENT)
+        }
 
-        // 判断是否为儿童（2~20岁）
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(true)
+
+        // 业务逻辑：标题、性别、仪表盘、图例
         val isChild = age in 2..20
-
-        // 1. 设置标题
         dialogBinding.tvDialogTitle.text = if (isChild) "BMI for Teenagers" else "BMI for Adults"
 
-        // 2. 设置年龄性别行
         val genderText = when (gender) {
             Gender.MALE.name -> "male"
             Gender.FEMALE.name -> "female"
@@ -443,17 +448,32 @@ class ResultActivity : BaseActivity() {
             dialogBinding.tvAgeGender.visibility = View.GONE
         }
 
-        // 3. 设置仪表盘配置（动态）
         val config = BmiConfigProvider.getConfig(age, gender)
         dialogBinding.bmiGaugeDialog.applyConfig(config)
         dialogBinding.bmiGaugeDialog.setShowPointer(false)
-
-        // 4. 应用图例高亮（动态隐藏/显示行，设置范围值）
         applyLegendHighlight(dialogBinding, bmiLevel, age, gender)
 
-        // 5. GOT IT 按钮
         dialogBinding.btnGotIt.setOnClickListener { dialog.dismiss() }
-        dialog.setCanceledOnTouchOutside(true)
+
+        // 获取 BottomSheet 并设置 Behavior
+        val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        bottomSheet?.let {
+            BottomSheetBehavior.from(it).apply {
+                state = BottomSheetBehavior.STATE_EXPANDED
+                skipCollapsed = true
+                isHideable = true
+                peekHeight = 0
+                addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                            dialog.dismiss()
+                        }
+                    }
+                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+                })
+            }
+        }
+
         dialog.show()
     }
 
@@ -628,9 +648,11 @@ class ResultActivity : BaseActivity() {
         dialog.setCancelable(true)
 
         dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
-        //todo 返回到home页面后弹出 toast显示已删除
         dialogBinding.tvDelete.setOnClickListener {
             dialog.dismiss()
+            //  保存删除成功标志到 SharedPreferences
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            prefs.edit().putBoolean("show_delete_success", true).apply()
             finish()
         }
         dialog.show()

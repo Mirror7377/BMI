@@ -27,6 +27,8 @@ import com.example.bmi.databinding.DialogLoginBinding
 import com.example.bmi.databinding.DialogLogoutBinding
 import com.example.bmi.databinding.DialogSyncIssueBinding
 import com.example.bmi.ui.feedback.FeedbackActivity
+import com.example.bmi.ui.language.LanguageActivity
+import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -49,10 +51,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // 返回按钮
         binding.ivBack.setOnClickListener { finish() }
 
-        // 点击第一个容器 -> 根据登录状态弹出不同弹窗
         binding.profileContainer.setOnClickListener {
             if (viewModel.state.value.isLoggedIn) {
                 showUserInfoDialog()
@@ -61,7 +61,10 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        // 同步数据图标
+        binding.tvLanguage.setOnClickListener {
+            startActivity(Intent(this, LanguageActivity::class.java))
+        }
+
         binding.ivExtraIcon.setOnClickListener {
             showSyncIssueDialog()
         }
@@ -73,11 +76,8 @@ class ProfileActivity : AppCompatActivity() {
         binding.tvRateUs.setOnClickListener {
             val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            // 检查是否有应用能处理该 Intent
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
-            } else {
-                Toast.makeText(this, "No browser available", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -95,42 +95,30 @@ class ProfileActivity : AppCompatActivity() {
     private fun renderState(state: ProfileState) {
         val isLoggedIn = state.isLoggedIn
 
-        // 未登录组（显示 Backup & Restore 等）
         binding.tvBackupRestore.isVisible = !isLoggedIn
         binding.tvSync.isVisible = !isLoggedIn
 
-        // 登录组（显示头像、姓名、邮箱）
         binding.loginGroup.isVisible = isLoggedIn
         if (isLoggedIn) {
             binding.tvNameLogin.text = state.userName
             binding.tvEmailLogin.text = state.userEmail
         }
 
-        // ====== 重要：两个图标始终显示 ======
-        binding.ivBackupIcon.isVisible = true   // 始终可见
-        binding.ivExtraIcon.isVisible = true    // 始终可见
+        binding.ivBackupIcon.isVisible = true
+        binding.ivExtraIcon.isVisible = true
 
-        // 动态切换 ivBackupIcon 的约束
         updateBackupIconConstraints(isLoggedIn)
     }
 
-    /**
-     * 动态修改 ivBackupIcon 的约束关系：
-     * - 未登录：对齐 tvBackupRestore
-     * - 登录后：对齐 tvNameLogin
-     */
     private fun updateBackupIconConstraints(isLoggedIn: Boolean) {
         val params = binding.ivBackupIcon.layoutParams as ConstraintLayout.LayoutParams
         if (isLoggedIn) {
-            // 登录状态：约束到 tvNameLogin
             params.startToEnd = binding.tvNameLogin.id
             params.topToTop = binding.tvNameLogin.id
             params.bottomToBottom = binding.tvNameLogin.id
-            // 清除可能冲突的旧约束
             params.startToStart = ConstraintLayout.LayoutParams.UNSET
             params.endToEnd = ConstraintLayout.LayoutParams.UNSET
         } else {
-            // 未登录状态：约束到 tvBackupRestore
             params.startToEnd = binding.tvBackupRestore.id
             params.topToTop = binding.tvBackupRestore.id
             params.bottomToBottom = binding.tvBackupRestore.id
@@ -138,7 +126,7 @@ class ProfileActivity : AppCompatActivity() {
             params.endToEnd = ConstraintLayout.LayoutParams.UNSET
         }
         binding.ivBackupIcon.layoutParams = params
-        binding.ivBackupIcon.requestLayout() // 刷新布局
+        binding.ivBackupIcon.requestLayout()
     }
 
     private fun observeEffect() {
@@ -156,11 +144,8 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    // ---------- 弹窗方法（使用 ViewBinding） ----------
+    // ---------- 弹窗方法 ----------
 
-    /**
-     * 登录弹窗（含 Log in 和 Cancel）
-     */
     private fun showLoginDialog() {
         val dialogBinding = DialogLoginBinding.inflate(layoutInflater)
         val dialog = Dialog(this).apply {
@@ -176,8 +161,14 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         dialogBinding.btnLogin.setOnClickListener {
-            viewModel.handleIntent(ProfileIntent.Login)
             dialog.dismiss()
+            // 直接显示登录成功 Banner
+            CommonBanner.show(
+                this,
+                R.drawable.login,
+                "Logged in successfully."
+            )
+            viewModel.handleIntent(ProfileIntent.Login)
         }
         dialogBinding.btnCancel.setOnClickListener {
             dialog.dismiss()
@@ -186,9 +177,6 @@ class ProfileActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    /**
-     * 用户信息弹窗（含 Log out 和 Cancel）
-     */
     private fun showUserInfoDialog() {
         val dialogBinding = DialogLogoutBinding.inflate(layoutInflater)
         val dialog = Dialog(this).apply {
@@ -204,8 +192,14 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         dialogBinding.btnLogout.setOnClickListener {
-            viewModel.handleIntent(ProfileIntent.Logout)
             dialog.dismiss()
+            // 直接显示登出成功 Banner
+            CommonBanner.show(
+                this,
+                R.drawable.logout,
+                "Logged out successfully."
+            )
+            viewModel.handleIntent(ProfileIntent.Logout)
         }
         dialogBinding.btnCancel.setOnClickListener {
             dialog.dismiss()
@@ -214,9 +208,6 @@ class ProfileActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    /**
-     * 同步问题弹窗
-     */
     private fun showSyncIssueDialog() {
         val dialogBinding = DialogSyncIssueBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(this).apply {
@@ -224,10 +215,8 @@ class ProfileActivity : AppCompatActivity() {
             setCancelable(true)
         }.create()
 
-        // 设置背景透明（让 CardView 圆角显示）
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // 组合文本：前半部分蓝色加粗，后半部分默认（黑色常规）
         val fullText = "The function will be back once the issue is solved. We’d greatly appreciate your patience."
         val spannable = SpannableString(fullText)
         val firstPart = "The function will be back once the issue is solved."
@@ -247,11 +236,11 @@ class ProfileActivity : AppCompatActivity() {
 
         dialogBinding.tvDialogCombined.text = spannable
 
-        // DONE 按钮点击关闭弹窗
         dialogBinding.btnDialogDone.setOnClickListener {
             dialog.dismiss()
         }
 
         dialog.show()
     }
+
 }

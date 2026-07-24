@@ -9,8 +9,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bmi.BaseActivity
+import com.example.bmi.R
 import com.example.bmi.databinding.ActivityRecentBinding
 import com.example.bmi.ui.historydetai.HistoryDetailActivity
+import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -52,5 +54,18 @@ class RecentActivity : BaseActivity() {
 
         // 返回
         binding.ivBack.setOnClickListener { finish() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("show_delete_success", false)) {
+            prefs.edit().remove("show_delete_success").apply()
+            CommonBanner.show(
+                this,
+                R.drawable.check_circle,
+                "Deleted successfully."
+            )
+        }
     }
 }

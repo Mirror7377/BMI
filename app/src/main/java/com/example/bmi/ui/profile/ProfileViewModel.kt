@@ -48,7 +48,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
                 userName = "Cassie",
                 userEmail = "cassiexiao@gmail.com"
             )
-            _effect.emit(ProfileEffect.ShowToast("Login successful"))
+           // _effect.emit(ProfileEffect.ShowToast("Login successful"))
         }
     }
 
@@ -59,7 +59,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
                 userName = "",
                 userEmail = ""
             )
-            _effect.emit(ProfileEffect.ShowToast("Logged out"))
+            //_effect.emit(ProfileEffect.ShowToast("Logged out"))
         }
     }
 }

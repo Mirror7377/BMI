@@ -657,7 +657,7 @@ class WeightChartView @JvmOverloads constructor(
         val points = getDataPoints(startIdx, visibleData)
         val point = points.find { it.dataIndex == selectedDataIndex } ?: return
 
-        val label = String.format("%.1f", selectedWeight)
+        val label = String.format("%.1f kg", selectedWeight)
 
         //=====================
         // 容器参数

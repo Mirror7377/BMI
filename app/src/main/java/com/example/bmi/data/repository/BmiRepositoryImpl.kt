@@ -68,4 +68,11 @@ class BmiRepositoryImpl @Inject constructor(
     ): List<BmiRecord> {
         return dao.getRecordsBetween(startTime, endTime)
     }
+
+    //获取历史数据
+    override suspend fun getAllSortedRecords(): Flow<List<BmiRecord>> {
+        return dao.getAllSortedRecords()
+    }
+
+
 }

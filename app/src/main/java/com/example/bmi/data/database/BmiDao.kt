@@ -16,6 +16,7 @@ interface BmiDao {
     @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC LIMIT 1")
     fun getLatestRecord(): Flow<BmiRecord?>
 
+    //最近记录的卡片排序
     @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC, createTime DESC")
     fun getAllRecords(): Flow<List<BmiRecord>>
 
@@ -27,7 +28,7 @@ interface BmiDao {
     @Query("SELECT EXISTS(SELECT 1 FROM bmi_records)")
     suspend fun hasAnyRecord(): Boolean
 
-    // 删除所有记录（用于测试或清空功能）
+    // 删除所有记录
     @Query("DELETE FROM bmi_records")
     suspend fun deleteAll()
 
@@ -43,19 +44,20 @@ interface BmiDao {
     suspend fun getRecordCount(): Int
 
     @Query("""
-    SELECT * FROM bmi_records 
-    ORDER BY
-        CASE timeOfDay
-            WHEN 'Morning' THEN 1
-            WHEN 'Afternoon' THEN 2
-            WHEN 'Evening' THEN 3
-            WHEN 'Night' THEN 4
-            ELSE 0
-        END DESC,
-        timestamp DESC
+    SELECT * FROM bmi_records
+ORDER BY 
+    DATE(timestamp / 1000, 'unixepoch') DESC,
+    CASE timeOfDay
+        WHEN 'Morning' THEN 1
+        WHEN 'Afternoon' THEN 2
+        WHEN 'Evening' THEN 3
+        WHEN 'Night' THEN 4
+        ELSE 0
+    END DESC;
 """)
     fun getAllSortedRecords(): Flow<List<BmiRecord>>
 
+    //todo 统计当天的最后一条
     @Query("""
     SELECT * FROM bmi_records 
     WHERE timestamp BETWEEN :startTime AND :endTime
