@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#EAEAEE">
 
-    <!-- ========== 顶部导航栏（未改动） ========== -->
+    <!-- ========== 顶部导航栏 ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navBar"
         android:layout_width="0dp"
