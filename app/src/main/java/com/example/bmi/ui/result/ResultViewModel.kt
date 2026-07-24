@@ -64,7 +64,6 @@ class ResultViewModel @Inject constructor(
             val record = BmiRecord(
                 weightInput = currentState.weightInput,
                 weightUnit = currentState.weightUnit,
-                heightInput = currentState.heightInput,
                 heightUnit = currentState.heightUnit,
                 feetInput = currentState.feet,
                 inchesInput = currentState.inches,
@@ -92,7 +91,6 @@ class ResultViewModel @Inject constructor(
                 bmi = record.bmi,
                 weightInput = record.weightInput,
                 weightUnit = record.weightUnit,
-                heightInput = record.heightInput,
                 heightUnit = record.heightUnit,
                 feet = record.feetInput ?: 0,
                 inches = record.inchesInput ?: 0,

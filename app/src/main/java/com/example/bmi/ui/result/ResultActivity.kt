@@ -340,7 +340,7 @@ class ResultActivity : BaseActivity() {
             val diffValue = if (userWeightShow < stdMinShow) {
                 stdMinShow - userWeightShow
             } else {
-                stdMaxShow - userWeightShow
+                userWeightShow - stdMaxShow
             }
             val diffSign = if (userWeightShow < stdMinShow) "+" else "-"
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
@@ -681,8 +681,9 @@ class ResultActivity : BaseActivity() {
 
         // 点击跳转
         cardView.setOnClickListener {
-            val intent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}"))
+            val url = "https://play.google.com/store/apps/details?id=${app.packageName}"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)  // 使浏览器在新任务中打开
             startActivity(intent)
         }
     }

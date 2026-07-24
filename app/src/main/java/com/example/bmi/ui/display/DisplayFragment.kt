@@ -136,12 +136,13 @@ class DisplayFragment : Fragment() {
         val weightText = when (record.weightUnit) {
             WeightUnit.KG.name -> String.format("%.2f kg", record.weightInput)
             WeightUnit.LB.name -> String.format("%.2f lb", record.weightInput)
-            else -> String.format("%.2f kg", record.weightInput)
+            else -> {}
         }
         val heightText = when (record.heightUnit) {
-            HeightUnit.CM.name -> String.format("%.1f cm", record.heightInput)
+            HeightUnit.CM.name -> String.format("%.1f cm", record.heightCm)
             HeightUnit.FT_IN.name -> "${record.feetInput ?: 0} ft ${record.inchesInput ?: 0} in"
-            else -> String.format("%.1f cm", record.heightInput)
+
+            else -> {}
         }
         val genderText = when (record.gender) {
             Gender.MALE.name -> "Male"

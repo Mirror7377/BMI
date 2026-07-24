@@ -4,6 +4,7 @@ package com.example.bmi.data.database
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
@@ -75,4 +76,8 @@ ORDER BY
 
     @Query("SELECT * FROM bmi_records WHERE timestamp BETWEEN :start AND :end ORDER BY timestamp ASC")
     suspend fun getRecordsBetween(start: Long, end: Long): List<BmiRecord>
+
+    //插入json解析后的数据
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(records: List<BmiRecord>)
 }

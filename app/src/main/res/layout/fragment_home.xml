@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EAEAEE">
+    android:background="@color/bg_gray">
 
     <!-- ========== 顶部导航栏 ========== -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,7 +18,7 @@
         <TextView
             android:id="@+id/tvCalculator"
             android:layout_width="135dp"
-            android:layout_height="24dp"
+            android:layout_height="wrap_content"
             android:text="@string/calculator"
             android:textColor="#000"
             android:textSize="24sp"
@@ -58,8 +58,8 @@
         android:id="@+id/tvWeight"
         android:layout_width="56.5dp"
         android:layout_height="17dp"
-        android:text="Weight"
-        android:textColor="#000000"
+        android:text="@string/weight"
+        android:textColor="@color/text_black"
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
@@ -75,8 +75,8 @@
         android:id="@+id/tvHeight"
         android:layout_width="48dp"
         android:layout_height="17dp"
-        android:text="Height"
-        android:textColor="#000000"
+        android:text="@string/height"
+        android:textColor="@color/text_black"
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
@@ -95,7 +95,7 @@
         android:layout_marginTop="134dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/heightGroupContainer"
@@ -108,8 +108,7 @@
             android:layout_height="37dp"
             android:layout_marginTop="16dp"
             android:layout_marginStart="35dp"
-            android:text="140.00"
-            android:textColor="#000000"
+            android:textColor="@color/text_black"
             android:textSize="25sp"
             android:fontFamily="@font/montserrat_extrabold"
             android:textAlignment="center"
@@ -148,7 +147,7 @@
                 android:layout_height="68dp"
                 app:cardCornerRadius="15dp"
                 app:cardElevation="0dp"
-                android:backgroundTint="#FFFFFF"
+                android:backgroundTint="@color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
@@ -162,8 +161,7 @@
                         android:id="@+id/etFtValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5"
-                        android:textColor="#000000"
+                        android:textColor="@color/text_black"
                         android:textSize="30sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_extrabold"
@@ -182,8 +180,8 @@
                         android:layout_height="wrap_content"
                         android:layout_toEndOf="@id/etFtValue"
                         android:layout_alignBaseline="@id/etFtValue"
-                        android:text="'"
-                        android:textColor="#000000"
+                        android:text="@string/yh"
+                        android:textColor="@color/text_black"
                         android:textSize="30sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_extrabold"
@@ -199,7 +197,7 @@
                 android:layout_marginStart="5.5dp"
                 app:cardCornerRadius="15dp"
                 app:cardElevation="0dp"
-                android:backgroundTint="#FFFFFF"
+                android:backgroundTint="@color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ftContainer">
 
@@ -213,8 +211,7 @@
                         android:id="@+id/etInValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="7"
-                        android:textColor="#000000"
+                        android:textColor="@color/text_black"
                         android:textSize="30sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_extrabold"
@@ -233,8 +230,8 @@
                         android:layout_height="wrap_content"
                         android:layout_toEndOf="@id/etInValue"
                         android:layout_alignBaseline="@id/etInValue"
-                        android:text="&quot;"
-                        android:textColor="#000000"
+                        android:text="@string/quot"
+                        android:textColor="@color/text_black"
                         android:textSize="30sp"
                         android:textStyle="bold"
                         android:fontFamily="@font/montserrat_extrabold"
@@ -252,7 +249,7 @@
             android:visibility="gone"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="@color/white"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
@@ -262,8 +259,7 @@
                 android:layout_height="37dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginStart="41.5dp"
-                android:text="170.0"
-                android:textColor="#000000"
+                android:textColor="@color/text_black"
                 android:textSize="30sp"
                 android:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
@@ -278,7 +274,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ========== 单位切换容器（链条居中） ========== -->
+    <!-- ========== 单位切换容器 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/unitSwitchContainer"
         android:layout_width="160dp"
@@ -286,7 +282,7 @@
         android:layout_marginTop="212dp"
         app:cardCornerRadius="18dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#F5F5F7"
+        android:backgroundTint="@color/gender"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/heightUnitSwitchContainer"
@@ -297,6 +293,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- 添加 50% 垂直参考线 -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_weight_units"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <!-- 背景滑块 -->
             <View
                 android:id="@+id/selectedUnitBg"
                 android:layout_width="90dp"
@@ -307,39 +312,41 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="0dp" />
 
+            <!-- 左单位：Lb -->
             <TextView
                 android:id="@+id/tvUnitLb"
-                android:layout_width="40dp"
+                android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="8.5dp"
-                android:layout_marginStart="25dp"
-                android:text="lb"
-                android:textColor="#000000"
+                android:text="@string/lb"
+                android:textColor="@color/text_black"
                 android:textSize="16sp"
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
-                android:textAlignment="center"
                 android:gravity="center"
                 android:includeFontPadding="false"
+                android:translationX="5dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/guideline_weight_units" />
 
+            <!-- 右单位：Kg -->
             <TextView
                 android:id="@+id/tvUnitKg"
-                android:layout_width="40dp"
+                android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="8.5dp"
-                android:layout_marginStart="95dp"
-                android:text="kg"
-                android:textColor="#000000"
+                android:text="@string/kg"
+                android:textColor="@color/text_black"
                 android:textSize="16sp"
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
-                android:textAlignment="center"
                 android:gravity="center"
                 android:includeFontPadding="false"
+                android:translationX="-5dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="@id/guideline_weight_units"
+                app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -352,7 +359,7 @@
         android:layout_marginStart="15dp"
         app:cardCornerRadius="18dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#F5F5F7"
+        android:backgroundTint="@color/gender"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/unitSwitchContainer"
         app:layout_constraintEnd_toEndOf="parent">
@@ -361,6 +368,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- 添加 50% 垂直参考线 -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_height_units"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <!-- 背景滑块 -->
             <View
                 android:id="@+id/selectedUnitBgHeight"
                 android:layout_width="90dp"
@@ -371,44 +387,46 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="0dp" />
 
+            <!-- 左单位：Ft_In -->
             <TextView
                 android:id="@+id/tvUnitFtIn"
-                android:layout_width="40dp"
+                android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="8.5dp"
-                android:layout_marginStart="25dp"
-                android:text="ft-in"
-                android:textColor="#000000"
+                android:text="@string/ft_in"
+                android:textColor="@color/text_black"
                 android:textSize="16sp"
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
-                android:textAlignment="center"
                 android:gravity="center"
                 android:includeFontPadding="false"
+                android:translationX="5dp"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/guideline_height_units" />
 
+            <!-- 右单位：Cm -->
             <TextView
                 android:id="@+id/tvUnitCm"
-                android:layout_width="30dp"
+                android:layout_width="0dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="8.5dp"
-                android:layout_marginStart="95dp"
-                android:text="cm"
-                android:textColor="#000000"
+                android:text="@string/cm"
+                android:textColor="@color/text_black"
                 android:textSize="16sp"
                 app:fontFamily="@font/montserrat_extrabold"
                 android:letterSpacing="-0.00937"
-                android:textAlignment="center"
                 android:gravity="center"
+                android:translationX="-5dp"
                 android:includeFontPadding="false"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="@id/guideline_height_units"
+                app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== 日期 / 时段选择容器（链条居中） ========== -->
+    <!-- ========== 日期 选择容器 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/datePickerContainer"
         android:layout_width="160dp"
@@ -416,7 +434,7 @@
         android:layout_marginTop="310dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/white"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -431,8 +449,7 @@
             android:layout_height="match_parent"
             android:fontFamily="@font/montserrat_extrabold"
             android:gravity="center"
-            android:text="Today"
-            android:textColor="#000000"
+            android:textColor="@color/text_black"
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 
@@ -444,7 +461,7 @@
         android:layout_marginStart="15dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/white"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
@@ -456,8 +473,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="Morning"
-            android:textColor="#000000"
+            android:textColor="@color/text_black"
             android:textSize="20sp"
             android:fontFamily="@font/montserrat_extrabold" />
     </androidx.cardview.widget.CardView>
@@ -467,8 +483,8 @@
         android:id="@+id/tvTime"
         android:layout_width="35dp"
         android:layout_height="17dp"
-        android:text="Time"
-        android:textColor="#000000"
+        android:text="@string/time"
+        android:textColor="@color/text_black"
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
@@ -483,8 +499,8 @@
         android:id="@+id/tvAge"
         android:layout_width="28dp"
         android:layout_height="17dp"
-        android:text="Age"
-        android:textColor="#000000"
+        android:text="@string/age"
+        android:textColor="@color/text_black"
         android:textSize="14sp"
         app:fontFamily="@font/montserrat_regular"
         android:textStyle="normal"
@@ -495,7 +511,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 年龄滚轮容器（已居中） ========== -->
+    <!-- ========== 年龄滚轮容器 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/valuesContainer"
         android:layout_width="335dp"
@@ -503,7 +519,7 @@
         android:layout_marginTop="432dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -543,7 +559,7 @@
         android:layout_marginTop="519dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        app:cardBackgroundColor="#FFFFFF"
+        app:cardBackgroundColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/genderContainer2"
         app:layout_constraintTop_toTopOf="parent"
@@ -568,8 +584,8 @@
                 android:id="@+id/genderText1"
                 android:layout_width="34dp"
                 android:layout_height="17dp"
-                android:text="Male"
-                android:textColor="#000000"
+                android:text="@string/male"
+                android:textColor="@color/text_black"
                 android:textSize="14sp"
                 app:fontFamily="@font/montserrat_regular"
                 android:textStyle="normal"
@@ -603,7 +619,7 @@
         android:layout_marginStart="15dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
-        app:cardBackgroundColor="#FFFFFF"
+        app:cardBackgroundColor="@color/white"
         app:layout_constraintStart_toEndOf="@+id/genderContainer1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -626,8 +642,8 @@
                 android:id="@+id/genderText2"
                 android:layout_width="52dp"
                 android:layout_height="17dp"
-                android:text="Female"
-                android:textColor="#000000"
+                android:text="@string/female"
+                android:textColor="@color/text_black"
                 android:textSize="14sp"
                 app:fontFamily="@font/montserrat_regular"
                 android:textStyle="normal"
@@ -653,13 +669,13 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ========== Calculate 按钮（已居中） ========== -->
+    <!-- ========== Calculate 按钮 ========== -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnCalculate"
         android:layout_width="345dp"
         android:layout_height="57.5dp"
         android:layout_marginBottom="20dp"
-        android:backgroundTint="#3659CF"
+        android:backgroundTint="@color/bg_rounded_blue"
         app:cardCornerRadius="28.75dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -670,8 +686,8 @@
             android:id="@+id/tvCalculate"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="CALCULATE"
-            android:textColor="#FFFFFF"
+            android:text="@string/calculate"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:gravity="center"
             android:includeFontPadding="false"
@@ -683,7 +699,7 @@
         android:id="@+id/bottomNavBar"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -694,7 +710,7 @@
             android:id="@+id/navIcon1"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:background="#3659CF"
+            android:background="@color/bg_rounded_blue"
             android:layout_marginTop="10.5dp"
             android:layout_marginStart="60dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -704,7 +720,7 @@
             android:id="@+id/navIcon2"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:background="#3659CF"
+            android:background="@color/bg_rounded_blue"
             android:layout_marginTop="10.5dp"
             android:layout_marginStart="179dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -714,7 +730,7 @@
             android:id="@+id/navIcon3"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:background="#3659CF"
+            android:background="@color/bg_rounded_blue"
             android:layout_marginTop="10.5dp"
             android:layout_marginStart="295dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -726,8 +742,8 @@
             android:layout_height="13dp"
             android:layout_marginTop="37.5dp"
             android:layout_marginStart="42dp"
-            android:text="Calculator"
-            android:textColor="#000000"
+            android:text="@string/calculator"
+            android:textColor="@color/text_black"
             android:textSize="12sp"
             app:fontFamily="@font/montserrat_extrabold"
             android:textStyle="normal"
@@ -745,8 +761,8 @@
             android:layout_height="13dp"
             android:layout_marginTop="37.5dp"
             android:layout_marginStart="179dp"
-            android:text="BMI"
-            android:textColor="#000000"
+            android:text="@string/bmi"
+            android:textColor="@color/text_black"
             android:textSize="12sp"
             app:fontFamily="@font/montserrat_extrabold"
             android:textStyle="normal"
@@ -764,8 +780,8 @@
             android:layout_height="13dp"
             android:layout_marginTop="37.5dp"
             android:layout_marginStart="280.5dp"
-            android:text="Statistics"
-            android:textColor="#000000"
+            android:text="@string/statistics"
+            android:textColor="@color/text_black"
             android:textSize="12sp"
             app:fontFamily="@font/montserrat_extrabold"
             android:textStyle="normal"
@@ -776,269 +792,6 @@
             android:includeFontPadding="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- ========== 底部日期弹窗（未改动） ========== -->
-    <View
-        android:id="@+id/datePickerMask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#80000000"
-        android:visibility="gone"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/datePickerBottomSheet"
-        android:layout_width="375dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_date_picker_bottom"
-        android:clipChildren="false"
-        android:visibility="gone"
-        android:paddingBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/tvDatePickerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:text="DATE"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:letterSpacing="-0.00935"
-            android:textAllCaps="true"
-            android:gravity="start|center_vertical"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="20dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <LinearLayout
-            android:id="@+id/datePickerPickerContainer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvDatePickerTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <!-- 月份 -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvMonth"
-                android:layout_width="0dp"
-                android:layout_height="315dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none" />
-
-            <!-- 日期 -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvDay"
-                android:layout_width="0dp"
-                android:layout_height="315dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none" />
-
-            <!-- 年份 -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvYear"
-                android:layout_width="0dp"
-                android:layout_height="315dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none" />
-        </LinearLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/btnDateCancel"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="27.5dp"
-            app:cardElevation="0dp"
-            android:backgroundTint="#F1F1F1"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toBottomOf="@id/datePickerPickerContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnDateDone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="CANCEL"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:fontFamily="@font/montserrat_extrabold"
-                android:letterSpacing="-0.00939"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_gravity="center" />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/btnDateDone"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="20dp"
-            app:cardCornerRadius="27.5dp"
-            app:cardElevation="0dp"
-            android:backgroundTint="#3659CF"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toBottomOf="@id/datePickerPickerContainer"
-            app:layout_constraintStart_toEndOf="@id/btnDateCancel"
-            app:layout_constraintEnd_toEndOf="parent">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="DONE"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:fontFamily="@font/montserrat_extrabold"
-                android:letterSpacing="-0.00939"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_gravity="center" />
-        </androidx.cardview.widget.CardView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- ========== 底部时段弹窗（未改动） ========== -->
-    <View
-        android:id="@+id/timePickerMask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#80000000"
-        android:visibility="gone"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/timePickerBottomSheet"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_date_picker_bottom"
-        android:clipChildren="false"
-        android:visibility="gone"
-        android:paddingBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/tvTimePickerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:text="TIME"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:fontFamily="@font/montserrat_extrabold"
-            android:letterSpacing="-0.00935"
-            android:textAllCaps="true"
-            android:gravity="start|center_vertical"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="20dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <FrameLayout
-            android:id="@+id/timePickerContainer"
-            android:layout_width="120dp"
-            android:layout_height="315dp"
-            android:clipChildren="false"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvTimePickerTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvTimePicker"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:scrollbars="none" />
-
-
-        </FrameLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/btnTimeCancel"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="27.5dp"
-            app:cardElevation="0dp"
-            android:backgroundTint="#F1F1F1"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toBottomOf="@id/timePickerContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnTimeDone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="CANCEL"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:fontFamily="@font/montserrat_extrabold"
-                android:letterSpacing="-0.00939"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_gravity="center" />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/btnTimeDone"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="20dp"
-            app:cardCornerRadius="27.5dp"
-            app:cardElevation="0dp"
-            android:backgroundTint="#3659CF"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toBottomOf="@id/timePickerContainer"
-            app:layout_constraintStart_toEndOf="@id/btnTimeCancel"
-            app:layout_constraintEnd_toEndOf="parent">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="DONE"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:fontFamily="@font/montserrat_extrabold"
-                android:letterSpacing="-0.00939"
-                android:textAllCaps="true"
-                android:gravity="center"
-                android:layout_gravity="center" />
-        </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -301,7 +301,7 @@ class HistoryDetailActivity : BaseActivity() {
             val diffValue = if (userWeightShow < stdMinShow) {
                 stdMinShow - userWeightShow
             } else {
-                stdMaxShow - userWeightShow
+                userWeightShow - stdMaxShow
             }
             val diffSign = if (userWeightShow < stdMinShow) "+" else "-"
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
@@ -338,16 +338,20 @@ class HistoryDetailActivity : BaseActivity() {
 
         // 业务逻辑：标题、性别、仪表盘、图例
         val isChild = age in 2..20
-        dialogBinding.tvDialogTitle.text = if (isChild) "BMI for Teenagers" else "BMI for Adults"
+        dialogBinding.tvDialogTitle.text = if (isChild) {
+            getString(R.string.bmi_for_teenagers)
+        } else {
+            getString(R.string.bmi_for_adults)
+        }
 
         val genderText = when (gender) {
-            Gender.MALE.name -> "male"
-            Gender.FEMALE.name -> "female"
-            else -> "male"
+            Gender.MALE.name -> getString(R.string.male)
+            Gender.FEMALE.name -> getString(R.string.female)
+            else -> getString(R.string.male)
         }
         if (isChild) {
             dialogBinding.tvAgeGender.visibility = View.VISIBLE
-            dialogBinding.tvAgeGender.text = "$age years old ($genderText)"
+            dialogBinding.tvAgeGender.text = getString(R.string.age_gender_format, age, genderText)
         } else {
             dialogBinding.tvAgeGender.visibility = View.GONE
         }
@@ -555,7 +559,9 @@ class HistoryDetailActivity : BaseActivity() {
         ratingTextView.text = String.format("%.1f", app.rating)
 
         cardView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}"))
+            val url = "https://play.google.com/store/apps/details?id=${app.packageName}"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)  // 使浏览器在新任务中打开
             startActivity(intent)
         }
     }

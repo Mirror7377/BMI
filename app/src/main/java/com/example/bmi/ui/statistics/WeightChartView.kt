@@ -510,8 +510,15 @@ class WeightChartView @JvmOverloads constructor(
     }
 
     // ========== 横坐标绘制（DAY/WEEK 显示日，MONTH 显示月数字） ==========
+
     private fun drawXLabels(canvas: Canvas, startIdx: Int, visibleData: List<DayWeightData>) {
         val dateY = viewHeight - dpToPx(17.5f)
+        textPaint.textAlign = Paint.Align.CENTER
+
+        // 计算当前可见区域在数据坐标系中的范围（canvas 已平移 -scrollOffset）
+        val visibleLeft = scrollOffset + xStart
+        val visibleRight = scrollOffset + viewWidth
+
         for (i in visibleData.indices) {
             val dataIndex = startIdx + i
             if (dataIndex >= allData.size) break
@@ -520,10 +527,19 @@ class WeightChartView @JvmOverloads constructor(
             val x = xStart + dataIndex * xInterval
             val label = when (chartMode) {
                 ChartMode.DAY, ChartMode.WEEK -> data.dayOfMonth.toString()
-                ChartMode.MONTH -> (data.month + 1).toString()  // 1~12
+                ChartMode.MONTH -> (data.month + 1).toString()
             }
-            canvas.drawText(label, x, dateY, textPaint)
+
+            // 检查标签是否完全位于可见区域内
+            val labelWidth = textPaint.measureText(label)
+            val left = x - labelWidth / 2
+            val right = x + labelWidth / 2
+            if (left >= visibleLeft && right <= visibleRight) {
+                canvas.drawText(label, x, dateY, textPaint)
+            }
         }
+
+        textPaint.textAlign = Paint.Align.LEFT
     }
 
     // ========== 月份/年份标签绘制 ==========

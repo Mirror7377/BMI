@@ -513,20 +513,29 @@ class BmiChartView @JvmOverloads constructor(
     }
 
     // ===== 横坐标（支持 Day / Week / Month） =====
+    // 在 BmiChartView.kt 中替换 drawXLabels 方法
     private fun drawXLabels(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
         val dateY = viewHeight - dpToPx(17.5f)
+        textPaint.textAlign = Paint.Align.CENTER
+        val visibleLeft = scrollOffset + xStart
+        val visibleRight = scrollOffset + viewWidth
         for (i in visibleData.indices) {
             val dataIndex = startIdx + i
             if (dataIndex >= allData.size) break
             val data = allData[dataIndex]
-
             val x = xStart + dataIndex * xInterval
             val label = when (chartMode) {
                 ChartMode.DAY, ChartMode.WEEK -> data.dayOfMonth.toString()
-                ChartMode.MONTH -> (data.month + 1).toString()  // 1~12
+                ChartMode.MONTH -> (data.month + 1).toString()
             }
-            canvas.drawText(label, x, dateY, textPaint)
+            val labelWidth = textPaint.measureText(label)
+            val left = x - labelWidth / 2
+            val right = x + labelWidth / 2
+            if (left >= visibleLeft && right <= visibleRight) {
+                canvas.drawText(label, x, dateY, textPaint)
+            }
         }
+        textPaint.textAlign = Paint.Align.LEFT
     }
 
     // ===== 月份/年份标签（DAY/WEEK 显示月缩写，MONTH 显示年份） =====

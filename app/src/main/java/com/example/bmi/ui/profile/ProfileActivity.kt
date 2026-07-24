@@ -1,7 +1,9 @@
 package com.example.bmi.ui.profile
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
@@ -21,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.bmi.BaseActivity
 import com.example.bmi.R
 import com.example.bmi.databinding.ActivityProfileBinding
 import com.example.bmi.databinding.DialogLoginBinding
@@ -31,12 +34,15 @@ import com.example.bmi.ui.language.LanguageActivity
 import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @AndroidEntryPoint
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
+
+    val REQUEST_LANGUAGE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,10 +68,18 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.tvLanguage.setOnClickListener {
-            startActivity(Intent(this, LanguageActivity::class.java))
+            val intent = Intent(this, LanguageActivity::class.java)
+            startActivityForResult(intent, REQUEST_LANGUAGE)
         }
 
         binding.ivExtraIcon.setOnClickListener {
+            try {
+                val jsonString = assets.open("sample_records.json")
+                    .bufferedReader().use { it.readText() }
+                viewModel.handleIntent(ProfileIntent.ImportJson(jsonString))
+            } catch (e: Exception) {
+                Toast.makeText(this, "Failed to load sample data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             showSyncIssueDialog()
         }
 
@@ -138,6 +152,7 @@ class ProfileActivity : AppCompatActivity() {
                             Toast.makeText(this@ProfileActivity, effect.message, Toast.LENGTH_SHORT).show()
                         }
                         is ProfileEffect.NavigateBack -> finish()
+                        is ProfileEffect.Success -> dialogSuccess()
                     }
                 }
             }
@@ -207,7 +222,6 @@ class ProfileActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
     private fun showSyncIssueDialog() {
         val dialogBinding = DialogSyncIssueBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(this).apply {
@@ -241,6 +255,15 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+
+    fun dialogSuccess(){
+        CommonBanner.show(
+            this,
+            R.drawable.check_circle,
+            "import records successfully."
+        )
     }
 
 }

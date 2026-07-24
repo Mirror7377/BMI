@@ -69,7 +69,7 @@ class StatisticsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.monthData.collect { data ->
-                    if (currentMode == ChartMode.DAY && data.isNotEmpty()) {
+                    if (currentMode == ChartMode.DAY) {
                         binding.chartView.setMode(BmiChartView.ChartMode.DAY)
                         binding.chartView.setData(data)
                     }
@@ -142,17 +142,9 @@ class StatisticsFragment : Fragment() {
         binding.tvDay.setOnClickListener {
             moveBgTo(OFFSET_DAY)
             currentMode = ChartMode.DAY
-
-            // 1. 立即用缓存数据刷新图表
-            binding.chartView.setMode(BmiChartView.ChartMode.DAY)
-            binding.chartView.setData(viewModel.getCurrentDayBmiData())
-
-            binding.weightChartView.setMode(WeightChartView.ChartMode.DAY)
-            binding.weightChartView.setData(viewModel.getCurrentDayWeightData())
-
-            // 2. 后台重新加载最新数据（完成后 Flow 会自动再次刷新）
-            viewModel.loadMonthData(currentYear, currentMonth)
-            viewModel.loadWeightMonthData(currentYear, currentMonth)
+            // 只触发加载，不手动设置图表（Flow 会自动更新）
+            viewModel.loadDayRangeData(60)
+            viewModel.loadWeightDayRangeData(60)
         }
 
         binding.tvWeek.setOnClickListener {

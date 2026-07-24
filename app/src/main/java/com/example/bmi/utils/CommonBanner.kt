@@ -9,7 +9,7 @@ import com.example.bmi.databinding.CommonBannerBinding
 object CommonBanner {
 
     fun show(
-        activity: Activity,
+        activity: Activity,//当前的 Activity 实例
         @DrawableRes iconRes: Int,
         message: String
     ) {
@@ -25,19 +25,14 @@ object CommonBanner {
         binding.ivIcon.setImageResource(iconRes)
         binding.tvMessage.text = message
 
+        //将 Banner 视图添加到 Activity 的根布局中，使其显示在屏幕最上层。
         root.addView(binding.root)
 
         binding.layoutSuccess.post {
 
-            // 直接显示
-            binding.layoutSuccess.translationY = 0f
-            binding.layoutSuccess.alpha = 1f
-
             binding.layoutSuccess.postDelayed({
-
-                // 到时间直接移除（没有退出动画）
+                // 到时间直接移除
                 root.removeView(binding.root)
-
             }, 2000)
         }
     }

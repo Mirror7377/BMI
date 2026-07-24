@@ -12,5 +12,8 @@
     <color name="rating_star">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="gender">#F5F5F7</color>
-
+    <color name="line">#D4D4D5</color>
+    <color name="bg_h">#444444</color>
+    <color name="bg_fg">#DDDDDD</color>
+    <color name="bg_text">#ABABAD</color>
 </resources>

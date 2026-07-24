@@ -9,7 +9,7 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <!-- BMI 数值（大号） -->
+    <!-- BMI 数值 -->
     <TextView
         android:id="@+id/tvBmiValue"
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:text="0.0"
-        android:textColor="#000000"
+        android:textColor="@color/text_black"
         android:textSize="27sp"
         android:fontFamily="@font/montserrat_extrabold"
         android:letterSpacing="-0.00938"
@@ -34,35 +34,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 等级名称（左对齐，单行） -->
     <TextView
         android:id="@+id/tvLevelName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginEnd="8dp"
         android:text="Normal"
-        android:textColor="#000000"
+        android:textColor="@color/text_black"
         android:textSize="16sp"
         android:fontFamily="@font/montserrat_regular"
-        app:layout_constraintStart_toEndOf="@id/dotLevel"
+        android:maxLines="1"
+        android:gravity="start|center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/dotLevel"
-        app:layout_constraintBottom_toBottomOf="@id/dotLevel"/>
+        app:layout_constraintBottom_toBottomOf="@id/dotLevel" />
 
-    <!-- 日期 + 时段 -->
+    <!-- 日期 + 时段（右对齐，两行） -->
     <TextView
         android:id="@+id/tvDateTime"
-        android:layout_width="83dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="48dp"
         android:text="May 6, 2021\nMorning"
-        android:textColor="#444444"
+        android:textColor="@color/bg_h"
         android:textSize="15sp"
         android:fontFamily="@font/montserrat_regular"
         android:letterSpacing="-0.00881"
         android:gravity="end|center_vertical"
         android:lineSpacingExtra="2dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@id/ivArrow"
+        android:maxLines="2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/ivArrow"
-        app:layout_constraintBottom_toBottomOf="@id/ivArrow"/>
+        app:layout_constraintBottom_toBottomOf="@id/ivArrow" />
 
     <!-- 右箭头 -->
     <ImageView

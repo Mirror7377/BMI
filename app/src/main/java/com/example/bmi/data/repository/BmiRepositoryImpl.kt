@@ -74,5 +74,7 @@ class BmiRepositoryImpl @Inject constructor(
         return dao.getAllSortedRecords()
     }
 
-
+    override suspend fun insertAll(records: List<BmiRecord>) {
+        return dao.insertAll(records)
+    }
 }

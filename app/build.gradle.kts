@@ -59,4 +59,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
+    implementation("com.google.code.gson:gson:2.14.0")
+
 }

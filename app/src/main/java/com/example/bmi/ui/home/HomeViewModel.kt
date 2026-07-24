@@ -52,19 +52,19 @@ class HomeViewModel @Inject constructor(
 
     // ---------- 各处理函数 ----------
     private fun init() {
+        val state = _state.value
         // 初始化时自动设置当前时间
         val now = System.currentTimeMillis()
         val timeOfDay = TimeOfDay.fromSystemTime()
+        val weightDisplay = String.format("%.2f", state.weightInput)
         updateState {
             copy(
                 //修正时间
                 timestamp = now,
                 timeOfDay = timeOfDay,
-                timeDisplay = formatTime(now, timeOfDay)
+                weightDisplay = weightDisplay
             )
         }
-        // 初始化时进行 更新派生字段（体重/身高显示）
-        refreshDisplayValues()
     }
 
     private fun onWeightChanged(value: Double) {
@@ -82,7 +82,7 @@ class HomeViewModel @Inject constructor(
         updateState {
             copy(
                 weightInput = clamped,
-                weightKg = kgValue,//如果为lb呢？那
+                weightKg = kgValue,
                 weightDisplay = String.format("%.2f", clamped)
             )
         }
@@ -98,7 +98,7 @@ class HomeViewModel @Inject constructor(
         } else {
             UnitConverter.kgToLb(state.weightInput).coerceIn(2.0, 551.0)
         }
-        // 换算后的值用于显示，同时更新 weightKg 和 weightInput todo 不是换算的值进行显示
+        // 换算后的值用于 详细页图标的显示
         val newWeightKg = if (unit == WeightUnit.KG) newWeightInput else UnitConverter.lbToKg(newWeightInput)
 
         updateState {
@@ -112,45 +112,46 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onHeightCmChanged(value: Double) {
-        //限定cm
         val clamped = value.coerceIn(1.0, 250.0)
         updateState {
             copy(
                 heightCm = clamped,
-                heightInput = clamped
+                feetInput = UnitConverter.cmToFeet(clamped),
+                inchesInput = UnitConverter.cmToInches(clamped)
             )
         }
-        //todo 什么意思？
-        refreshDisplayValues()
     }
 
     private fun onHeightUnitChanged(unit: HeightUnit) {
         val currentCm = _state.value.heightCm
+        val feetInput = _state.value.feetInput
+        val inchesInput = _state.value.inchesInput
         if (unit == HeightUnit.CM) {
-            updateState { copy(heightUnit = unit, heightInput = currentCm) }
+            var heightCm = UnitConverter.feetInchToCm(feetInput, inchesInput)
+            updateState {
+                copy(heightUnit = unit,
+                    heightCm = heightCm
+                ) }
         } else { // FT_IN
             val rawFeet = UnitConverter.cmToFeet(currentCm)
             val rawInches = UnitConverter.cmToInches(currentCm)
 
-            val feet = rawFeet.coerceIn(1, 8)
+            val feet = rawFeet.coerceIn(1, 8) //限制为1-8
+            //限制英寸
             val inches = when {
                 rawFeet < 1 -> 0                 // 不足 1 英尺，强制 1'0"
                 feet == 8  -> rawInches.coerceIn(0, 2)  // 8 英尺时英寸上限 2
                 else       -> rawInches.coerceIn(0, 11)
             }
 
-            val newHeightCm = UnitConverter.feetInchToCm(feet, inches)
             updateState {
                 copy(
                     heightUnit = unit,
                     feetInput = feet,
-                    inchesInput = inches,
-                    heightInput = (feet * 12 + inches).toDouble(),
-                    heightCm = newHeightCm
+                    inchesInput = inches
                 )
             }
         }
-        refreshDisplayValues()
     }
 
     private fun onFeetChanged(feet: Int) {
@@ -161,28 +162,25 @@ class HomeViewModel @Inject constructor(
             currentInches = 2
         }
         val cm = UnitConverter.feetInchToCm(clamped, currentInches)
-        val totalInches = (clamped * 12 + currentInches).toDouble()
         updateState {
             copy(
                 feetInput = clamped,
                 inchesInput = currentInches,
-                heightCm = cm,
-                heightInput = totalInches
+                heightCm = cm
             )
         }
     }
 
     private fun onInchesChanged(inches: Int) {
         val currentFeet = _state.value.feetInput
-        val maxInches = if (currentFeet >= 8) 2 else 11
+        val maxInches = if (currentFeet == 8) 2 else 11
         val clamped = inches.coerceIn(0, maxInches)
         val cm = UnitConverter.feetInchToCm(currentFeet, clamped)
-        val totalInches = (currentFeet * 12 + clamped).toDouble()
         updateState {
             copy(
                 inchesInput = clamped,
-                heightCm = cm,
-                heightInput = totalInches
+                feetInput = currentFeet,
+                heightCm = cm
             )
         }
     }
@@ -201,7 +199,6 @@ class HomeViewModel @Inject constructor(
             copy(
                 timestamp = timestamp,
                 timeOfDay = timeOfDay,
-                timeDisplay = formatTime(timestamp, timeOfDay)
             )
         }
     }
@@ -231,7 +228,6 @@ class HomeViewModel @Inject constructor(
         val record = BmiRecord(
             weightInput = state.weightInput,
             weightUnit = state.weightUnit.name,
-            heightInput = state.heightInput,
             heightUnit = state.heightUnit.name,
             feetInput = if (state.heightUnit == HeightUnit.FT_IN) state.feetInput else null,
             inchesInput = if (state.heightUnit == HeightUnit.FT_IN) state.inchesInput else null,
@@ -253,33 +249,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ---------- 辅助函数，格式化为ui需要的格式 ----------
-    private fun refreshDisplayValues() {
-        val state = _state.value
 
-        // 体重显示：直接使用 weightInput（当前单位值）
-        val weightDisplay = String.format("%.2f", state.weightInput)
-
-        // 身高显示
-        val heightDisplay = if (state.heightUnit == HeightUnit.CM) {
-            String.format("%.1f", state.heightInput)  // heightInput 已是 cm 值
-        } else {
-            // ft-in 模式：使用 feetInput 和 inchesInput
-            "${state.feetInput}' ${state.inchesInput}\""
-        }
-
-
-        // 更新时间显示 todo什么?
-        val timeDisplay = formatTime(state.timestamp, state.timeOfDay)
-
-        updateState {
-            copy(
-                weightDisplay = weightDisplay,
-                heightDisplay = heightDisplay,
-                timeDisplay = timeDisplay
-            )
-        }
-    }
 
 
     private fun formatTime(timestamp: Long, timeOfDay: TimeOfDay): String {

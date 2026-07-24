@@ -113,7 +113,7 @@ object BmiConfigProvider {
 
     /**
      * 获取对应年龄性别的配置
-     * @param age 年龄（≥2）
+     * @param age 年龄（≥20）
      * @param gender 字符串 "MALE" 或 "FEMALE"
      */
     fun getConfig(age: Int, gender: String): BmiGaugeConfig {

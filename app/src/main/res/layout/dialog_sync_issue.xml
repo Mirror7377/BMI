@@ -5,7 +5,7 @@
     android:layout_height="399dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
-    android:backgroundTint="#FFFFFF"
+    android:backgroundTint="@color/white"
     android:layout_gravity="center">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -80,7 +80,7 @@
             android:layout_height="45dp"
             app:cardCornerRadius="22.5dp"
             app:cardElevation="0dp"
-            android:backgroundTint="#3659CF"
+            android:backgroundTint="@color/splash_blue"
             android:clickable="true"
             android:focusable="true"
             android:layout_marginTop="28dp"
@@ -93,8 +93,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="DONE"
-                android:textColor="#FFFFFF"
+                android:text="@string/done"
+                android:textColor="@color/white"
                 android:textSize="20sp"
                 android:fontFamily="@font/montserrat_extrabold"
                 android:gravity="center"

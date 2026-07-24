@@ -26,4 +26,6 @@ interface BmiRepository {
     suspend fun getRecordsBetween(startTime: Long, endTime: Long): List<BmiRecord>
 
     suspend fun getAllSortedRecords(): Flow<List<BmiRecord>>
+
+    suspend fun insertAll(records: List<BmiRecord>)
 }

@@ -34,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="Deleted successfully."
+                android:text="@string/deleted_successfully"
                 android:textColor="#000000"
                 android:textSize="12sp"
                 android:gravity="center_vertical"

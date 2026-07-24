@@ -29,50 +29,28 @@ class MainActivity : BaseActivity() {
     private var latestRecord: BmiRecord? = null
 
     private var currentTag: String? = null
-    private var bottomNavHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 获取底部导航高度
-        binding.bottomNav.post {
-            bottomNavHeight = binding.bottomNav.height
-        }
 
         // 监听数据库，控制导航栏显隐 + 通知 HomeFragment 更新按钮位置
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeLatestRecord()
-                    .distinctUntilChanged()
                     .collect { record ->
                         latestRecord = record
-                        val isEmpty = record == null
-                        binding.bottomNav.visibility = if (isEmpty) View.GONE else View.VISIBLE
-
-                        val homeFragment = supportFragmentManager.findFragmentByTag("Home") as? HomeFragment
-                        homeFragment?.setEmptyMode(isEmpty)
+                        binding.bottomNav.visibility = if (record == null) View.GONE else View.VISIBLE
                     }
             }
         }
 
         setupBottomNav()
-
-        // 根据 SplashActivity 传递的标志决定初始显示
-        val hasData = intent.getBooleanExtra("hasData", false)
-        if (hasData) {
-            // 有数据：显示 DisplayFragment，并高亮底部导航第二项（index 1）
-            navigateToDisplay()
-            binding.bottomNav.selectedItemId = R.id.nav_display
-        } else {
-            // 无数据：显示 HomeFragment
-            navigateToHome()
-            binding.bottomNav.selectedItemId = R.id.nav_home
-        }
+        initializeInitialFragment()
     }
 
-    fun getBottomNavHeight(): Int = bottomNavHeight
 
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -94,6 +72,20 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun initializeInitialFragment() {
+        // 根据 SplashActivity 传递的标志决定初始显示
+        val hasData = intent.getBooleanExtra("hasData", false)
+        if (hasData) {
+            // 有数据：显示 DisplayFragment，并高亮底部导航第二项（index 1）
+            navigateToDisplay()
+            binding.bottomNav.selectedItemId = R.id.nav_display
+        } else {
+            // 无数据：显示 HomeFragment
+            navigateToHome()
+            binding.bottomNav.selectedItemId = R.id.nav_home
+        }
+    }
+
     private fun navigateToHome() {
         val fragmentManager = supportFragmentManager
         var homeFragment = fragmentManager.findFragmentByTag("Home")
@@ -107,7 +99,7 @@ class MainActivity : BaseActivity() {
         if (currentTag == "Home") return
 
         fragmentManager.fragments.forEach { fragment ->
-            if (fragment != homeFragment && fragment.isAdded) {
+            if (fragment.isAdded && fragment != homeFragment) {
                 fragmentManager.beginTransaction()
                     .hide(fragment)
                     .commitNow()
@@ -136,7 +128,7 @@ class MainActivity : BaseActivity() {
         if (currentTag == "Display") return
 
         fragmentManager.fragments.forEach { fragment ->
-            if (fragment != displayFragment && fragment.isAdded) {
+            if (fragment.isAdded && fragment != displayFragment) {
                 fragmentManager.beginTransaction()
                     .hide(fragment)
                     .commitNow()
@@ -165,7 +157,7 @@ class MainActivity : BaseActivity() {
         if (currentTag == "Statistics") return
 
         fragmentManager.fragments.forEach { fragment ->
-            if (fragment != statisticsFragment && fragment.isAdded) {
+            if (fragment.isAdded && fragment != statisticsFragment) {
                 fragmentManager.beginTransaction()
                     .hide(fragment)
                     .commitNow()
@@ -186,15 +178,7 @@ class MainActivity : BaseActivity() {
         binding.bottomNav.selectedItemId = R.id.nav_home
     }
 
-    fun hideBottomNav() {
-        binding.bottomNav.visibility = View.GONE
-    }
 
-    fun showBottomNav() {
-        if (latestRecord != null) {
-            binding.bottomNav.visibility = View.VISIBLE
-        }
-    }
 
     override fun onResume() {
         super.onResume()

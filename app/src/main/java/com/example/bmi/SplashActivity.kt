@@ -4,13 +4,11 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.bmi.databinding.ActivitySplashBinding
 import com.example.bmi.data.repository.BmiRepository
@@ -19,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : BaseActivity() {
 
     @Inject
     lateinit var repository: BmiRepository
@@ -38,25 +36,29 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        layoutViews()
+        initState()
         binding.root.post {
-            layoutViews()
-            initState()
             startAnimation()
         }
     }
 
     private fun initState() {
+        //设为完全透明，会有淡入效果
         binding.logoContainer.alpha = 0f
+        //位移距离
         binding.logoContainer.translationY = 100f * scale
     }
 
+    //根据实际屏幕尺寸与设计尺寸的比例
     private fun layoutViews() {
-        val dm = resources.displayMetrics
+        val dm = resources.displayMetrics//获取当前设备信息
         val sw = dm.widthPixels.toFloat()
         val sh = dm.heightPixels.toFloat()
 
+        //取两者中的较小值作为最终缩放比例。
         scale = minOf(sw / DESIGN_WIDTH, sh / DESIGN_HEIGHT)
+        //计算偏移量
         offsetX = (sw - DESIGN_WIDTH * scale) / 2f
         offsetY = (sh - DESIGN_HEIGHT * scale) / 2f
 
@@ -65,59 +67,68 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun startAnimation() {
-        binding.imgNeedle.post {
-            binding.imgNeedle.pivotX = binding.imgNeedle.width / 2f
-            binding.imgNeedle.pivotY = binding.imgNeedle.height.toFloat()
+        // 设置指针旋转轴心（在视图测量完成后调用，确保宽高已确定）
+        binding.imgNeedle.pivotX = binding.imgNeedle.width / 2f
+        binding.imgNeedle.pivotY = binding.imgNeedle.height.toFloat()
 
-            val logoMove = AnimatorSet().apply {
-                playTogether(
-                    ObjectAnimator.ofFloat(binding.logoContainer, View.TRANSLATION_Y, 100f * scale, 0f),
-                    ObjectAnimator.ofFloat(binding.logoContainer, View.ALPHA, 0f, 1f)
-                )
-                duration = 800
-            }
-
-            val firstNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, -30f, 45f).apply {
-                duration = 800
-            }
-
-            val secondNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, 45f, -45f).apply {
-                duration = 800
-                interpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
-            }
-
-            val firstStage = AnimatorSet().apply {
-                playTogether(logoMove, firstNeedle)
-            }
-
-            val hold = ValueAnimator.ofFloat(0f, 1f).apply { duration = 100 }
-
-            val all = AnimatorSet().apply {
-                playSequentially(firstStage, secondNeedle, hold)
-            }
-
-            all.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    // 动画结束后，查询是否有数据
-                    lifecycleScope.launch {
-                        val hasData = repository.getRecordCount() != 0
-                        val intent = Intent(this@SplashActivity, MainActivity::class.java).apply {
-                            putExtra("hasData", hasData)
-                        }
-                        startActivity(intent)
-                        finish()
-                    }
-                }
-            })
-            all.start()
+        //Logo 容器动画：同时执行上移和淡入
+        val logoMove = AnimatorSet().apply {
+            //并行播放括号内的所有动画
+            playTogether(
+                ObjectAnimator.ofFloat(binding.logoContainer, View.TRANSLATION_Y, 100f * scale, 0f),
+                ObjectAnimator.ofFloat(binding.logoContainer, View.ALPHA, 0f, 1f)
+            )
+            duration = 800
         }
+
+        // 指针第一次摆动：-30° → 45°
+        val firstNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, -30f, 45f).apply {
+            duration = 800
+        }
+
+        // 指针第二次摆动：45° → -45°（带弹性插值器）
+        val secondNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, 45f, -45f).apply {
+            duration = 800
+            interpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
+        }
+
+        // 第一阶段：Logo 动画和第一次摆动同时进行
+        val firstStage = AnimatorSet().apply {
+            playTogether(logoMove, firstNeedle)
+        }
+
+
+        // 依次执行
+        val all = AnimatorSet().apply {
+            playSequentially(firstStage, secondNeedle)
+        }
+
+        // 动画结束监听：查询数据库，跳转主界面
+        all.addListener(object : AnimatorListenerAdapter() {
+            //当 all 动画序列播放完毕时自动回调
+            override fun onAnimationEnd(animation: Animator) {
+                lifecycleScope.launch {
+                    val hasData = repository.getRecordCount() != 0
+                    val intent = Intent(this@SplashActivity, MainActivity::class.java).apply {
+                        putExtra("hasData", hasData)
+                    }
+                    startActivity(intent)
+                    finish()
+                }
+            }
+        })
+
+        // 启动动画
+        all.start()
     }
 
     private fun layout(view: View, left: Float, top: Float, width: Float, height: Float) {
+        //换算后的布局
         val lp = FrameLayout.LayoutParams(
             (width * scale).toInt(),
             (height * scale).toInt()
         )
+        //设置左右边距
         lp.leftMargin = (left * scale + offsetX).toInt()
         lp.topMargin = (top * scale + offsetY).toInt()
         view.layoutParams = lp

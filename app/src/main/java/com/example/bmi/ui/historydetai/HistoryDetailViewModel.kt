@@ -56,7 +56,6 @@ class HistoryDetailViewModel @Inject constructor(
                             bmi = record.bmi,
                             weightInput = record.weightInput,
                             weightUnit = record.weightUnit,
-                            heightInput = record.heightInput,
                             heightUnit = record.heightUnit,
                             feet = record.feetInput ?: 0,
                             inches = record.inchesInput ?: 0,

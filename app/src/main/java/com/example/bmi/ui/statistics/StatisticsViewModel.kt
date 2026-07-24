@@ -395,4 +395,81 @@ class StatisticsViewModel @Inject constructor(
         }
     }
 
+    fun loadDayRangeData(days: Int = 60) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val endDate = Calendar.getInstance()
+                val startDate = endDate.clone() as Calendar
+                startDate.add(Calendar.DAY_OF_YEAR, -days)
+                val records = repository.getRecordsBetween(startDate.timeInMillis, endDate.timeInMillis)
+                val data = buildDayRangeData(startDate, endDate, records)
+                // 关键：即使 data 与之前相等，也强制创建一个新列表（例如使用 toList()）
+                _monthData.value = data.toList()   // 或 ArrayList(data)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // 对应体重的范围加载
+    fun loadWeightDayRangeData(days: Int = 60) {
+        viewModelScope.launch {
+            _isWeightLoading.value = true
+            try {
+                val endDate = Calendar.getInstance()
+                val startDate = endDate.clone() as Calendar
+                startDate.add(Calendar.DAY_OF_YEAR, -days)
+                val records = repository.getRecordsBetween(startDate.timeInMillis, endDate.timeInMillis)
+                val data = buildWeightDayRangeData(startDate, endDate, records)
+                _weightData.value = data
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isWeightLoading.value = false
+            }
+        }
+    }
+
+    // 辅助方法：构建 BMI 日数据（范围）
+    private fun buildDayRangeData(startDate: Calendar, endDate: Calendar, records: List<BmiRecord>): List<DayBmiData> {
+        // 按天分组，取每天最新一条记录
+        val latestPerDay = records.groupBy { record ->
+            val cal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+            cal.get(Calendar.YEAR) to cal.get(Calendar.DAY_OF_YEAR)
+        }.mapValues { (_, list) -> list.maxByOrNull { it.timestamp } }
+
+        val result = mutableListOf<DayBmiData>()
+        var current = startDate.clone() as Calendar
+        while (current <= endDate) {
+            val key = current.get(Calendar.YEAR) to current.get(Calendar.DAY_OF_YEAR)
+            val record = latestPerDay[key]
+            val bmi = record?.bmi?.toFloat()
+            result.add(DayBmiData(current.clone() as Calendar, bmi))
+            current.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return result
+    }
+
+    // 辅助方法：构建体重日数据（范围）
+    private fun buildWeightDayRangeData(startDate: Calendar, endDate: Calendar, records: List<BmiRecord>): List<DayWeightData> {
+        val latestPerDay = records.groupBy { record ->
+            val cal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+            cal.get(Calendar.YEAR) to cal.get(Calendar.DAY_OF_YEAR)
+        }.mapValues { (_, list) -> list.maxByOrNull { it.timestamp } }
+
+        val result = mutableListOf<DayWeightData>()
+        var current = startDate.clone() as Calendar
+        while (current <= endDate) {
+            val key = current.get(Calendar.YEAR) to current.get(Calendar.DAY_OF_YEAR)
+            val record = latestPerDay[key]
+            val weight = record?.weightKg?.toFloat()
+            result.add(DayWeightData(current.clone() as Calendar, weight))
+            current.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return result
+    }
+
 }
