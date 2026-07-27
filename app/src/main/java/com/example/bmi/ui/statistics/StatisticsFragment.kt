@@ -61,8 +61,8 @@ class StatisticsFragment : Fragment() {
         currentMonth = calendar.get(Calendar.MONTH)
 
         // 默认加载 Day 数据
-        viewModel.loadMonthData(currentYear, currentMonth)
-        viewModel.loadWeightMonthData(currentYear, currentMonth)
+        viewModel.loadDayRangeData(60)
+        viewModel.loadWeightDayRangeData(60)
 
         // ========== Flow 观察者（保留，用于数据库更新后自动刷新） ==========
         // BMI Day 数据

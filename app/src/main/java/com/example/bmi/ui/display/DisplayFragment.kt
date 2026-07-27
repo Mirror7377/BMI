@@ -58,7 +58,6 @@ class DisplayFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentDisplayBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -66,37 +65,61 @@ class DisplayFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        bindClick(binding.root)
-
+        // 点击事件 → 发送 Intent
         binding.tvRecent.setOnClickListener {
-            startActivity(Intent(requireContext(), RecentActivity::class.java))
+            viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.RECENT))
         }
 
-        // 点击除 Recent 按钮外的任意位置，返回 Home 页面
         binding.root.setOnClickListener {
-            (requireActivity() as? MainActivity)?.goToHome()
+            viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.HOME))
         }
 
-
-        // 观察最新记录
+        // 观察 State
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.latestRecord.collect { record ->
-                    if (record != null) {
-                        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-                        binding.tvDate.text = dateFormat.format(record.timestamp)
+                viewModel.state.collect { state ->
+                    renderState(state)
+                }
+            }
+        }
 
-                        // 显示详细内容
-                        binding.scrollViewContent.visibility = View.VISIBLE
-
-                        // 绑定详细数据
-                        bindDetailData(record)
+        // 观察 Effect
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
+                        is DisplayEffect.NavigateTo -> {
+                            when (effect.destination) {
+                                DisplayIntent.Destination.HOME -> {
+                                    (requireActivity() as? MainActivity)?.goToHome()
+                                }
+                                DisplayIntent.Destination.RECENT -> {
+                                    startActivity(Intent(requireContext(), RecentActivity::class.java))
+                                }
+                            }
+                        }
+                        is DisplayEffect.ShowError -> {
+                            // 可根据需要显示 Snackbar / Toast
+                            // Snackbar.make(binding.root, effect.message, Snackbar.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
         }
     }
 
+    // ========== 渲染函数 ==========
+    private fun renderState(state: DisplayState) {
+        val record = state.record ?: return
+        // 日期显示
+        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+        binding.tvDate.text = dateFormat.format(record.timestamp)
+
+        binding.scrollViewContent.visibility = View.VISIBLE
+        bindDetailData(record)
+    }
+
+    // ========== 详情绑定 ==========
     private fun bindDetailData(record: BmiRecord) {
         val age = record.age
         val gender = when (record.gender) {
@@ -105,24 +128,22 @@ class DisplayFragment : Fragment() {
             else -> Gender.MALE
         }
 
-        // 1. 获取 BMI 等级
         val bmiLevel = if (age < 20) {
-            BmiConfigProvider.classifyChild(age, gender.name, record.bmi)  // 使用 BmiConfigProvider 的方法
+            BmiConfigProvider.classifyChild(age, gender.name, record.bmi)
         } else {
             BmiClassifier.classifyAdult(record.bmi)
         }
 
-        // 2. 仪表盘配置
+        // 仪表盘配置
         val config = BmiConfigProvider.getConfig(age, gender.name)
         binding.bmiGauge.applyConfig(config)
-        // 直接传入，内部已做钳制
         binding.bmiGauge.setBmi(record.bmi.toFloat(), false)
 
-        // 3. BMI 数值
+        // BMI 数值
         binding.tvBmiValueLarge.text = String.format("%.1f", record.bmi)
 
-        // 4. 状态标签
-        binding.tvBmiStatus.text = bmiLevel.statusText
+        // 状态标签
+        binding.tvBmiStatus.text = getString(bmiLevel.statusTextRes)
         val radius = dpToPx(19.75f).toFloat()
         val colorBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -132,33 +153,43 @@ class DisplayFragment : Fragment() {
         binding.statusContainer.background = colorBg
         binding.statusIcon.visibility = View.GONE
 
-        // 5. 个人信息
+        // 个人信息
         val weightText = when (record.weightUnit) {
             WeightUnit.KG.name -> String.format("%.2f kg", record.weightInput)
             WeightUnit.LB.name -> String.format("%.2f lb", record.weightInput)
-            else -> {}
+            else -> String.format("%.2f kg", record.weightInput)
         }
+
         val heightText = when (record.heightUnit) {
             HeightUnit.CM.name -> String.format("%.1f cm", record.heightCm)
             HeightUnit.FT_IN.name -> "${record.feetInput ?: 0} ft ${record.inchesInput ?: 0} in"
-
-            else -> {}
+            else -> String.format("%.1f cm", record.heightCm)
         }
+
         val genderText = when (record.gender) {
-            Gender.MALE.name -> "Male"
-            Gender.FEMALE.name -> "Female"
-            else -> "Male"
+            Gender.MALE.name -> getString(R.string.gender_male)
+            Gender.FEMALE.name -> getString(R.string.gender_female)
+            else -> getString(R.string.gender_male)
         }
-        binding.tvBmiInfo.text = "$weightText | $heightText | $genderText | ${record.age} years old"
 
-        // 6. 图例
+        val ageText = getString(R.string.age_years_old, age)
+
+        binding.tvBmiInfo.text = getString(
+            R.string.bmi_info_format,
+            weightText,
+            heightText,
+            genderText,
+            ageText
+        )
+
         bindBmiLegend(bmiLevel, age, gender.name)
     }
 
+    // ========== 图例绑定==========
     private fun bindBmiLegend(currentLevel: BmiLevel, age: Int, gender: String) {
         val isChild = age < 20
         val config = BmiConfigProvider.getConfig(age, gender)
-        val splitPoints = config.splitPoints  // List<Float>
+        val splitPoints = config.splitPoints
         val colors = config.colors
 
         val radius = dpToPx(15f).toFloat()
@@ -184,18 +215,6 @@ class DisplayFragment : Fragment() {
             binding.tvLevelRange4, binding.tvLevelRange5, binding.tvLevelRange6, binding.tvLevelRange7
         )
 
-        val levelNames = listOf(
-            "Very Severely Underweight",
-            "Severely Underweight",
-            "Underweight",
-            "Normal",
-            "Overweight",
-            "Obese Class I",
-            "Obese Class II",
-            "Obese Class III"
-        )
-
-        // 儿童只显示 4 行：Underweight, Normal, Overweight, Obese I
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
 
         fun getLevelColor(index: Int): Int {
@@ -225,7 +244,6 @@ class DisplayFragment : Fragment() {
                     else -> ""
                 }
             }
-            // 成人范围
             return when (index) {
                 0 -> "＜16"
                 1 -> "16.0-16.9"
@@ -246,14 +264,13 @@ class DisplayFragment : Fragment() {
             val rangeTv = rangeTvs[index]
 
             val shouldShow = index in visibleIndices
-
             if (!shouldShow) {
                 layout.visibility = View.GONE
                 return@forEachIndexed
             }
             layout.visibility = View.VISIBLE
 
-            nameTv.text = levelNames[index]
+            nameTv.text = getString(level.statusTextRes)
             rangeTv.text = getRangeText(index)
 
             val color = getLevelColor(index)
@@ -282,7 +299,7 @@ class DisplayFragment : Fragment() {
         }
     }
 
-    //todo doTOPx抽成utils 或densityUtil
+    // ========== 工具 ==========
     private fun dpToPx(dp: Float): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
@@ -290,19 +307,5 @@ class DisplayFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun bindClick(view: View) {
-        if (view.id == R.id.tvRecent) return
-
-        view.setOnClickListener {
-            (requireActivity() as? MainActivity)?.goToHome()
-        }
-
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                bindClick(view.getChildAt(i))
-            }
-        }
     }
 }

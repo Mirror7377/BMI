@@ -1,13 +1,13 @@
 package com.example.bmi.ui.home.enums
 
-
+import com.example.bmi.R
 import java.util.Calendar
 
-enum class TimeOfDay(val displayName: String) {
-    MORNING("Morning"),//displayName属性
-    AFTERNOON("Afternoon"),
-    EVENING("Evening"),
-    NIGHT("Night");
+enum class TimeOfDay(val displayName: Int) {
+    MORNING(R.string.time_morning),
+    AFTERNOON(R.string.time_afternoon),
+    EVENING(R.string.time_evening),
+    NIGHT(R.string.time_night);
 
     companion object {
         fun fromSystemTime(): TimeOfDay {

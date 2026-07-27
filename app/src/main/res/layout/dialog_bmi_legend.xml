@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="375dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_discard_dialog"
-    android:paddingBottom="20dp"
+    android:background="@drawable/bg_date_picker_bottom"
+    android:paddingBottom="10dp"
     android:minHeight="300dp">
 
     <!-- 标题 -->

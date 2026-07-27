@@ -26,17 +26,6 @@
     <string name="delete">删除</string>
     <string name="apps_you_might_need">您可能需要的应用</string>
     <string name="category">分类</string>
-    <string name="language_options">语言选项</string>
-    <string name="english">英语</string>
-    <string name="portugu_s">葡萄牙语</string>
-    <string name="pycc">俄语</string>
-    <string name="deutsch">德语</string>
-    <string name="ch_tw">繁體中文</string>
-    <string name="ch">简体中文</string>
-    <string name="fran_ais">法语</string>
-    <string name="espa_ol">西班牙语</string>
-    <string name="italiano">意大利语</string>
-    <string name="hg">韩语</string>
     <string name="me">我</string>
     <string name="backup_amp_restore"><![CDATA[数据备份与恢复]]></string>
     <string name="synchronize_your_data">同步您的数据</string>
@@ -73,9 +62,36 @@
     <string name="update">更新</string>
     <string name="quot">\"</string>
     <string name="yh">\'</string>
+    <string name="time_morning">上午</string>
+    <string name="time_afternoon">下午</string>
+    <string name="time_evening">傍晚</string>
+    <string name="time_night">深夜</string>
+    <string name="gender_male">男性</string>
+    <string name="gender_female">女性</string>
+    <string name="age_years_old">%d岁</string>
+    <string name="bmi_info_format">%s | %s | %s | %s</string>
+    <!-- BMI 状态名称 -->
+    <string name="bmi_status_very_severely_underweight">极度体重过轻</string>
+    <string name="bmi_status_severely_underweight">严重体重过轻</string>
+    <string name="bmi_status_underweight">体重过轻</string>
+    <string name="bmi_status_normal">正常</string>
+    <string name="bmi_status_overweight">超重</string>
+    <string name="bmi_status_obese_class_i">肥胖一级</string>
+    <string name="bmi_status_obese_class_ii">肥胖二级</string>
+    <string name="bmi_status_obese_class_iii">肥胖三级</string>
+
+    <!-- BMI 描述 -->
+    <string name="bmi_desc_very_severely_underweight">希望你多爱自己一点！你需要补充健康脂肪，摄入营养密度高的食物，并寻求医疗建议来增加体重。</string>
+    <string name="bmi_desc_severely_underweight">是时候照顾好自己了，避免免疫功能低下和骨质疏松的风险。给自己一顿均衡的餐食和多样化的营养吧。</string>
+    <string name="bmi_desc_underweight">你的身体似乎需要更多能量。除非你天生很瘦，否则你可能需要考虑增重的方法，因为你的体重可能带来健康风险。</string>
+    <string name="bmi_desc_normal">恭喜！你现在状态很好。保持健康的习惯，维持你的健康体重。</string>
+    <string name="bmi_desc_overweight">别再等了！是时候采取行动达到你的体重目标了。你携带了多余的脂肪，应平衡饮食和体育活动以实现健康体重。</string>
+    <string name="bmi_desc_obese_class_i">哎呀！你当前的体重超过了理想范围，患各种健康问题的风险增加。是时候拥抱健康饮食并增加运动量了。</string>
+    <string name="bmi_desc_obese_class_ii">是时候改变了！你处于肥胖相关疾病的高风险中。你应该增加体育活动，逐渐减少热量摄入。健康筛查也至关重要。</string>
+    <string name="bmi_desc_obese_class_iii">我们很担心你！你的体重对健康构成严重而迫切的威胁。请寻求健康建议并科学地制定减肥计划。</string>
     <string name="error_height_invalid">请输入有效的身高（1-250 厘米）以准确计算您的BMI</string>
     <string name="error_height_ft_invalid">请输入有效的身高（1英尺 - 8英尺）以准确计算您的BMI</string>
     <string name="error_height_inches_invalid">请输入有效身高（0 - 11 英寸）以准确计算您的BMI</string>
     <string name="error_height_full_invalid">请输入有效身高（1英尺 - 8英尺2英寸）以准确计算您的BMI</string>
-
+    <string name="error_weight_invalid">请输入有效的体重（%d-%d），以便准确计算您的BMI</string>
 </resources>

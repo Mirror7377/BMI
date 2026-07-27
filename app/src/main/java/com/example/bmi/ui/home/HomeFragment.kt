@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,7 +83,6 @@ class HomeFragment : Fragment() {
         setupListeners()
         setupAgeRecyclerView()
         observeEffect()
-        viewModel.sendIntent(HomeIntent.Init)
     }
 
     // ---- 状态观察 ----
@@ -125,7 +125,7 @@ class HomeFragment : Fragment() {
         heightParams.marginStart = dpToPx(heightMarginStart)
         binding.selectedUnitBgHeight.layoutParams = heightParams
 
-        binding.etWeightValue.setText(state.weightDisplay)
+        binding.etWeightValue.setText(String.format("%.2f", state.weightInput))
         when (state.heightUnit) {
             HeightUnit.CM -> {
                 binding.heightFtInGroup.visibility = View.GONE
@@ -142,7 +142,7 @@ class HomeFragment : Fragment() {
 
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         binding.tvDateDisplay.text = dateFormat.format(Date(state.timestamp))
-        binding.tvTimeOfDayDisplay.text = state.timeOfDay.displayName
+        binding.tvTimeOfDayDisplay.setText(state.timeOfDay.displayName)
         updateGenderUI(state.gender)
     }
 
@@ -234,7 +234,7 @@ class HomeFragment : Fragment() {
         ).show()
     }
 
-    // ---- 年龄滚轮（保持原样，因样式特殊） ----
+    // ---- 年龄滚轮 ----
     private fun setupAgeRecyclerView() {
         val ages = (2..99).toList()
         ageAdapter = AgeAdapter(ages) { selectedAge ->
@@ -342,7 +342,7 @@ class HomeFragment : Fragment() {
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
             }
             raw.toDoubleOrNull() == null -> {
-                editText.setText(viewModel.state.value.weightDisplay)
+                editText.setText(String.format("%.2f", viewModel.state.value.weightInput))
                 CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {

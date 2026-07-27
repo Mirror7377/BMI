@@ -19,4 +19,34 @@
         <item name="android:fontFamily">@font/montserrat_extrabold</item>
     </style>
 
+    <!-- BottomSheet Dialog Theme -->
+    <style name="Theme.BMI.BottomSheetDialog"
+        parent="ThemeOverlay.Material3.BottomSheetDialog">
+
+        <item name="bottomSheetStyle">@style/Widget.BMI.BottomSheet</item>
+
+    </style>
+
+
+    <!-- BottomSheet 本体 -->
+    <style name="Widget.BMI.BottomSheet"
+        parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <!-- 使用自己的 Shape -->
+        <item name="shapeAppearance">@style/ShapeAppearance.BMI.BottomSheet</item>
+        <!-- 不要阴影 -->
+        <item name="android:elevation">0dp</item>
+    </style>
+
+
+    <!-- Shape -->
+    <style name="ShapeAppearance.BMI.BottomSheet"
+        parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">22dp</item>
+        <item name="cornerSizeTopRight">22dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
 </resources>

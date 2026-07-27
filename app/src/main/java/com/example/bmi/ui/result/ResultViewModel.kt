@@ -74,7 +74,7 @@ class ResultViewModel @Inject constructor(
                 age = currentState.age,
                 gender = currentState.gender,
                 bmi = currentState.bmi,
-                category = bmiLevel.statusText,
+                category = bmiLevel.name,
                 createTime = System.currentTimeMillis()
             )
             repository.saveRecord(record)

@@ -16,4 +16,7 @@
     <color name="bg_h">#444444</color>
     <color name="bg_fg">#DDDDDD</color>
     <color name="bg_text">#ABABAD</color>
+    <color name="bg_start">#000000</color>
+    <color name="bg_end">#BBBBBB</color>
+
 </resources>
