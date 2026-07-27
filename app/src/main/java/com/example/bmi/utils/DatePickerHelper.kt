@@ -39,6 +39,7 @@ class DatePickerHelper(
         val calendar = Calendar.getInstance().apply {
             timeInMillis = currentTimestamp.coerceAtMost(System.currentTimeMillis())
         }
+        Log.d("Wheel", calendar.time.toString())
         val initYear = calendar.get(Calendar.YEAR)
         val initMonth = calendar.get(Calendar.MONTH)
         val initDay = calendar.get(Calendar.DAY_OF_MONTH) - 1//索引
@@ -47,6 +48,9 @@ class DatePickerHelper(
         val years = (1900..currentYear).map { it.toString() }
         val yearPos = initYear - 1900
         selectedYear = yearPos
+        Log.d("Wheel", "initYear=$initYear")
+        Log.d("Wheel", "yearPos=$yearPos")
+        Log.d("Wheel", "currentTimestamp=$currentTimestamp")
 
         //初始化年份滚轮
         WheelPickerHelper.setupWheelPicker(
