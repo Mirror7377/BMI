@@ -1,6 +1,7 @@
 package com.example.bmi.ui.bmigauge
 
 import androidx.annotation.ColorInt
+import com.example.bmi.R
 import com.example.bmi.ui.home.enums.Gender
 
 
@@ -110,49 +111,48 @@ object BmiClassifier {
 
 }
 enum class BmiLevel(
-    val statusText: String,
-    @ColorInt val cardBgColor: Int,
-    val descText: String
+     val statusTextRes: Int,
+     val cardBgColor: Int,
+     val descTextRes: Int
 ) {
     VERY_SEVERELY_UNDERWEIGHT(
-        statusText = "Very Severely Underweight",
+        statusTextRes = R.string.bmi_status_very_severely_underweight,
         cardBgColor = 0xFF4343B8.toInt(),
-        //todo 加表情，删除除了NORMAL
-        descText = "We wish you to show some love to yourself! You need to add healthy fats, go nutrient-dense and seek medical advice to gain weight."
+        descTextRes = R.string.bmi_desc_very_severely_underweight
     ),
     SEVERELY_UNDERWEIGHT(
-        statusText = "Severely Underweight",
+        statusTextRes = R.string.bmi_status_severely_underweight,
         cardBgColor = 0xFF1258E1.toInt(),
-        descText = "It’s time to take care of yourself and get rid of the risk of poor immune function and osteoporosis. Treat yourself to a balanced meal and a variety of nutrients."
+        descTextRes = R.string.bmi_desc_severely_underweight
     ),
     UNDERWEIGHT(
-        statusText = "Underweight",
+        statusTextRes = R.string.bmi_status_underweight,
         cardBgColor = 0xFF0099F2.toInt(),
-        descText = "It seems that your body needs more fuel. Unless you’re naturally very slim, you may need to consider ways of gaining weight as your weight may pose certain health risks."
+        descTextRes = R.string.bmi_desc_underweight
     ),
     NORMAL(
-        statusText = "Normal",
+        statusTextRes = R.string.bmi_status_normal,
         cardBgColor = 0xFF54A529.toInt(),
-        descText = "Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight."
+        descTextRes = R.string.bmi_desc_normal
     ),
     OVERWEIGHT(
-        statusText = "Overweight",
+        statusTextRes = R.string.bmi_status_overweight,
         cardBgColor = 0xFFFECD2E.toInt(),
-        descText = "Don’t wait any longer! It’s time to take action to reach your weight target. You are carrying excess fat and should balance your diet and physical activity to achieve a healthy weight."
+        descTextRes = R.string.bmi_desc_overweight
     ),
     OBESE_CLASS_I(
-        statusText = "Obese Class I",
+        statusTextRes = R.string.bmi_status_obese_class_i,
         cardBgColor = 0xFFFFA100.toInt(),
-        descText = "Uh-oh! Your current weight is more than the ideal range and you have an increased risk of developing various health problems. It's time to embrace healthy eating and increase your activity level."
+        descTextRes = R.string.bmi_desc_obese_class_i
     ),
     OBESE_CLASS_II(
-        statusText = "Obese Class II",
+        statusTextRes = R.string.bmi_status_obese_class_ii,
         cardBgColor = 0xFFFF7137.toInt(),
-        descText = "Time to change! You are at high risk of obesity-related diseases. You should increase physical activity and reduce calorie intake slowly but surely. It is also vital to have a health screening."
+        descTextRes = R.string.bmi_desc_obese_class_ii
     ),
     OBESE_CLASS_III(
-        statusText = "Obese Class III",
+        statusTextRes = R.string.bmi_status_obese_class_iii,
         cardBgColor = 0xFFD3333B.toInt(),
-        descText = "We are worried about you! Your weight is a serious and imminent threat to your health. Go for health advice and a weight loss plan scientifically."
+        descTextRes = R.string.bmi_desc_obese_class_iii
     )
 }

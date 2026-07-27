@@ -38,8 +38,6 @@ class BmiChartView @JvmOverloads constructor(
         const val DOT_RADIUS_NORMAL = 3f
         const val DOT_RADIUS_SELECTED = 5.0f
         const val DOT_RADIUS_COLOR = 4f
-
-        const val VALUE_LABEL_TOP_OFFSET = 8f
     }
 
     // 月份锚点缓存（仅 DAY / WEEK 使用）
@@ -282,7 +280,7 @@ class BmiChartView @JvmOverloads constructor(
 
         // 默认滚动到最后 8 个月
         val targetStart = (allData.size - displayCount).coerceAtLeast(0)
-        scrollOffset = targetStart.toFloat() * xInterval
+        scrollOffset = targetStart * xInterval + xInterval / 2f
         updateScrollBounds()
         clampScrollOffset()
 
@@ -344,7 +342,7 @@ class BmiChartView @JvmOverloads constructor(
         step = (step * 10).toInt().toFloat() / 10f
         if (step < 0.1f) step = 0.1f
 
-        axisMin = kotlin.math.floor(axisMin / step).toFloat() * step
+        axisMin = kotlin.math.floor(axisMin / step) * step
         axisMax = axisMin + step * (Y_LABEL_COUNT - 1)
 
         return Triple(axisMin, axisMax, step)
@@ -357,10 +355,15 @@ class BmiChartView @JvmOverloads constructor(
             maxScrollX = 0f
             return
         }
+
         val totalWidth = (allData.size - 1) * xInterval
         val visibleWidth = (displayCount - 1) * xInterval
+
+        // 左侧允许再滑出半个刻度
+        minScrollX = -xInterval / 2f
+
+        // 右侧保持原来的逻辑
         maxScrollX = max(0f, totalWidth - visibleWidth)
-        minScrollX = 0f
     }
 
     private fun clampScrollOffset() {

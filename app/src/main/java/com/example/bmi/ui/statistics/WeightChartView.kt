@@ -263,7 +263,7 @@ class WeightChartView @JvmOverloads constructor(
         updateLayoutMetrics()
 
         val targetStart = (allData.size - displayCount).coerceAtLeast(0)
-        scrollOffset = targetStart.toFloat() * xInterval
+        scrollOffset = targetStart * xInterval + xInterval / 2f
         updateScrollBounds()
         clampScrollOffset()
 
@@ -361,7 +361,7 @@ class WeightChartView @JvmOverloads constructor(
         val totalWidth = (allData.size - 1) * xInterval
         val visibleWidth = (displayCount - 1) * xInterval
         maxScrollX = max(0f, totalWidth - visibleWidth)
-        minScrollX = 0f
+        minScrollX = -xInterval / 2f
     }
 
     private fun clampScrollOffset() {
@@ -438,10 +438,10 @@ class WeightChartView @JvmOverloads constructor(
         canvas.translate(-scrollOffset, 0f)
 
         drawVerticalGridLines(canvas, startIdx, visibleSubList)
-        drawFillArea(canvas, startIdx, visibleSubList)
+        drawFillArea(canvas)
         drawXLabels(canvas, startIdx, visibleSubList)
         drawMonthLabel(canvas, startIdx, endIdx, visibleSubList)
-        drawDataLine(canvas, startIdx, visibleSubList)
+        drawDataLine(canvas)
         drawDots(canvas, startIdx, visibleSubList)
         drawSelectedValue(canvas, startIdx, visibleSubList)
 
@@ -467,8 +467,8 @@ class WeightChartView @JvmOverloads constructor(
         }
     }
 
-    private fun drawFillArea(canvas: Canvas, startIdx: Int, visibleData: List<DayWeightData>) {
-        val points = getDataPoints(startIdx, visibleData)
+    private fun drawFillArea(canvas: Canvas) {
+        val points = getFullDataPoints()
         if (points.size < 2) return
 
         val fillPath = Path()
@@ -622,8 +622,8 @@ class WeightChartView @JvmOverloads constructor(
         }
     }
 
-    private fun drawDataLine(canvas: Canvas, startIdx: Int, visibleData: List<DayWeightData>) {
-        val points = getDataPoints(startIdx, visibleData)
+    private fun drawDataLine(canvas: Canvas) {
+        val points = getFullDataPoints()
         if (points.size < 2) return
 
         val path = Path()
@@ -670,7 +670,7 @@ class WeightChartView @JvmOverloads constructor(
     ) {
         if (selectedDataIndex == null || selectedWeight == null) return
 
-        val points = getDataPoints(startIdx, visibleData)
+        val points = getFullDataPoints()
         val point = points.find { it.dataIndex == selectedDataIndex } ?: return
 
         val label = String.format("%.1f kg", selectedWeight)
@@ -760,6 +760,24 @@ class WeightChartView @JvmOverloads constructor(
             val y = weightToY(data.weight)
             points.add(ChartPoint(dataIndex, x, y))
         }
+        return points
+    }
+
+    private fun getFullDataPoints(): List<ChartPoint> {
+        val points = mutableListOf<ChartPoint>()
+
+        allData.forEachIndexed { index, data ->
+            data.weight?.let {
+                points.add(
+                    ChartPoint(
+                        index,
+                        xStart + index * xInterval,
+                        weightToY(it)
+                    )
+                )
+            }
+        }
+
         return points
     }
 

@@ -45,7 +45,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardContainer"
         android:layout_width="345dp"
-        android:layout_height="590dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         app:cardCornerRadius="12dp"
         app:cardBackgroundColor="@color/white"

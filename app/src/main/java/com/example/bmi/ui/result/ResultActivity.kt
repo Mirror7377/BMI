@@ -3,6 +3,7 @@ package com.example.bmi.ui.result
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -128,7 +129,7 @@ class ResultActivity : BaseActivity() {
 
         // ---------- 2. 状态标签（tvBmiStatus）----------
         val bmiLevel = state.bmiLevel
-        binding.tvBmiStatus.text = bmiLevel.statusText
+        binding.tvBmiStatus.text = getString(bmiLevel.statusTextRes)
         val radius = dpToPx(19.75f).toFloat()
 
         if (hasHistory) {
@@ -155,26 +156,32 @@ class ResultActivity : BaseActivity() {
             binding.statusContainer.isFocusable = false
         }
 
-        // ---------- 3. 个人信息行 ----------
+        // 1. 体重文本（单位保留英文）
         val weightText = when (state.weightUnit) {
             WeightUnit.KG.name -> String.format("%.2f kg", state.weightInput)
             WeightUnit.LB.name -> String.format("%.2f lb", state.weightInput)
             else -> String.format("%.2f kg", state.weightInput)
         }
 
+        // 2. 身高文本（单位保留英文）
         val heightText = when (state.heightUnit) {
             HeightUnit.CM.name -> String.format("%.1f cm", state.heightInput)
             HeightUnit.FT_IN.name -> "${state.feet} ft ${state.inches} in"
             else -> String.format("%.1f cm", state.heightInput)
         }
 
+        // 3. 性别（从资源读取）
         val genderText = when (state.gender) {
-            Gender.MALE.name -> "Male"
-            Gender.FEMALE.name -> "Female"
-            else -> "Male"
+            Gender.MALE.name -> getString(R.string.gender_male)
+            Gender.FEMALE.name -> getString(R.string.gender_female)
+            else -> getString(R.string.gender_male)
         }
 
-        binding.tvBmiInfo.text = "$weightText | $heightText | $genderText | ${state.age} years old"
+        // 4. 年龄（从资源读取，带占位符）
+        val ageText = getString(R.string.age_years_old, state.age)
+
+        // 5. 组装完整信息
+        binding.tvBmiInfo.text = getString(R.string.bmi_info_format, weightText, heightText, genderText, ageText)
 
         // ---------- 4. 图例区域 ----------
         if (hasHistory) {
@@ -321,7 +328,7 @@ class ResultActivity : BaseActivity() {
         }
 
         val unitStr = if (isUserKg) "kg" else "lb"
-        val descText = bmiLevel.descText
+        val descText = getString(bmiLevel.descTextRes)
 
         // 描述文字
         listOf(tvDesc, tvDescHasData).forEach { it.text = descText; it.visibility = View.VISIBLE }
@@ -330,14 +337,14 @@ class ResultActivity : BaseActivity() {
             listOf(tvMain, tvMainHasData).forEach { it.visibility = View.GONE }
             listOf(tvRange, tvRangeHasData).forEach { it.visibility = View.GONE }
         } else {
-            val mainText = "Normal weight for your height($userHeightDisplayText)"
+            val mainText = getString(R.string.normal_weight_for_height, userHeightDisplayText)
             listOf(tvMain, tvMainHasData).forEach {
                 it.text = mainText
                 it.visibility = View.VISIBLE
             }
 
             val rangeStr = String.format("%.1f%s - %.1f%s", stdMinShow, unitStr, stdMaxShow, unitStr)
-            val diffValue = if (userWeightShow < stdMinShow) {
+            val diffValue = if (stdMinShow > userWeightShow) {
                 stdMinShow - userWeightShow
             } else {
                 userWeightShow - stdMaxShow
@@ -417,61 +424,91 @@ class ResultActivity : BaseActivity() {
     }
 
     // ----------  弹出层相关 ----------
-    private fun showBmiLegendDialog(bmiLevel: BmiLevel, age: Int, gender: String) {
+    private fun showBmiLegendDialog(
+        bmiLevel: BmiLevel,
+        age: Int,
+        gender: String
+    ) {
         val dialogBinding = DialogBmiLegendBinding.inflate(layoutInflater)
-        val dialog = BottomSheetDialog(this)
-        dialog.setContentView(dialogBinding.root)
 
-        // Window 配置
-        dialog.window?.apply {
-            setBackgroundDrawableResource(android.R.color.transparent)
-            setGravity(Gravity.BOTTOM)
-            setLayout(dpToPx(375f), WindowManager.LayoutParams.WRAP_CONTENT)
-        }
+        // 使用自定义 Theme
+        val dialog = BottomSheetDialog(
+            this,
+            R.style.Theme_BMI_BottomSheetDialog
+        )
+
+        dialog.setContentView(dialogBinding.root)
 
         dialog.setCancelable(true)
         dialog.setCanceledOnTouchOutside(true)
 
-        // 业务逻辑：标题、性别、仪表盘、图例
+        // 标题
         val isChild = age in 2..20
-        dialogBinding.tvDialogTitle.text = if (isChild) "BMI for Teenagers" else "BMI for Adults"
+        // 标题
+        dialogBinding.tvDialogTitle.text = if (isChild) {
+            getString(R.string.bmi_for_teenagers)
+        } else {
+            getString(R.string.bmi_for_adults)
+        }
 
         val genderText = when (gender) {
-            Gender.MALE.name -> "male"
-            Gender.FEMALE.name -> "female"
-            else -> "male"
+            Gender.MALE.name -> getString(R.string.gender_male)      // "Male"
+            Gender.FEMALE.name -> getString(R.string.gender_female)  // "Female"
+            else -> getString(R.string.gender_male)
         }
+
         if (isChild) {
             dialogBinding.tvAgeGender.visibility = View.VISIBLE
-            dialogBinding.tvAgeGender.text = "$age years old ($genderText)"
+            dialogBinding.tvAgeGender.text = getString(R.string.age_gender_format, age, genderText)
         } else {
             dialogBinding.tvAgeGender.visibility = View.GONE
         }
 
+        // Gauge
         val config = BmiConfigProvider.getConfig(age, gender)
         dialogBinding.bmiGaugeDialog.applyConfig(config)
         dialogBinding.bmiGaugeDialog.setShowPointer(false)
+
+        // 图例高亮
         applyLegendHighlight(dialogBinding, bmiLevel, age, gender)
 
-        dialogBinding.btnGotIt.setOnClickListener { dialog.dismiss() }
+        // 按钮
+        dialogBinding.btnGotIt.setOnClickListener {
+            dialog.dismiss()
+        }
 
-        // 获取 BottomSheet 并设置 Behavior
-        val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-        bottomSheet?.let {
-            BottomSheetBehavior.from(it).apply {
-                state = BottomSheetBehavior.STATE_EXPANDED
-                skipCollapsed = true
-                isHideable = true
-                peekHeight = 0
-                addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+        dialog.setOnShowListener {
+
+            val bottomSheet = dialog.findViewById<FrameLayout>(
+                com.google.android.material.R.id.design_bottom_sheet
+            ) ?: return@setOnShowListener
+
+            val behavior = BottomSheetBehavior.from(bottomSheet)
+
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.skipCollapsed = true
+            behavior.isHideable = true
+            behavior.peekHeight = 0
+
+            behavior.addBottomSheetCallback(
+                object : BottomSheetBehavior.BottomSheetCallback() {
+
+                    override fun onStateChanged(
+                        bottomSheet: View,
+                        newState: Int
+                    ) {
                         if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             dialog.dismiss()
                         }
                     }
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-                })
-            }
+
+                    override fun onSlide(
+                        bottomSheet: View,
+                        slideOffset: Float
+                    ) {
+                    }
+                }
+            )
         }
 
         dialog.show()
@@ -489,7 +526,6 @@ class ResultActivity : BaseActivity() {
         val isChild = age in 2..20
         val config = BmiConfigProvider.getConfig(age, gender)
         val splitPoints = config.splitPoints
-        val colors = config.colors
 
         val radius = dpToPx(15f).toFloat()
         val whiteColor = 0xFFFFFFFF.toInt()
@@ -516,17 +552,6 @@ class ResultActivity : BaseActivity() {
             binding.tvLevelRange4, binding.tvLevelRange5, binding.tvLevelRange6, binding.tvLevelRange7
         )
 
-        // 等级名称
-        val levelNames = listOf(
-            "Very Severely Underweight",
-            "Severely Underweight",
-            "Underweight",
-            "Normal",
-            "Overweight",
-            "Obese Class I",
-            "Obese Class II",
-            "Obese Class III"
-        )
 
         // 儿童可见索引：2,3,4,5 (Underweight, Normal, Overweight, Obese I)
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
@@ -577,7 +602,7 @@ class ResultActivity : BaseActivity() {
             }
 
             // 设置名称
-            nameTv.text = levelNames[index]
+            nameTv.text = getString(level.statusTextRes)
 
             // 确定颜色
             val color = if (isChild) {

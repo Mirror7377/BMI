@@ -67,9 +67,24 @@ class ProfileActivity : BaseActivity() {
             }
         }
 
-        binding.tvLanguage.setOnClickListener {
+        // Language 行（已改为容器）
+        binding.llLanguageRow.setOnClickListener {
             val intent = Intent(this, LanguageActivity::class.java)
             startActivityForResult(intent, REQUEST_LANGUAGE)
+        }
+
+        // Rate Us 行（新容器）
+        binding.llRateUs.setOnClickListener {
+            val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            }
+        }
+
+        // Feedback 行（新容器）
+        binding.llFeedback.setOnClickListener {
+            startActivity(Intent(this, FeedbackActivity::class.java))
         }
 
         binding.ivExtraIcon.setOnClickListener {
@@ -83,17 +98,7 @@ class ProfileActivity : BaseActivity() {
             showSyncIssueDialog()
         }
 
-        binding.tvFeedback.setOnClickListener {
-            startActivity(Intent(this, FeedbackActivity::class.java))
-        }
-
-        binding.tvRateUs.setOnClickListener {
-            val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            }
-        }
+        // 注意：原来单独对 tvRateUs 和 tvFeedback 的监听已移除
     }
 
     private fun observeState() {

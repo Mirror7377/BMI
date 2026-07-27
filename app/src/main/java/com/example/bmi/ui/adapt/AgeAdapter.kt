@@ -24,6 +24,7 @@ class AgeAdapter(
 
         holder.binding.tvAgeItem.text = age.toString()
 
+        //设置点击事件
         holder.itemView.setOnClickListener {
             onAgeClicked(age)
         }

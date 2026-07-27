@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -167,7 +168,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- 第二个容器（保持不变） -->
+    <!-- 第二个容器（Language 和 Sync） -->
     <androidx.cardview.widget.CardView
         android:id="@+id/languageContainer"
         android:layout_width="345dp"
@@ -180,21 +181,61 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/ivLangIcon1"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/thumbnail"
-                android:scaleType="centerInside"
+            <!-- ====== Language 行（可点击容器，无波纹） ====== -->
+            <LinearLayout
+                android:id="@+id/llLanguageRow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent"
                 android:layout_marginTop="24dp"
-                android:layout_marginStart="15dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
+                <ImageView
+                    android:id="@+id/ivLangIcon1"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/thumbnail"
+                    android:scaleType="centerInside"
+                    android:layout_marginStart="15dp" />
+
+                <TextView
+                    android:id="@+id/tvLanguage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:fontWeight="400"
+                    android:lineHeight="21dp"
+                    android:letterSpacing="-0.009375"
+                    android:layout_marginStart="10dp" />
+
+            </LinearLayout>
+
+            <!-- 分隔线 -->
+            <View
+                android:id="@+id/dividerLang"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="@color/bg_fg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/llLanguageRow"
+                app:layout_constraintBottom_toTopOf="@id/ivLangIcon2"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <!-- ====== Sync 行（保持不变） ====== -->
             <ImageView
                 android:id="@+id/ivLangIcon2"
                 android:layout_width="24dp"
@@ -205,34 +246,6 @@
                 android:layout_marginStart="15dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <!-- 分隔线：位于两个图标之间，居中 -->
-            <View
-                android:id="@+id/dividerLang"
-                android:layout_width="264.5dp"
-                android:layout_height="0.5dp"
-                android:background="@color/bg_fg"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivLangIcon1"
-                app:layout_constraintBottom_toTopOf="@id/ivLangIcon2"
-                app:layout_constraintVertical_chainStyle="packed" />
-
-            <TextView
-                android:id="@+id/tvLanguage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/language"
-                android:textColor="@color/text_black"
-                android:textSize="16sp"
-                android:fontFamily="@font/montserrat_regular"
-                android:fontWeight="400"
-                android:lineHeight="21dp"
-                android:letterSpacing="-0.009375"
-                android:layout_marginStart="10dp"
-                app:layout_constraintStart_toEndOf="@id/ivLangIcon1"
-                app:layout_constraintTop_toTopOf="@id/ivLangIcon1"
-                app:layout_constraintBottom_toBottomOf="@id/ivLangIcon1"/>
 
             <TextView
                 android:id="@+id/tvLanguageValue"
@@ -268,7 +281,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- 第三个容器 -->
+    <!-- 第三个容器（更多选项） -->
     <androidx.cardview.widget.CardView
         android:id="@+id/moreContainer"
         android:layout_width="345dp"
@@ -285,7 +298,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- 图标1 带背景 -->
+            <!-- ====== 第一行：Remove Ads（不可点击） ====== -->
             <ImageView
                 android:id="@+id/ivIcon1"
                 android:layout_width="32dp"
@@ -299,85 +312,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- 分隔线 1-2 -->
-            <View
-                android:id="@+id/divider1"
-                android:layout_width="264.5dp"
-                android:layout_height="0.5dp"
-                android:background="@color/bg_fg"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivIcon1"
-                app:layout_constraintBottom_toTopOf="@id/ivIcon2"
-                app:layout_constraintVertical_chainStyle="packed" />
-
-            <!-- 图标2 -->
-            <ImageView
-                android:id="@+id/ivIcon2"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/icon_2"
-                android:background="@drawable/icon_bg"
-                android:padding="4dp"
-                android:scaleType="centerInside"
-                android:layout_marginTop="78dp"
-                android:layout_marginStart="15dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <!-- 分隔线 2-3 -->
-            <View
-                android:id="@+id/divider2"
-                android:layout_width="264.5dp"
-                android:layout_height="0.5dp"
-                android:background="@color/bg_fg"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivIcon2"
-                app:layout_constraintBottom_toTopOf="@id/ivIcon3"
-                app:layout_constraintVertical_chainStyle="packed" />
-
-            <!-- 图标3 -->
-            <ImageView
-                android:id="@+id/ivIcon3"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/icon_3"
-                android:background="@drawable/icon_bg"
-                android:padding="4dp"
-                android:scaleType="centerInside"
-                android:layout_marginTop="138dp"
-                android:layout_marginStart="15dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <!-- 分隔线 3-4 -->
-            <View
-                android:id="@+id/divider3"
-                android:layout_width="264.5dp"
-                android:layout_height="0.5dp"
-                android:background="@color/bg_fg"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivIcon3"
-                app:layout_constraintBottom_toTopOf="@id/ivIcon4"
-                app:layout_constraintVertical_chainStyle="packed" />
-
-            <!-- 图标4 -->
-            <ImageView
-                android:id="@+id/ivIcon4"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/icon_4"
-                android:background="@drawable/icon_bg"
-                android:padding="4dp"
-                android:scaleType="centerInside"
-                android:layout_marginTop="198dp"
-                android:layout_marginStart="15dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <!-- 文本1 -->
             <TextView
                 android:id="@+id/tvRemoveAds"
                 android:layout_width="wrap_content"
@@ -394,41 +328,131 @@
                 app:layout_constraintTop_toTopOf="@id/ivIcon1"
                 app:layout_constraintBottom_toBottomOf="@id/ivIcon1" />
 
-            <!-- 文本2 -->
-            <TextView
-                android:id="@+id/tvRateUs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/rate_us"
-                android:textColor="@color/text_black"
-                android:textSize="16sp"
-                android:fontFamily="@font/montserrat_regular"
-                android:fontWeight="400"
-                android:lineHeight="21dp"
-                android:letterSpacing="-0.009375"
-                android:layout_marginStart="15dp"
-                app:layout_constraintStart_toEndOf="@id/ivIcon2"
-                app:layout_constraintTop_toTopOf="@id/ivIcon2"
-                app:layout_constraintBottom_toBottomOf="@id/ivIcon2" />
+            <!-- 分隔线 1-2 -->
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="@color/bg_fg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivIcon1"
+                app:layout_constraintBottom_toTopOf="@id/llRateUs" />
 
-            <!-- 文本3 -->
-            <TextView
-                android:id="@+id/tvFeedback"
-                android:layout_width="wrap_content"
+            <!-- ====== 第二行：Rate Us（可点击容器，无波纹） ====== -->
+            <LinearLayout
+                android:id="@+id/llRateUs"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/feedback"
-                android:textColor="@color/text_black"
-                android:textSize="16sp"
-                android:fontFamily="@font/montserrat_regular"
-                android:fontWeight="400"
-                android:lineHeight="21dp"
-                android:letterSpacing="-0.009375"
-                android:layout_marginStart="15dp"
-                app:layout_constraintStart_toEndOf="@id/ivIcon3"
-                app:layout_constraintTop_toTopOf="@id/ivIcon3"
-                app:layout_constraintBottom_toBottomOf="@id/ivIcon3" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="78dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <!-- 文本4 -->
+                <ImageView
+                    android:id="@+id/ivIcon2"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/icon_2"
+                    android:background="@drawable/icon_bg"
+                    android:padding="4dp"
+                    android:scaleType="centerInside"
+                    android:layout_marginStart="15dp" />
+
+                <TextView
+                    android:id="@+id/tvRateUs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rate_us"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:fontWeight="400"
+                    android:lineHeight="21dp"
+                    android:letterSpacing="-0.009375"
+                    android:layout_marginStart="15dp" />
+            </LinearLayout>
+
+            <!-- 分隔线 2-3 -->
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="@color/bg_fg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/llRateUs"
+                app:layout_constraintBottom_toTopOf="@id/llFeedback" />
+
+            <!-- ====== 第三行：Feedback（可点击容器，无波纹） ====== -->
+            <LinearLayout
+                android:id="@+id/llFeedback"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="138dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/ivIcon3"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/icon_3"
+                    android:background="@drawable/icon_bg"
+                    android:padding="4dp"
+                    android:scaleType="centerInside"
+                    android:layout_marginStart="15dp" />
+
+                <TextView
+                    android:id="@+id/tvFeedback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/feedback"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:fontWeight="400"
+                    android:lineHeight="21dp"
+                    android:letterSpacing="-0.009375"
+                    android:layout_marginStart="15dp" />
+            </LinearLayout>
+
+            <!-- 分隔线 3-4 -->
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="264.5dp"
+                android:layout_height="0.5dp"
+                android:background="@color/bg_fg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/llFeedback"
+                app:layout_constraintBottom_toTopOf="@id/ivIcon4" />
+
+            <!-- ====== 第四行：Privacy Policy（不可点击） ====== -->
+            <ImageView
+                android:id="@+id/ivIcon4"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/icon_4"
+                android:background="@drawable/icon_bg"
+                android:padding="4dp"
+                android:scaleType="centerInside"
+                android:layout_marginTop="198dp"
+                android:layout_marginStart="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/tvPrivacyPolicy"
                 android:layout_width="wrap_content"

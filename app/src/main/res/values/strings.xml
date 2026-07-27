@@ -79,9 +79,36 @@
     <string name="update">Update</string>
     <string name="quot">\"</string>
     <string name="yh">\'</string>
+    <string name="time_morning">Morning</string>
+    <string name="time_afternoon">Afternoon</string>
+    <string name="time_evening">Evening</string>
+    <string name="time_night">Night</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="age_years_old">%d years old</string>
+    <string name="bmi_info_format">%s | %s | %s | %s</string>
+    <!-- BMI 状态名称 -->
+    <string name="bmi_status_very_severely_underweight">Very Severely Underweight</string>
+    <string name="bmi_status_severely_underweight">Severely Underweight</string>
+    <string name="bmi_status_underweight">Underweight</string>
+    <string name="bmi_status_normal">Normal</string>
+    <string name="bmi_status_overweight">Overweight</string>
+    <string name="bmi_status_obese_class_i">Obese Class I</string>
+    <string name="bmi_status_obese_class_ii">Obese Class II</string>
+    <string name="bmi_status_obese_class_iii">Obese Class III</string>
+
+    <!-- BMI 描述 -->
+    <string name="bmi_desc_very_severely_underweight">We wish you to show some love to yourself! You need to add healthy fats, go nutrient-dense and seek medical advice to gain weight.</string>
+    <string name="bmi_desc_severely_underweight">It’s time to take care of yourself and get rid of the risk of poor immune function and osteoporosis. Treat yourself to a balanced meal and a variety of nutrients.</string>
+    <string name="bmi_desc_underweight">It seems that your body needs more fuel. Unless you’re naturally very slim, you may need to consider ways of gaining weight as your weight may pose certain health risks.</string>
+    <string name="bmi_desc_normal">Congratulations! You’re in a great place now. Keep up your healthy habits to maintain your healthy weight.</string>
+    <string name="bmi_desc_overweight">Don’t wait any longer! It’s time to take action to reach your weight target. You are carrying excess fat and should balance your diet and physical activity to achieve a healthy weight.</string>
+    <string name="bmi_desc_obese_class_i">Uh-oh! Your current weight is more than the ideal range and you have an increased risk of developing various health problems. It\'s time to embrace healthy eating and increase your activity level.</string>
+    <string name="bmi_desc_obese_class_ii">Time to change! You are at high risk of obesity-related diseases. You should increase physical activity and reduce calorie intake slowly but surely. It is also vital to have a health screening.</string>
+    <string name="bmi_desc_obese_class_iii">We are worried about you! Your weight is a serious and imminent threat to your health. Go for health advice and a weight loss plan scientifically.</string>
     <string name="error_height_invalid">Please input a valid height (1-250 cm) to calculate your BMI accurately</string>
     <string name="error_height_ft_invalid">Please input a valid height (1\' - 8\' ft) to calculate your BMI accurately</string>
     <string name="error_height_inches_invalid">Please input a valid height (0 - 11 in) to calculate your BMI accurately</string>
     <string name="error_height_full_invalid">Please input a valid height (1\' - 8\'2\'\') to calculate your BMI accurately</string>
-
+    <string name="error_weight_invalid">Please input a valid weight (%d-%d) to calculate your BMI accurately</string>
 </resources>

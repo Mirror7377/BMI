@@ -6,8 +6,6 @@ import com.example.bmi.ui.home.enums.TimeOfDay
 import com.example.bmi.ui.home.enums.WeightUnit
 
 sealed class HomeIntent {
-    // 初始化
-    object Init : HomeIntent()
 
     // 体重相关
     data class WeightChanged(val value: Double) : HomeIntent()           // 用户手动输入（kg）

@@ -36,7 +36,6 @@ class HomeViewModel @Inject constructor(
     // ---------- Intent 处理 ----------
     fun sendIntent(intent: HomeIntent) {
         when (intent) {
-            HomeIntent.Init -> init()
             is HomeIntent.WeightChanged -> onWeightChanged(intent.value)
             is HomeIntent.WeightUnitChanged -> onWeightUnitChanged(intent.unit)
             is HomeIntent.HeightCmChanged -> onHeightCmChanged(intent.value)
@@ -50,22 +49,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ---------- 各处理函数 ----------
-    private fun init() {
-        val state = _state.value
-        // 初始化时自动设置当前时间
-        val now = System.currentTimeMillis()
-        val timeOfDay = TimeOfDay.fromSystemTime()
-        val weightDisplay = String.format("%.2f", state.weightInput)
-        updateState {
-            copy(
-                //修正时间
-                timestamp = now,
-                timeOfDay = timeOfDay,
-                weightDisplay = weightDisplay
-            )
-        }
-    }
 
     private fun onWeightChanged(value: Double) {
         val (min, max) = when (_state.value.weightUnit) {
@@ -76,14 +59,12 @@ class HomeViewModel @Inject constructor(
         val kgValue = if (_state.value.weightUnit == WeightUnit.KG) {
             clamped
         } else {
-            //todo 为什么转换？
             UnitConverter.lbToKg(clamped)
         }
         updateState {
             copy(
                 weightInput = clamped,
-                weightKg = kgValue,
-                weightDisplay = String.format("%.2f", clamped)
+                weightKg = kgValue
             )
         }
     }
@@ -105,8 +86,7 @@ class HomeViewModel @Inject constructor(
             copy(
                 weightUnit = unit,
                 weightInput = newWeightInput,
-                weightKg = newWeightKg,
-                weightDisplay = String.format("%.2f", newWeightInput)
+                weightKg = newWeightKg
             )
         }
     }
@@ -186,7 +166,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onAgeChanged(age: Int) {
-        val clamped = age.coerceIn(2, 100)
+        val clamped = age.coerceIn(2, 99)
         updateState { copy(age = clamped) }
     }
 
@@ -234,7 +214,7 @@ class HomeViewModel @Inject constructor(
             weightKg = state.weightKg,
             heightCm = state.heightCm,
             timestamp = state.timestamp,
-            timeOfDay = state.timeOfDay.displayName,
+            timeOfDay = state.timeOfDay.name,
             age = state.age,
             gender = state.gender.name,
             bmi = bmi,
@@ -249,14 +229,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
-
-
-    private fun formatTime(timestamp: Long, timeOfDay: TimeOfDay): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        val dateStr = sdf.format(Date(timestamp))
-        return "$dateStr ${timeOfDay.displayName}"
-    }
 
     private inline fun updateState(block: HomeState.() -> HomeState) {
         _state.update { it.block() }

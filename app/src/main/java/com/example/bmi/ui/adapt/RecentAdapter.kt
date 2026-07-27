@@ -48,7 +48,8 @@ class RecentAdapter(
             } else {
                 BmiClassifier.classifyChild(record.age, record.gender, record.bmi)
             }
-            binding.tvLevelName.text = bmiLevel.statusText
+            binding.tvLevelName.text = binding.root.context.getString(bmiLevel.statusTextRes)
+
 
             // 3. 彩色圆点（纯代码动态创建）
             val density = binding.root.context.resources.displayMetrics.density

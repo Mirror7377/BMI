@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +41,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import androidx.core.view.isEmpty
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -82,7 +84,6 @@ class HomeFragment : Fragment() {
         setupListeners()
         setupAgeRecyclerView()
         observeEffect()
-        viewModel.sendIntent(HomeIntent.Init)
     }
 
     // ---- 状态观察 ----
@@ -125,7 +126,7 @@ class HomeFragment : Fragment() {
         heightParams.marginStart = dpToPx(heightMarginStart)
         binding.selectedUnitBgHeight.layoutParams = heightParams
 
-        binding.etWeightValue.setText(state.weightDisplay)
+        binding.etWeightValue.setText(String.format("%.2f", state.weightInput))
         when (state.heightUnit) {
             HeightUnit.CM -> {
                 binding.heightFtInGroup.visibility = View.GONE
@@ -142,7 +143,7 @@ class HomeFragment : Fragment() {
 
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         binding.tvDateDisplay.text = dateFormat.format(Date(state.timestamp))
-        binding.tvTimeOfDayDisplay.text = state.timeOfDay.displayName
+        binding.tvTimeOfDayDisplay.setText(state.timeOfDay.displayName)
         updateGenderUI(state.gender)
     }
 
@@ -234,7 +235,7 @@ class HomeFragment : Fragment() {
         ).show()
     }
 
-    // ---- 年龄滚轮（保持原样，因样式特殊） ----
+    // ---- 年龄滚轮 ----
     private fun setupAgeRecyclerView() {
         val ages = (2..99).toList()
         ageAdapter = AgeAdapter(ages) { selectedAge ->
@@ -244,16 +245,24 @@ class HomeFragment : Fragment() {
         binding.rvAgePicker.adapter = ageAdapter
 
         if (binding.rvAgePicker.itemDecorationCount == 0) {
+            //添加卡片间距
             binding.rvAgePicker.addItemDecoration(AgeItemDecoration(resources.getDimensionPixelSize(R.dimen.age_item_space)))
         }
+
+        //专门用来让 RecyclerView 在滚动停止时，自动将离中心最近的那个 Item 平滑地对齐到中心位置。
         snapHelper = LinearSnapHelper()
+        //吸到你的年龄滚轮
         snapHelper.attachToRecyclerView(binding.rvAgePicker)
 
+        //滚动监听
         binding.rvAgePicker.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                // 只有完全停止时才执行下面的逻辑
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     snapHelper.findSnapView(recyclerView.layoutManager)?.let {
+                        //查询索引
                         val pos = recyclerView.getChildAdapterPosition(it)
+                        //不等于-1时
                         if (pos != RecyclerView.NO_POSITION) viewModel.sendIntent(HomeIntent.AgeChanged(ages[pos]))
                     }
                 }
@@ -261,16 +270,28 @@ class HomeFragment : Fragment() {
         })
 
         binding.rvAgePicker.post {
+            //为了放到正中央
             val sidePadding = (binding.rvAgePicker.width - resources.getDimensionPixelSize(R.dimen.age_item_width)) / 2
             binding.rvAgePicker.setPadding(sidePadding, 0, sidePadding, 0)
+            //2-99
             val index = viewModel.state.value.age - 2
+            //把制定索引的数据滚动到正中间
             (binding.rvAgePicker.layoutManager as LinearLayoutManager).scrollToPosition(index)
+            //todo闪烁？
             binding.rvAgePicker.post {
+                //当前停在中央的那个卡片
                 snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let { view ->
-                    binding.rvAgePicker.layoutManager?.let { snapHelper.calculateDistanceToFinalSnap(it, view) }
-                        ?.let {
-                        binding.rvAgePicker.scrollBy(it[0], it[1])
+                    binding.rvAgePicker.layoutManager?.let {
+                        //计算“物理中心”与“当前卡片中心”的像素差
+                        //it：是“RecyclerView 的 LayoutManager
+                        //view：是“离屏幕中心最近的那个卡片 View”
+                        snapHelper.calculateDistanceToFinalSnap(it, view)
                     }
+                        ?.let {
+                            //[0]：水平方向（X 轴）需要滚动的像素距离。
+                            //[1]：垂直方向（Y 轴）需要滚动的像素距离。
+                            binding.rvAgePicker.scrollBy(it[0], it[1])
+                        }
                 }
                 updateAgePickerEffects()
             }
@@ -283,9 +304,10 @@ class HomeFragment : Fragment() {
         })
     }
 
+    //渐变设置
     private fun updateAgePickerEffects() {
         val recycler = binding.rvAgePicker
-        if (recycler.childCount == 0) return
+        if (recycler.isEmpty()) return
 
         val itemWidthPx = resources.getDimensionPixelSize(R.dimen.age_item_width)
         val spacePx = resources.getDimensionPixelSize(R.dimen.age_item_space)
@@ -293,13 +315,15 @@ class HomeFragment : Fragment() {
         val maxDistance = 2.5f * unitPx
         val centerX = recycler.width / 2f
         val argbEvaluator = ArgbEvaluator()
-        val startColor = 0xFF000000.toInt()
-        val endColor = 0xFFBBBBBB.toInt()
+        val startColor = ContextCompat.getColor(requireContext(), R.color.bg_start)
+        val endColor = ContextCompat.getColor(requireContext(), R.color.bg_end)
 
         for (i in 0 until recycler.childCount) {
             val child = recycler.getChildAt(i)
-            val tv = child.findViewById<TextView>(R.id.tvAgeItem) ?: continue
+            val tv = child.findViewById<TextView>(R.id.tvAgeItem)
+            //距离中心点的距离
             val distance = abs(child.left + child.width / 2f - centerX)
+            //计算渐变比例
             val ratio = (distance / maxDistance).coerceIn(0f, 1f)
             tv.alpha = 1f - ratio * 0.75f
             tv.setTextColor(argbEvaluator.evaluate(ratio, startColor, endColor) as Int)
@@ -342,7 +366,7 @@ class HomeFragment : Fragment() {
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
             }
             raw.toDoubleOrNull() == null -> {
-                editText.setText(viewModel.state.value.weightDisplay)
+                editText.setText(String.format("%.2f", viewModel.state.value.weightInput))
                 CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
