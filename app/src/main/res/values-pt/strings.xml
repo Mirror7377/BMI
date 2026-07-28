@@ -9,6 +9,7 @@
     <string name="cm">cm</string>
     <string name="time">Hora</string>
     <string name="age">Idade</string>
+    <string name="feedback_thanks_message">Obrigado pelo seu feedback! \"%s\" Faremos o nosso melhor para proporcionar uma melhor experiência ao usuário.</string>
     <string name="yinhao">"</string>
     <string name="danyinhao">\'</string>
     <string name="cancel">CANCELAR</string>

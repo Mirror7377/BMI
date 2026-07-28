@@ -5,6 +5,7 @@
     <string name="height">Taille</string>
     <string name="lb">lb</string>
     <string name="kg">kg</string>
+    <string name="feedback_thanks_message">Merci pour vos commentaires ! «%s» Nous ferons de notre mieux pour offrir une meilleure expérience utilisateur.</string>
     <string name="ft_in">ft·in</string>
     <string name="cm">cm</string>
     <string name="time">Heure</string>

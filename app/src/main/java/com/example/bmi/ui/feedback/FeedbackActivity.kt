@@ -33,26 +33,43 @@ class FeedbackActivity : AppCompatActivity() {
         binding = ActivityFeedbackBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 使按钮能动态调整位置
-        val originalBottomMargin =
-            resources.getDimensionPixelSize(R.dimen.feedback_bottom_margin)
+        // 读取按钮的底部外边距 使按钮能动态调整位置
+        val originalBottomMargin = resources.getDimensionPixelSize(R.dimen.feedback_bottom_margin)
 
+        //设置一个 窗口插入监听器
         ViewCompat.setOnApplyWindowInsetsListener(binding.feedbackContainer) { view, insets ->
-
+            //从 insets 中提取 键盘输入法（IME）的底部插入高度
             val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-
+            //动态更新 feedbackContainer 的 bottomMargin 属性。
             view.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 bottomMargin = originalBottomMargin + imeBottom
             }
-
             insets
         }
 
         setupListeners()
-        observeState()
-        observeEffect()
+        // 初始按钮置灰
+        updateSaveButtonState(false)
 
-        // 监听输入框变化
+    }
+
+    private fun setupListeners() {
+        // 返回按钮
+        binding.ivBack.setOnClickListener {
+            finish()
+        }
+
+        // 提交按钮
+        binding.btnSave.setOnClickListener {
+            val feedbackText = binding.etFeedback.text.toString().trim()
+            if (feedbackText.isNotEmpty()) {
+                val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                prefs.edit().putString("feedback_content", feedbackText).apply()
+                finish()
+            }
+        }
+
+        // 输入框监听（控制按钮启用/禁用）
         binding.etFeedback.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -61,71 +78,14 @@ class FeedbackActivity : AppCompatActivity() {
                 updateSaveButtonState(hasText)
             }
         })
-        // 初始状态（无内容）
-        updateSaveButtonState(false)
-
-        viewModel.handleIntent(FeedbackIntent.Init)
-
-
     }
 
     private fun updateSaveButtonState(enabled: Boolean) {
-        //todo 按钮置灰，动态显示如何实现
         val bgColor = if (enabled) {
-            ContextCompat.getColor(this, R.color.splash_blue) // #3659CF
+            ContextCompat.getColor(this, R.color.splash_blue)
         } else {
-            ContextCompat.getColor(this, R.color.bg_gray) // #EAEAEE
+            ContextCompat.getColor(this, R.color.bg_gray)
         }
         binding.btnSave.setCardBackgroundColor(bgColor)
-    }
-
-    private fun setupListeners() {
-        binding.ivBack.setOnClickListener {
-            finish()
-        }
-
-        binding.btnSave.setOnClickListener {
-            val text = binding.etFeedback.text.toString().trim()
-            if (text.isEmpty()) {
-            } else {
-                // 然后关闭当前 Activity 返回上一页
-                finish()
-            }
-        }
-    }
-
-    private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    renderState(state)
-                }
-            }
-        }
-    }
-
-    private fun renderState(state: FeedbackState) {
-        // 可处理加载状态、错误等
-        if (state.isLoading) {
-            // 显示进度
-        }
-        state.errorMessage?.let {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun observeEffect() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.effect.collect { effect ->
-                    when (effect) {
-                        is FeedbackEffect.ShowToast -> {
-                            Toast.makeText(this@FeedbackActivity, effect.message, Toast.LENGTH_SHORT).show()
-                        }
-                        is FeedbackEffect.NavigateBack -> finish()
-                    }
-                }
-            }
-        }
     }
 }

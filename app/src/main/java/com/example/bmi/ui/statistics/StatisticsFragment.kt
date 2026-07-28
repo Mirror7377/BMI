@@ -52,9 +52,6 @@ class StatisticsFragment : Fragment() {
             (requireActivity() as? MainActivity)?.goToHome()
         }
 
-        // 保留原有的日期范围回调（如果需要在 Fragment 中处理，可设置）
-        // 原代码中并未使用该回调做 UI 显示，所以不处理也可以
-        // 若需要，可在这里设置 binding.chartView.onDataRangeChanged = { ... }
     }
 
     // ========== 观察状态 ==========
@@ -62,28 +59,11 @@ class StatisticsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    // 设置模式（View 原有方法）
-                    binding.chartView.setMode(
-                        when (state.mode) {
-                            ChartMode.DAY -> BmiChartView.ChartMode.DAY
-                            ChartMode.WEEK -> BmiChartView.ChartMode.WEEK
-                            ChartMode.MONTH -> BmiChartView.ChartMode.MONTH
-                        }
-                    )
-                    binding.weightChartView.setMode(
-                        when (state.mode) {
-                            ChartMode.DAY -> WeightChartView.ChartMode.DAY
-                            ChartMode.WEEK -> WeightChartView.ChartMode.WEEK
-                            ChartMode.MONTH -> WeightChartView.ChartMode.MONTH
-                        }
-                    )
+                    binding.chartView.setMode(state.mode)
+                    binding.weightChartView.setMode(state.mode)
 
-                    // 设置数据（View 原有方法）
                     binding.chartView.setData(state.bmiData)
                     binding.weightChartView.setData(state.weightData)
-
-                    // 加载状态（可显示进度条，根据需求）
-                    // 例如：binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                 }
             }
         }
@@ -109,6 +89,7 @@ class StatisticsFragment : Fragment() {
         }
     }
 
+    //移动背景
     private fun moveBgTo(targetMarginStartDp: Float) {
         val bg = binding.selectedPeriodBg
         val params = bg.layoutParams as ConstraintLayout.LayoutParams

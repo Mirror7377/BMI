@@ -35,6 +35,7 @@ class ProfileViewModel @Inject constructor(private val repository: BmiRepository
             is ProfileIntent.Logout -> performLogout()
             is ProfileIntent.ImportJson -> importJson(intent.json)
             is ProfileIntent.ImportSampleData -> importSampleData()
+            is ProfileIntent.AvatarClicked -> handleAvatarClicked()
         }
     }
 
@@ -93,7 +94,7 @@ class ProfileViewModel @Inject constructor(private val repository: BmiRepository
     }
 
     private fun importSampleData() {
-        viewModelScope.launch(Dispatchers.IO) { // 全部在 IO 线程
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 // 1. 读取文件（在后台线程）
                 val jsonString = application.assets.open("sample_records.json")
@@ -119,6 +120,18 @@ class ProfileViewModel @Inject constructor(private val repository: BmiRepository
             } catch (e: Exception) {
                 // 解析或数据库插入失败
                 Log.e("ProfileViewModel", "Import failed: ${e.message}", e)
+            }
+        }
+    }
+
+    private fun handleAvatarClicked() {
+        viewModelScope.launch {
+            val currentState = _state.value
+            if (currentState.isLoggedIn) {
+                // 发送 Effect 通知 Activity 显示用户信息对话框
+                _effect.emit(ProfileEffect.ShowUserInfoDialog)
+            } else {
+                _effect.emit(ProfileEffect.ShowLoginDialog)
             }
         }
     }

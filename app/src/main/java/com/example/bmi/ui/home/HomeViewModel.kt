@@ -235,6 +235,3 @@ class HomeViewModel @Inject constructor(
         _state.update { it.block() }
     }
 }
-sealed class HomeEffect {
-    data class NavigateToResult(val record: BmiRecord) : HomeEffect()
-}

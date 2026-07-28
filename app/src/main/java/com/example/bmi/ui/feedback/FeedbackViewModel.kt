@@ -19,14 +19,5 @@ class FeedbackViewModel @Inject constructor() : ViewModel() {
     private val _effect = MutableSharedFlow<FeedbackEffect>()
     val effect: SharedFlow<FeedbackEffect> = _effect.asSharedFlow()
 
-    fun handleIntent(intent: FeedbackIntent) {
-        when (intent) {
-            is FeedbackIntent.Init -> init()
-            else -> {}
-        }
-    }
 
-    private fun init() {
-        // 暂不实现
-    }
 }

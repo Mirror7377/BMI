@@ -9,6 +9,7 @@
     <string name="cm">см</string>
     <string name="time">Время</string>
     <string name="age">Возраст</string>
+    <string name="feedback_thanks_message">Спасибо за ваш отзыв! \"%s\" Мы сделаем всё возможное, чтобы улучшить пользовательский опыт.</string>
     <string name="yinhao">"</string>
     <string name="danyinhao">\'</string>
     <string name="cancel">ОТМЕНА</string>

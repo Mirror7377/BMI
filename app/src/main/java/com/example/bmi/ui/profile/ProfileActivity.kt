@@ -59,11 +59,7 @@ class ProfileActivity : BaseActivity() {
         binding.ivBack.setOnClickListener { finish() }
 
         binding.profileContainer.setOnClickListener {
-            if (viewModel.state.value.isLoggedIn) {
-                showUserInfoDialog()
-            } else {
-                showLoginDialog()
-            }
+            viewModel.handleIntent(ProfileIntent.AvatarClicked)
         }
 
         // Language 行
@@ -130,6 +126,7 @@ class ProfileActivity : BaseActivity() {
             params.startToEnd = binding.tvNameLogin.id
             params.topToTop = binding.tvNameLogin.id
             params.bottomToBottom = binding.tvNameLogin.id
+            //ConstraintLayout.LayoutParams.UNSET 清空“旧约束”，防止位置错乱
             params.startToStart = ConstraintLayout.LayoutParams.UNSET
             params.endToEnd = ConstraintLayout.LayoutParams.UNSET
         } else {
@@ -139,7 +136,9 @@ class ProfileActivity : BaseActivity() {
             params.startToStart = ConstraintLayout.LayoutParams.UNSET
             params.endToEnd = ConstraintLayout.LayoutParams.UNSET
         }
+        //把修改后的参数重新绑定给图标
         binding.ivBackupIcon.layoutParams = params
+        //强制触发重绘和重新测量
         binding.ivBackupIcon.requestLayout()
     }
 
@@ -148,7 +147,8 @@ class ProfileActivity : BaseActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        is ProfileEffect.NavigateBack -> finish()
+                        is ProfileEffect.ShowUserInfoDialog -> showUserInfoDialog()
+                        is ProfileEffect.ShowLoginDialog -> showLoginDialog()
                         is ProfileEffect.Success -> dialogSuccess()
                     }
                 }
@@ -261,6 +261,18 @@ class ProfileActivity : BaseActivity() {
             R.drawable.check_circle,
             "import records successfully."
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val feedbackContent = prefs.getString("feedback_content", null)
+        if (!feedbackContent.isNullOrEmpty()) {
+            prefs.edit().remove("feedback_content").apply()
+            // 从资源文件读取带占位符的模板，并用 feedbackContent 替换 %s
+            val message = getString(R.string.feedback_thanks_message, feedbackContent)
+            CommonBanner.show(this, R.drawable.check_circle, message)
+        }
     }
 
 }

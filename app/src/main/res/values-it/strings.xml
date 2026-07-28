@@ -6,6 +6,7 @@
     <string name="lb">lb</string>
     <string name="kg">kg</string>
     <string name="ft_in">ft·in</string>
+    <string name="feedback_thanks_message">Grazie per il tuo feedback! «%s» Faremo del nostro meglio per offrire una migliore esperienza utente.</string>
     <string name="cm">cm</string>
     <string name="time">Ora</string>
     <string name="age">Età</string>

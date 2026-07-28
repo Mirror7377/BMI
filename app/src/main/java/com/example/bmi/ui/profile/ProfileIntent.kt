@@ -7,4 +7,5 @@ sealed class ProfileIntent {
     data class ImportJson(val json: String) : ProfileIntent()
 
     object ImportSampleData : ProfileIntent()
+    object AvatarClicked : ProfileIntent()
 }

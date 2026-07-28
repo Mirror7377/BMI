@@ -7,6 +7,7 @@
     <string name="kg">kg</string>
     <string name="ft_in">ft·in</string>
     <string name="cm">cm</string>
+    <string name="feedback_thanks_message">Vielen Dank für Ihr Feedback! \"%s\" Wir werden unser Bestes tun, um eine bessere Benutzererfahrung zu bieten.</string>
     <string name="time">Zeit</string>
     <string name="age">Alter</string>
     <string name="yinhao">"</string>

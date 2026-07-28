@@ -43,6 +43,7 @@
     <string name="espa_ol">Español</string>
     <string name="italiano">Italiano</string>
     <string name="hg">한국어</string>
+    <string name="feedback_thanks_message">Thanks for your feedback! \"%s\" We\'ll do our best to bring a better user experience.</string>
     <string name="me">ME</string>
     <string name="backup_amp_restore"><![CDATA[Backup & Restore]]></string>
     <string name="synchronize_your_data">Synchronize your data</string>

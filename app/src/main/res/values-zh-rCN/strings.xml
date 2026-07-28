@@ -7,6 +7,7 @@
     <string name="age">年龄</string>
     <string name="yinhao">"</string>
     <string name="danyinhao">\'</string>
+    <string name="feedback_thanks_message">感谢您的反馈！「%s」我们会尽力提供更好的用户体验。</string>
     <string name="cancel">取消</string>
     <string name="cancell">取消</string>
     <string name="done">完成</string>
