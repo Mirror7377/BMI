@@ -51,7 +51,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ========== 下方详细内容（有数据时显示） ========== -->
+    <!-- ========== 详细内容 ========== -->
     <ScrollView
         android:id="@+id/scrollViewContent"
         android:layout_width="match_parent"
@@ -59,7 +59,7 @@
         android:fillViewport="true"
         android:scrollbars="none"
         android:paddingBottom="20dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/tvDate"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

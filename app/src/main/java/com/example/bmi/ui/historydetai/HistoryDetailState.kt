@@ -1,9 +1,9 @@
-package com.example.bmi.ui.historydetail
+package com.example.bmi.ui.historydetai
 
 import com.example.bmi.data.database.RecommendApp
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.ui.bmigauge.BmiLevel
 
 data class HistoryDetailState(
@@ -11,7 +11,6 @@ data class HistoryDetailState(
     val bmi: Double = 0.0,
     val weightInput: Double = 0.0,
     val weightUnit: String = WeightUnit.KG.name,
-    val heightInput: Double = 0.0,
     val heightUnit: String = HeightUnit.CM.name,
     val feet: Int = 0,
     val inches: Int = 0,
@@ -21,6 +20,5 @@ data class HistoryDetailState(
     val bmiLevel: BmiLevel = BmiLevel.NORMAL,
     val recommendedApps: List<RecommendApp> = emptyList(),
     val timestamp: Long = 0L,
-    val timeOfDay: String = "",
-    val isLoading: Boolean = false
+    val timeOfDay: String = ""
 )

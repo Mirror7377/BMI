@@ -21,11 +21,11 @@ data class BmiRecord(
     val weightKg: Double,
     val heightCm: Double,
 
-    val timestamp: Long,  //测量时间 todo 格式化
-    val timeOfDay: String, //测量时间段 todo 格式化
+    val timestamp: Long,  //测量时间
+    val timeOfDay: String, //测量时间段
     val age: Int,
     val gender: String,
     val bmi: Double,
     val category: String,   //BMI 对应的等级
-    val createTime: Long = 0 //todo 格式化
+    val createTime: Long = 0
 ) : Parcelable

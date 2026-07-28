@@ -20,7 +20,7 @@ class BmiChartView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // ===== 枚举（新增 MONTH） =====
+    // ===== 枚举 =====
     enum class ChartMode { DAY, WEEK, MONTH }
 
     // ===== 常量 =====
@@ -186,7 +186,7 @@ class BmiChartView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ===== 数据设置（新增 MONTH 分支） =====
+    // ===== 数据设置（路由到对应模式） =====
     fun setData(data: List<DayBmiData>) {
         when (chartMode) {
             ChartMode.DAY -> setDataDay(data)
@@ -195,7 +195,7 @@ class BmiChartView @JvmOverloads constructor(
         }
     }
 
-    // ---------- DAY 模式（原逻辑） ----------
+    // ---------- DAY 模式 ----------
     private fun setDataDay(data: List<DayBmiData>) {
         val sorted = data.sortedBy { it.date.timeInMillis }
         val lastWithBmi = sorted.findLast { it.bmi != null }
@@ -249,7 +249,7 @@ class BmiChartView @JvmOverloads constructor(
         notifyRangeChanged()
     }
 
-    // ---------- WEEK 模式（原逻辑） ----------
+    // ---------- WEEK 模式 ----------
     private fun setDataWeek(data: List<DayBmiData>) {
         allData = data.sortedBy { it.date.timeInMillis }
         selectedDataIndex = null
@@ -269,7 +269,7 @@ class BmiChartView @JvmOverloads constructor(
         updateMonthAnchorPositions()
     }
 
-    // ---------- MONTH 模式（新增） ----------
+    // ---------- MONTH 模式 ----------
     private fun setDataMonth(data: List<DayBmiData>) {
         allData = data.sortedBy { it.date.timeInMillis }
         selectedDataIndex = null
@@ -278,7 +278,6 @@ class BmiChartView @JvmOverloads constructor(
         computeFixedYAxis(allData)
         updateLayoutMetrics()
 
-        // 默认滚动到最后 8 个月
         val targetStart = (allData.size - displayCount).coerceAtLeast(0)
         scrollOffset = targetStart * xInterval + xInterval / 2f
         updateScrollBounds()
@@ -286,8 +285,6 @@ class BmiChartView @JvmOverloads constructor(
 
         invalidate()
         notifyRangeChanged()
-        // MONTH 模式不使用月份锚点（年份标签直接在 drawMonthLabel 中绘制）
-        // 但为避免干扰，清空锚点
         monthAnchors.clear()
         updateMonthAnchorPositions()
     }
@@ -359,10 +356,7 @@ class BmiChartView @JvmOverloads constructor(
         val totalWidth = (allData.size - 1) * xInterval
         val visibleWidth = (displayCount - 1) * xInterval
 
-        // 左侧允许再滑出半个刻度
         minScrollX = -xInterval / 2f
-
-        // 右侧保持原来的逻辑
         maxScrollX = max(0f, totalWidth - visibleWidth)
     }
 
@@ -370,7 +364,7 @@ class BmiChartView @JvmOverloads constructor(
         scrollOffset = scrollOffset.coerceIn(minScrollX, maxScrollX)
     }
 
-    // ===== 日期范围回调（MONTH 模式特殊格式） =====
+    // ===== 日期范围回调 =====
     private fun notifyRangeChanged() {
         if (allData.isEmpty()) return
 
@@ -434,27 +428,23 @@ class BmiChartView @JvmOverloads constructor(
         canvas.save()
         canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom)
 
-        // 计算可见范围（用于网格、标签、点、选中值）
         val startIdx = visibleStartIndex.toInt()
         val endIdx = min(startIdx + displayCount + 1, allData.size)
         val visibleSubList = allData.subList(startIdx, endIdx)
         canvas.translate(-scrollOffset, 0f)
 
-        // 可见元素
         drawVerticalGridLines(canvas, startIdx, visibleSubList)
         drawXLabels(canvas, startIdx, visibleSubList)
         drawMonthLabel(canvas, startIdx, endIdx, visibleSubList)
         drawDots(canvas, startIdx, visibleSubList)
         drawSelectedValue(canvas, startIdx, visibleSubList)
 
-        // ---- 曲线和填充基于全量数据 ----
-        drawFillArea(canvas)      // 不再传参，内部使用 getFullDataPoints()
-        drawDataLine(canvas)      // 同上
+        drawFillArea(canvas)
+        drawDataLine(canvas)
 
         canvas.restore()
     }
 
-    // ===== 各元素绘制 =====
     private fun drawEmptyState(canvas: Canvas) {
         textPaint.textSize = spToPx(14f)
         textPaint.color = Color.WHITE
@@ -515,8 +505,6 @@ class BmiChartView @JvmOverloads constructor(
         canvas.drawPath(fillPath, fillPaint)
     }
 
-    // ===== 横坐标（支持 Day / Week / Month） =====
-    // 在 BmiChartView.kt 中替换 drawXLabels 方法
     private fun drawXLabels(canvas: Canvas, startIdx: Int, visibleData: List<DayBmiData>) {
         val dateY = viewHeight - dpToPx(17.5f)
         textPaint.textAlign = Paint.Align.CENTER
@@ -541,11 +529,9 @@ class BmiChartView @JvmOverloads constructor(
         textPaint.textAlign = Paint.Align.LEFT
     }
 
-    // ===== 月份/年份标签（DAY/WEEK 显示月缩写，MONTH 显示年份） =====
     private fun drawMonthLabel(canvas: Canvas, startIdx: Int, endIdx: Int, visibleData: List<*>) {
         when (chartMode) {
             ChartMode.DAY -> {
-                // Day 模式：每月 1 号显示月份缩写，仅当完全可见时绘制
                 var pos = -1
                 for (i in visibleData.indices) {
                     val dataIndex = startIdx + i
@@ -569,7 +555,6 @@ class BmiChartView @JvmOverloads constructor(
             }
 
             ChartMode.WEEK -> {
-                // Week 模式：每月第一个周一显示月份缩写，仅当完全可见时绘制
                 for (anchor in monthAnchors) {
                     val x = anchor.x
                     val text = getMonthAbbr(anchor.month)
@@ -585,12 +570,11 @@ class BmiChartView @JvmOverloads constructor(
             }
 
             ChartMode.MONTH -> {
-                // Month 模式：仅在 1 月（month == 0）的位置绘制年份，仅当完全可见时绘制
                 for (i in visibleData.indices) {
                     val dataIndex = startIdx + i
                     if (dataIndex >= allData.size) break
                     val data = allData[dataIndex]
-                    if (data.month == 0) {  // 1月
+                    if (data.month == 0) {
                         val x = xStart + dataIndex * xInterval
                         val text = data.year.toString()
                         val textWidth = monthPaint.measureText(text)
@@ -677,22 +661,16 @@ class BmiChartView @JvmOverloads constructor(
 
         val label = String.format("%.1f", selectedBmi)
 
-        //=====================
-        // 容器参数
-        //=====================
         val paddingHorizontal = dpToPx(8f)
         val paddingTop = dpToPx(6f)
         val paddingBottom = dpToPx(6f)
 
         val textWidth = valuePaint.measureText(label)
-
-        val textHeight =
-            valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
+        val textHeight = valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
 
         val bgWidth = textWidth + paddingHorizontal * 2
         val bgHeight = textHeight + paddingTop + paddingBottom
 
-        // 背景距离圆点9dp
         val gap = dpToPx(9f)
 
         val bgLeft = point.x - bgWidth / 2
@@ -700,9 +678,6 @@ class BmiChartView @JvmOverloads constructor(
         val bgTop = bgBottom - bgHeight
         val bgRight = bgLeft + bgWidth
 
-        //=====================
-        // 绘制背景
-        //=====================
         canvas.drawRoundRect(
             bgLeft,
             bgTop,
@@ -713,28 +688,13 @@ class BmiChartView @JvmOverloads constructor(
             valueBgPaint
         )
 
-        //=====================
-        // 绘制文字
-        //=====================
         val fm = valuePaint.fontMetrics
-
         val textX = point.x
-
-        val textY =
-            bgTop +
-                    paddingTop -
-                    fm.ascent
-
-        canvas.drawText(
-            label,
-            textX,
-            textY,
-            valuePaint
-        )
+        val textY = bgTop + paddingTop - fm.ascent
+        canvas.drawText(label, textX, textY, valuePaint)
 
         val triangleHeight = dpToPx(3f)
         val triangleHalfWidth = dpToPx(5f)
-
         val triangleTop = bgBottom
         val triangleBottom = bgBottom + triangleHeight
         val triangleCenterX = point.x
@@ -745,11 +705,10 @@ class BmiChartView @JvmOverloads constructor(
             lineTo(triangleCenterX, triangleBottom)
             close()
         }
-
         canvas.drawPath(trianglePath, valueBgPaint)
     }
 
-    // ===== 数据点提取（自动过滤 null） =====
+    // ===== 数据点提取 =====
     private fun getDataPoints(startIdx: Int, visibleData: List<DayBmiData>): List<ChartPoint> {
         val points = mutableListOf<ChartPoint>()
         for (i in visibleData.indices) {
@@ -764,7 +723,19 @@ class BmiChartView @JvmOverloads constructor(
         return points
     }
 
-    // ===== 触摸事件（完全复用） =====
+    private fun getFullDataPoints(): List<ChartPoint> {
+        val points = mutableListOf<ChartPoint>()
+        for (i in allData.indices) {
+            val data = allData[i]
+            val bmi = data.bmi ?: continue
+            val x = xStart + i * xInterval
+            val y = bmiToY(bmi)
+            points.add(ChartPoint(i, x, y))
+        }
+        return points
+    }
+
+    // ===== 触摸事件 =====
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (allData.isEmpty()) return false
 
@@ -944,7 +915,7 @@ class BmiChartView @JvmOverloads constructor(
         val y: Float
     )
 
-    // ===== 月份锚点管理（仅 DAY / WEEK 使用） =====
+    // ===== 月份锚点管理 =====
     private fun rebuildMonthAnchors() {
         monthAnchors.clear()
         if (allData.isEmpty()) return
@@ -996,7 +967,6 @@ class BmiChartView @JvmOverloads constructor(
             }
 
             ChartMode.MONTH -> {
-                // MONTH 模式不使用锚点，清空即可
                 monthAnchors.clear()
             }
         }
@@ -1006,17 +976,5 @@ class BmiChartView @JvmOverloads constructor(
         for (anchor in monthAnchors) {
             anchor.x = xStart + anchor.dataIndex * xInterval
         }
-    }
-
-    private fun getFullDataPoints(): List<ChartPoint> {
-        val points = mutableListOf<ChartPoint>()
-        for (i in allData.indices) {
-            val data = allData[i]
-            val bmi = data.bmi ?: continue
-            val x = xStart + i * xInterval
-            val y = bmiToY(bmi)
-            points.add(ChartPoint(i, x, y))
-        }
-        return points
     }
 }

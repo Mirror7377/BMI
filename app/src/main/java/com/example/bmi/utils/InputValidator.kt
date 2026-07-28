@@ -1,6 +1,6 @@
 package com.example.bmi.utils
 
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

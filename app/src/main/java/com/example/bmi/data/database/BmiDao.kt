@@ -13,19 +13,43 @@ interface BmiDao {
     @Insert
     suspend fun insert(record: BmiRecord)
 
-    // 获取最新一条记录（按时间戳降序）
-    @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC LIMIT 1")
+    // 获取最新一条记录（按时间戳-时间段降序）
+    @Query("""
+    SELECT * FROM bmi_records
+    ORDER BY 
+        DATE(timestamp / 1000, 'unixepoch') DESC,
+        CASE timeOfDay
+            WHEN 'Morning' THEN 1
+            WHEN 'Afternoon' THEN 2
+            WHEN 'Evening' THEN 3
+            WHEN 'Night' THEN 4
+            ELSE 0
+        END DESC
+    LIMIT 1;
+""")
     fun getLatestRecord(): Flow<BmiRecord?>
 
     //最近记录的卡片排序
-    @Query("SELECT * FROM bmi_records ORDER BY timestamp DESC, createTime DESC")
-    fun getAllRecords(): Flow<List<BmiRecord>>
+    @Query("""
+    SELECT * FROM bmi_records
+ORDER BY 
+    DATE(timestamp / 1000, 'unixepoch') DESC,
+    CASE timeOfDay
+        WHEN 'Morning' THEN 1
+        WHEN 'Afternoon' THEN 2
+        WHEN 'Evening' THEN 3
+        WHEN 'Night' THEN 4
+        ELSE 0
+    END DESC;
+""")
+    fun getAllRecords(): Flow<List<BmiRecord>>//unixepoch 把时间戳转换成日期格式（比如 2026-07-28）
 
     // 获取时间段内的记录（按时间戳升序）    //todo 确定历史记录排序顺序
+    //todo未使用
     @Query("SELECT * FROM bmi_records WHERE timestamp >= :start AND timestamp < :end ORDER BY timestamp ASC")
     fun getRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
 
-    // 获取记录总数
+    // 获取是否有数据
     @Query("SELECT EXISTS(SELECT 1 FROM bmi_records)")
     suspend fun hasAnyRecord(): Boolean
 
@@ -44,21 +68,7 @@ interface BmiDao {
     @Query("SELECT COUNT(*) FROM bmi_records")
     suspend fun getRecordCount(): Int
 
-    @Query("""
-    SELECT * FROM bmi_records
-ORDER BY 
-    DATE(timestamp / 1000, 'unixepoch') DESC,
-    CASE timeOfDay
-        WHEN 'Morning' THEN 1
-        WHEN 'Afternoon' THEN 2
-        WHEN 'Evening' THEN 3
-        WHEN 'Night' THEN 4
-        ELSE 0
-    END DESC;
-""")
-    fun getAllSortedRecords(): Flow<List<BmiRecord>>
-
-    //todo 统计当天的最后一条
+    //todo 未使用统计当天的最后一条
     @Query("""
     SELECT * FROM bmi_records 
     WHERE timestamp BETWEEN :startTime AND :endTime

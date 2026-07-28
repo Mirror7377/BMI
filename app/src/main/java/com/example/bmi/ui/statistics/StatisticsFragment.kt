@@ -14,7 +14,6 @@ import com.example.bmi.MainActivity
 import com.example.bmi.databinding.FragmentStatisticsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 @AndroidEntryPoint
 class StatisticsFragment : Fragment() {
@@ -23,12 +22,6 @@ class StatisticsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: StatisticsViewModel by viewModels()
-
-    private enum class ChartMode { DAY, WEEK, MONTH }
-    private var currentMode = ChartMode.DAY
-
-    private var currentYear = 0
-    private var currentMonth = 0
 
     private companion object {
         private const val OFFSET_DAY = 0.0f
@@ -47,8 +40,11 @@ class StatisticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupPeriodSwitcher()
 
+        setupPeriodSwitcher()
+        observeUiState()
+
+        // 保留原有的更新按钮点击事件
         binding.tvBmiUpdate.setOnClickListener {
             (requireActivity() as? MainActivity)?.goToHome()
         }
@@ -56,127 +52,60 @@ class StatisticsFragment : Fragment() {
             (requireActivity() as? MainActivity)?.goToHome()
         }
 
-        val calendar = Calendar.getInstance()
-        currentYear = calendar.get(Calendar.YEAR)
-        currentMonth = calendar.get(Calendar.MONTH)
+        // 保留原有的日期范围回调（如果需要在 Fragment 中处理，可设置）
+        // 原代码中并未使用该回调做 UI 显示，所以不处理也可以
+        // 若需要，可在这里设置 binding.chartView.onDataRangeChanged = { ... }
+    }
 
-        // 默认加载 Day 数据
-        viewModel.loadDayRangeData(60)
-        viewModel.loadWeightDayRangeData(60)
-
-        // ========== Flow 观察者（保留，用于数据库更新后自动刷新） ==========
-        // BMI Day 数据
+    // ========== 观察状态 ==========
+    private fun observeUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.monthData.collect { data ->
-                    if (currentMode == ChartMode.DAY) {
-                        binding.chartView.setMode(BmiChartView.ChartMode.DAY)
-                        binding.chartView.setData(data)
-                    }
-                }
-            }
-        }
+                viewModel.uiState.collect { state ->
+                    // 设置模式（View 原有方法）
+                    binding.chartView.setMode(
+                        when (state.mode) {
+                            ChartMode.DAY -> BmiChartView.ChartMode.DAY
+                            ChartMode.WEEK -> BmiChartView.ChartMode.WEEK
+                            ChartMode.MONTH -> BmiChartView.ChartMode.MONTH
+                        }
+                    )
+                    binding.weightChartView.setMode(
+                        when (state.mode) {
+                            ChartMode.DAY -> WeightChartView.ChartMode.DAY
+                            ChartMode.WEEK -> WeightChartView.ChartMode.WEEK
+                            ChartMode.MONTH -> WeightChartView.ChartMode.MONTH
+                        }
+                    )
 
-        // Weight Day 数据
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.weightData.collect { data ->
-                    if (currentMode == ChartMode.DAY && data.isNotEmpty()) {
-                        binding.weightChartView.setMode(WeightChartView.ChartMode.DAY)
-                        binding.weightChartView.setData(data)
-                    }
-                }
-            }
-        }
+                    // 设置数据（View 原有方法）
+                    binding.chartView.setData(state.bmiData)
+                    binding.weightChartView.setData(state.weightData)
 
-        // BMI Week 数据
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.weekBmiData.collect { data ->
-                    if (currentMode == ChartMode.WEEK && data.isNotEmpty()) {
-                        binding.chartView.setMode(BmiChartView.ChartMode.WEEK)
-                        binding.chartView.setData(data)
-                    }
-                }
-            }
-        }
-
-        // Weight Week 数据
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.weekWeightData.collect { data ->
-                    if (currentMode == ChartMode.WEEK && data.isNotEmpty()) {
-                        binding.weightChartView.setMode(WeightChartView.ChartMode.WEEK)
-                        binding.weightChartView.setData(data)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.monthBmiData.collect { data ->
-                    if (currentMode == ChartMode.MONTH && data.isNotEmpty()) {
-                        binding.chartView.setMode(BmiChartView.ChartMode.MONTH)
-                        binding.chartView.setData(data)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.monthWeightData.collect { data ->
-                    if (currentMode == ChartMode.MONTH && data.isNotEmpty()) {
-                        binding.weightChartView.setMode(WeightChartView.ChartMode.MONTH)
-                        binding.weightChartView.setData(data)
-                    }
+                    // 加载状态（可显示进度条，根据需求）
+                    // 例如：binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                 }
             }
         }
     }
 
+    // ========== 模式切换 ==========
     private fun setupPeriodSwitcher() {
         moveBgTo(OFFSET_DAY)
 
         binding.tvDay.setOnClickListener {
             moveBgTo(OFFSET_DAY)
-            currentMode = ChartMode.DAY
-            // 只触发加载，不手动设置图表（Flow 会自动更新）
-            viewModel.loadDayRangeData(60)
-            viewModel.loadWeightDayRangeData(60)
+            viewModel.dispatch(StatisticsIntent.LoadDay)
         }
 
         binding.tvWeek.setOnClickListener {
             moveBgTo(OFFSET_WEEK)
-            currentMode = ChartMode.WEEK
-
-            // 1. 立即用缓存数据刷新图表
-            binding.chartView.setMode(BmiChartView.ChartMode.WEEK)
-            binding.chartView.setData(viewModel.getCurrentWeekBmiData())
-
-            binding.weightChartView.setMode(WeightChartView.ChartMode.WEEK)
-            binding.weightChartView.setData(viewModel.getCurrentWeekWeightData())
-
-            // 2. 后台重新加载最新数据（完成后 Flow 会自动再次刷新）
-            viewModel.loadWeekData()
+            viewModel.dispatch(StatisticsIntent.LoadWeek)
         }
 
         binding.tvMonth.setOnClickListener {
             moveBgTo(OFFSET_MONTH)
-            currentMode = ChartMode.MONTH
-
-            // BMI Month
-            binding.chartView.setMode(BmiChartView.ChartMode.MONTH)
-            binding.chartView.setData(viewModel.getCurrentMonthBmiData())
-
-            // Weight Month
-            binding.weightChartView.setMode(WeightChartView.ChartMode.MONTH)
-            binding.weightChartView.setData(viewModel.getCurrentMonthWeightData())
-
-            // 后台加载最新数据
-            viewModel.loadMonthStatistics()
-            viewModel.loadMonthWeightStatistics()
+            viewModel.dispatch(StatisticsIntent.LoadMonth)
         }
     }
 

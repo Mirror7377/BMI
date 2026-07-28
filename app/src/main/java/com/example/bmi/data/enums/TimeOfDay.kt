@@ -1,4 +1,4 @@
-package com.example.bmi.ui.home.enums
+package com.example.bmi.data.enums
 
 import com.example.bmi.R
 import java.util.Calendar

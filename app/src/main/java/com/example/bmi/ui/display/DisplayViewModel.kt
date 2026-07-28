@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,23 +28,17 @@ class DisplayViewModel @Inject constructor(
 
     fun handleIntent(intent: DisplayIntent) {
         when (intent) {
-            DisplayIntent.LoadLatest -> loadLatestRecord()
+            is DisplayIntent.LoadLatest -> loadLatestRecord()
             is DisplayIntent.NavigateTo -> navigateTo(intent.destination)
         }
     }
 
     private fun loadLatestRecord() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
             repository.observeLatestRecord()
+                .take(1)//只取一次，避免重复监听
                 .collect { record ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            record = record,
-                            error = null
-                        )
-                    }
+                    _state.update { it.copy(record = record) }
                 }
         }
     }
@@ -53,9 +47,5 @@ class DisplayViewModel @Inject constructor(
         viewModelScope.launch {
             _effect.emit(DisplayEffect.NavigateTo(destination))
         }
-    }
-
-    init {
-        handleIntent(DisplayIntent.LoadLatest)
     }
 }

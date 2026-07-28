@@ -15,13 +15,14 @@ import com.example.bmi.MainActivity
 import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentDisplayBinding
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.ui.recent.RecentActivity
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
 import com.example.bmi.ui.bmigauge.BmiLevel
+import com.example.bmi.ui.recent.RecentIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -36,10 +37,7 @@ class DisplayFragment : Fragment() {
     private val viewModel: DisplayViewModel by viewModels()
 
     companion object {
-        fun newInstance(): DisplayFragment {
-            val frag = DisplayFragment()
-            return frag
-        }
+        fun newInstance(): DisplayFragment = DisplayFragment()
     }
 
     private val legendLevels = listOf(
@@ -64,43 +62,36 @@ class DisplayFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupListeners()
+        setupObservers()
+        viewModel.handleIntent(DisplayIntent.LoadLatest)
+    }
 
-        // 点击事件 → 发送 Intent
+    // ========== 设置监听器 ==========
+    private fun setupListeners() {
         binding.tvRecent.setOnClickListener {
             viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.RECENT))
         }
-
         binding.root.setOnClickListener {
             viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.HOME))
         }
+    }
 
-        // 观察 State
+    // ========== 统一观察状态和副作用 ==========
+    private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    renderState(state)
+                // 收集状态（StateFlow）
+                launch {
+                    viewModel.state.collect { state ->
+                        renderState(state)
+                    }
                 }
-            }
-        }
-
-        // 观察 Effect
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.effect.collect { effect ->
-                    when (effect) {
-                        is DisplayEffect.NavigateTo -> {
-                            when (effect.destination) {
-                                DisplayIntent.Destination.HOME -> {
-                                    (requireActivity() as? MainActivity)?.goToHome()
-                                }
-                                DisplayIntent.Destination.RECENT -> {
-                                    startActivity(Intent(requireContext(), RecentActivity::class.java))
-                                }
-                            }
-                        }
-                        is DisplayEffect.ShowError -> {
-                            // 可根据需要显示 Snackbar / Toast
-                            // Snackbar.make(binding.root, effect.message, Snackbar.LENGTH_SHORT).show()
+                // 收集副作用（SharedFlow）
+                launch {
+                    viewModel.effect.collect { effect ->
+                        when (effect) {
+                            is DisplayEffect.NavigateTo -> handleNavigation(effect)
                         }
                     }
                 }
@@ -108,18 +99,29 @@ class DisplayFragment : Fragment() {
         }
     }
 
-    // ========== 渲染函数 ==========
+    // ========== 导航处理 ==========
+    private fun handleNavigation(effect: DisplayEffect.NavigateTo) {
+        when (effect.destination) {
+            DisplayIntent.Destination.HOME -> {
+                (requireActivity() as? MainActivity)?.goToHome()
+            }
+            DisplayIntent.Destination.RECENT -> {
+                startActivity(Intent(requireContext(), RecentActivity::class.java))
+            }
+        }
+    }
+
+    // ========== 渲染状态 ==========
     private fun renderState(state: DisplayState) {
         val record = state.record ?: return
-        // 日期显示
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+        //左上角日期
         binding.tvDate.text = dateFormat.format(record.timestamp)
 
-        binding.scrollViewContent.visibility = View.VISIBLE
         bindDetailData(record)
     }
 
-    // ========== 详情绑定 ==========
+    // ========== 绑定数据详情 ==========
     private fun bindDetailData(record: BmiRecord) {
         val age = record.age
         val gender = when (record.gender) {
@@ -134,26 +136,22 @@ class DisplayFragment : Fragment() {
             BmiClassifier.classifyAdult(record.bmi)
         }
 
-        // 仪表盘配置
         val config = BmiConfigProvider.getConfig(age, gender.name)
         binding.bmiGauge.applyConfig(config)
         binding.bmiGauge.setBmi(record.bmi.toFloat(), false)
 
-        // BMI 数值
         binding.tvBmiValueLarge.text = String.format("%.1f", record.bmi)
 
-        // 状态标签
         binding.tvBmiStatus.text = getString(bmiLevel.statusTextRes)
         val radius = dpToPx(19.75f).toFloat()
         val colorBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = radius
-            setColor(bmiLevel.cardBgColor)
+            setColor(bmiLevel.cardBgColor)//动态颜色
         }
         binding.statusContainer.background = colorBg
         binding.statusIcon.visibility = View.GONE
 
-        // 个人信息
         val weightText = when (record.weightUnit) {
             WeightUnit.KG.name -> String.format("%.2f kg", record.weightInput)
             WeightUnit.LB.name -> String.format("%.2f lb", record.weightInput)
@@ -185,7 +183,7 @@ class DisplayFragment : Fragment() {
         bindBmiLegend(bmiLevel, age, gender.name)
     }
 
-    // ========== 图例绑定==========
+    // ========== 图例绑定 ==========
     private fun bindBmiLegend(currentLevel: BmiLevel, age: Int, gender: String) {
         val isChild = age < 20
         val config = BmiConfigProvider.getConfig(age, gender)
@@ -224,6 +222,7 @@ class DisplayFragment : Fragment() {
                     3 -> BmiLevel.NORMAL.cardBgColor
                     4 -> BmiLevel.OVERWEIGHT.cardBgColor
                     5 -> BmiLevel.OBESE_CLASS_I.cardBgColor
+                    //getOrElse当索引越界时，不会抛出异常，而是执行一个 lambda 函数，返回一个“兜底值”。
                     else -> colors.getOrElse(index) { 0xFF000000.toInt() }
                 }
             } else {
@@ -299,10 +298,8 @@ class DisplayFragment : Fragment() {
         }
     }
 
-    // ========== 工具 ==========
-    private fun dpToPx(dp: Float): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
+    // ========== 工具方法 ==========
+    private fun dpToPx(dp: Float): Int = (dp * resources.displayMetrics.density).toInt()
 
     override fun onDestroyView() {
         super.onDestroyView()

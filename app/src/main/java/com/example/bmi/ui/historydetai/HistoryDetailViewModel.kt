@@ -1,11 +1,12 @@
-package com.example.bmi.ui.historydetail
+package com.example.bmi.ui.historydetai
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.R
 import com.example.bmi.data.database.RecommendApp
 import com.example.bmi.data.repository.BmiRepository
-import com.example.bmi.ui.home.enums.Gender
+import com.example.bmi.data.enums.Gender
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiLevel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,7 +41,6 @@ class HistoryDetailViewModel @Inject constructor(
 
     private fun loadRecord(id: Long) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
             try {
                 val record = repository.getRecordById(id)
                 if (record != null) {
@@ -65,17 +65,14 @@ class HistoryDetailViewModel @Inject constructor(
                             bmiLevel = level,
                             recommendedApps = apps,
                             timestamp = record.timestamp,
-                            timeOfDay = record.timeOfDay,
-                            isLoading = false
+                            timeOfDay = record.timeOfDay
                         )
                     }
                 } else {
-                    _effect.emit(HistoryDetailEffect.ShowError("Record not found"))
-                    _state.update { it.copy(isLoading = false) }
+                    Log.w("HistoryDetailViewModel", "Record not found")
                 }
             } catch (e: Exception) {
-                _effect.emit(HistoryDetailEffect.ShowError(e.message ?: "Unknown error"))
-                _state.update { it.copy(isLoading = false) }
+                Log.e("HistoryDetailViewModel", "Error loading detail: ${e.message}")
             }
         }
     }
@@ -97,7 +94,7 @@ class HistoryDetailViewModel @Inject constructor(
                     _effect.emit(HistoryDetailEffect.NavigateBack)
                 }
             } else {
-                _effect.emit(HistoryDetailEffect.ShowError("No record to delete"))
+                Log.w("HistoryDetailViewModel", "No record to delete")
             }
         }
     }
@@ -192,6 +189,7 @@ class HistoryDetailViewModel @Inject constructor(
         )
     )
 
+    //todo 代码重复使用
     private fun getRecommendedApps(bmiLevel: BmiLevel, gender: String): List<RecommendApp> {
         val isUnderNormal = bmiLevel.ordinal < BmiLevel.NORMAL.ordinal
         val ids = if (isUnderNormal) {
@@ -207,6 +205,7 @@ class HistoryDetailViewModel @Inject constructor(
             val pool3 = listOf(4, 5, 9, 10).shuffled().first()
             pool12 + listOf(pool3)
         }
+        //将随机选出的 ids（Int 列表）转换为对应的 RecommendApp 对象列表，并确保返回的列表不包含 null 值。
         return ids.mapNotNull { id -> allApps.find { it.id == id } }
     }
 }

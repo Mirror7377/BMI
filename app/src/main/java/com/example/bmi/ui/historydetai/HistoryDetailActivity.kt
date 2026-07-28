@@ -29,14 +29,10 @@ import com.example.bmi.databinding.DialogBmiLegendBinding
 import com.example.bmi.databinding.DialogDiscardConfirmBinding
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
 import com.example.bmi.ui.bmigauge.BmiLevel
-import com.example.bmi.ui.historydetail.HistoryDetailEffect
-import com.example.bmi.ui.historydetail.HistoryDetailIntent
-import com.example.bmi.ui.historydetail.HistoryDetailState
-import com.example.bmi.ui.historydetail.HistoryDetailViewModel
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.TimeOfDay
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.TimeOfDay
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.utils.UnitConverter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -45,6 +41,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.content.edit
+import com.example.bmi.ui.bmigauge.BmiClassifier
 
 @AndroidEntryPoint
 class HistoryDetailActivity : BaseActivity() {
@@ -69,15 +67,23 @@ class HistoryDetailActivity : BaseActivity() {
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 获取并校验 recordId
         val recordId = intent.getLongExtra("RECORD_ID", 0L)
         if (recordId == 0L) {
-            Toast.makeText(this, "Invalid record", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        viewModel.handleIntent(HistoryDetailIntent.LoadRecord(recordId))
+        setupListeners()
+        observeState()
+        observeEffect()
 
+        // 触发加载数据
+        viewModel.handleIntent(HistoryDetailIntent.LoadRecord(recordId))
+    }
+
+    // ========== 设置监听器（点击事件） ==========
+    private fun setupListeners() {
         binding.ivBack.setOnClickListener {
             viewModel.handleIntent(HistoryDetailIntent.BackPressed)
         }
@@ -90,7 +96,10 @@ class HistoryDetailActivity : BaseActivity() {
             val state = viewModel.state.value
             showBmiLegendDialog(state.bmiLevel, state.age, state.gender)
         }
+    }
 
+    // ========== 观察状态 ==========
+    private fun observeState() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
@@ -98,7 +107,10 @@ class HistoryDetailActivity : BaseActivity() {
                 }
             }
         }
+    }
 
+    // ========== 观察副作用 ==========
+    private fun observeEffect() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
@@ -106,20 +118,21 @@ class HistoryDetailActivity : BaseActivity() {
                         is HistoryDetailEffect.NavigateBack -> finish()
                         is HistoryDetailEffect.NavigateToHome -> {
                             val intent = Intent(this@HistoryDetailActivity, MainActivity::class.java).apply {
+                                //FLAG_ACTIVITY_NEW_TASK在新的任务栈中启动目标 Activity
+                                //FLAG_ACTIVITY_CLEAR_TASK 在启动新 Activity 之前，清除目标 Activity 所在任务栈里的所有旧 Activity。
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             }
                             startActivity(intent)
                             finish()
                         }
-                        is HistoryDetailEffect.ShowError -> Toast.makeText(this@HistoryDetailActivity, effect.message, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
     }
 
+    // ========== 绑定数据到 UI ==========
     private fun bindState(state: HistoryDetailState) {
-        if (state.isLoading) return
         if (state.bmi <= 0) return
 
         // 1. 仪表盘配置
@@ -152,9 +165,9 @@ class HistoryDetailActivity : BaseActivity() {
         }
 
         val heightText = when (state.heightUnit) {
-            HeightUnit.CM.name -> String.format("%.1f cm", state.heightInput)
+            HeightUnit.CM.name -> String.format("%.1f cm", state.heightCm)
             HeightUnit.FT_IN.name -> "${state.feet} ft ${state.inches} in"
-            else -> String.format("%.1f cm", state.heightInput)
+            else -> String.format("%.1f cm", state.heightCm)
         }
 
         val genderText = when (state.gender) {
@@ -170,12 +183,8 @@ class HistoryDetailActivity : BaseActivity() {
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         val dateStr = dateFormat.format(Date(state.timestamp))
 
-        // 时段显示
-        val timeOfDayEnum = try {
-            TimeOfDay.valueOf(state.timeOfDay)
-        } catch (e: IllegalArgumentException) {
-            TimeOfDay.MORNING
-        }
+        val timeOfDayEnum = TimeOfDay.valueOf(state.timeOfDay)
+
         val timeStr = getString(timeOfDayEnum.displayName)
         binding.tvDividerDateTime.text = "$dateStr $timeStr"
 
@@ -186,15 +195,16 @@ class HistoryDetailActivity : BaseActivity() {
             userWeightUnitStr = state.weightUnit,
             userHeightCm = state.heightCm,
             userHeightDisplayText = heightText,
+            age = state.age,
+            gender = state.gender,
             tvDesc = binding.tvTipDescHasData,
             tvMain = binding.tvTipMainHasData,
-            tvRange = binding.tvTipRangeHasData,
-            tvDiff = binding.tvTipDiffHasData
+            tvRange = binding.tvTipRangeHasData
         )
 
-        // 7. 推荐 App
+        // 推荐 App
         val recommendedApps = state.recommendedApps
-        if (recommendedApps.size >= 3) {
+        if (recommendedApps.size == 3) {
             bindAppToCard(
                 binding.adCard1,
                 binding.ivAppIcon1,
@@ -224,25 +234,20 @@ class HistoryDetailActivity : BaseActivity() {
             )
         }
 
-        // 8. 卡片圆角背景
-        setTipCardRadius(binding.llBottomTipHasData)
     }
 
-    // ---------- 辅助方法 ----------
-    private fun setTipCardRadius(vararg views: View) {
-        views.forEach { view ->
-            val drawable = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                cornerRadius = dpToPx(15f).toFloat()
-                setColor(0xFFF4F4F4.toInt())
-            }
-            view.background = drawable
-        }
-    }
 
-    private fun getStandardWeightRangeCm(heightCm: Double): Pair<Double, Double> {
+    //todo 复用代码
+    private fun getStandardWeightRangeCm(heightCm: Double, age: Int, gender: String): Pair<Double, Double> {
         val h = heightCm / 100.0
-        return Pair(18.5 * h * h, 24.9 * h * h)
+        return if (age in 2..20) {
+            val genderEnum = if (gender == Gender.MALE.name) Gender.MALE else Gender.FEMALE
+            val (bmiLow, bmiHigh) = BmiClassifier.getNormalBmiRange(age, genderEnum)
+            Pair(bmiLow * h * h, bmiHigh * h * h)
+        } else {
+            // 成人固定标准
+            Pair(18.5 * h * h, 24.9 * h * h)
+        }
     }
 
     private fun renderBottomTip(
@@ -251,12 +256,13 @@ class HistoryDetailActivity : BaseActivity() {
         userWeightUnitStr: String,
         userHeightCm: Double,
         userHeightDisplayText: String,
+        age: Int,
+        gender: String,
         tvDesc: TextView,
         tvMain: TextView,
-        tvRange: TextView,
-        tvDiff: TextView
+        tvRange: TextView
     ) {
-        val (stdMinKg, stdMaxKg) = getStandardWeightRangeCm(userHeightCm)
+        val (stdMinKg, stdMaxKg) = getStandardWeightRangeCm(userHeightCm,age, gender)
         val isUserKg = userWeightUnitStr == WeightUnit.KG.name
 
         val (stdMinShow, stdMaxShow, userWeightShow) = if (isUserKg) {
@@ -293,7 +299,7 @@ class HistoryDetailActivity : BaseActivity() {
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
             val fullText = "$rangeStr$diffText"
             val spannable = SpannableString(fullText)
-            val redColor = 0xFFFF3333.toInt()
+            val redColor = 0xFFFF3333.toInt()//染成红色
             spannable.setSpan(
                 ForegroundColorSpan(redColor),
                 rangeStr.length,
@@ -303,10 +309,10 @@ class HistoryDetailActivity : BaseActivity() {
             tvRange.text = spannable
             tvRange.visibility = View.VISIBLE
         }
-        tvDiff.visibility = View.GONE
     }
 
     // ---------- 图例弹窗 ----------
+    //todo 代码复用？
     private fun showBmiLegendDialog(
         bmiLevel: BmiLevel,
         age: Int,
@@ -353,24 +359,33 @@ class HistoryDetailActivity : BaseActivity() {
             dialog.dismiss()
         }
 
+        //给对话框设置监听器
         dialog.setOnShowListener {
+            //找到 BottomSheetDialog 里的“那个滑动的抽屉”
             val bottomSheet = dialog.findViewById<FrameLayout>(
                 com.google.android.material.R.id.design_bottom_sheet
             ) ?: return@setOnShowListener
 
+            //配置滑动的抽屉给
             val behavior = BottomSheetBehavior.from(bottomSheet)
+            //完全展开
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            //不要停在中间（半折叠状态）
             behavior.skipCollapsed = true
+            //允许完全隐藏
             behavior.isHideable = true
+            //预览高度为 0
             behavior.peekHeight = 0
 
             behavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
+                    //当面板状态改变时（比如用户松手、滑到最底部），会回调这个函数。
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             dialog.dismiss()
                         }
                     }
+                    //（滑动过程中触发）
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {}
                 }
             )
@@ -379,6 +394,7 @@ class HistoryDetailActivity : BaseActivity() {
         dialog.show()
     }
 
+    //todo 代码复用
     private fun applyLegendHighlight(
         binding: DialogBmiLegendBinding,
         currentLevel: BmiLevel,
@@ -413,10 +429,8 @@ class HistoryDetailActivity : BaseActivity() {
             binding.tvLevelRange4, binding.tvLevelRange5, binding.tvLevelRange6, binding.tvLevelRange7
         )
 
-        // 儿童可见索引：2,3,4,5 (Underweight, Normal, Overweight, Obese I)
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
 
-        // 儿童颜色映射
         val childColors = mapOf(
             2 to 0xFF5BB1F5.toInt(), // Underweight
             3 to 0xFFA8C526.toInt(), // Normal
@@ -424,7 +438,6 @@ class HistoryDetailActivity : BaseActivity() {
             5 to 0xFFFD9845.toInt()  // Obese I
         )
 
-        // 生成范围文本
         fun getRangeText(index: Int): String {
             if (splitPoints.isEmpty()) return ""
             val s = splitPoints
@@ -450,7 +463,6 @@ class HistoryDetailActivity : BaseActivity() {
             }
             layout.visibility = View.VISIBLE
 
-            // 使用资源获取等级名称
             nameTv.text = getString(level.statusTextRes)
 
             val color = if (isChild) {
@@ -539,23 +551,28 @@ class HistoryDetailActivity : BaseActivity() {
         super.onDestroy()
     }
 
+    // ---------- 删除确认对话框 ----------
+    //todo 代码复用？
     private fun showDeleteConfirmDialog() {
         val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
         val dialog = Dialog(this)
         dialog.setContentView(dialogBinding.root)
-        val window = dialog.window ?: return
 
+        //获取对话框的窗口对象（Window）
+        val window = dialog.window ?: return
         window.setBackgroundDrawableResource(android.R.color.transparent)
+        //把窗口的默认内边距（Padding）去掉。系统有时候会给窗口加一点边距
         window.decorView.setPadding(0, 0, 0, 0)
-        window.setGravity(Gravity.CENTER)
+        window.setGravity(Gravity.CENTER)//居中
         window.setLayout(dpToPx(301f), dpToPx(154f))
-        dialog.setCancelable(true)
+        dialog.setCancelable(true)//返回或点击遮罩层可以取消
 
         dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
         dialogBinding.tvDelete.setOnClickListener {
             dialog.dismiss()
+            //获取一个名为 app_prefs 的本地存储文件（SharedPreferences）
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            prefs.edit().putBoolean("show_delete_success", true).apply()
+            prefs.edit { putBoolean("show_delete_success", true) }
             viewModel.handleIntent(HistoryDetailIntent.DeleteRecord)
         }
         dialog.show()

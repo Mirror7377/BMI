@@ -573,12 +573,6 @@
                         android:singleLine="true"
                         app:fontFamily="@font/montserrat_extrabold"
                         android:ellipsize="end"/>
-
-                    <TextView
-                        android:id="@+id/tvTipDiff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
                 </LinearLayout>
 
             </LinearLayout>
@@ -597,7 +591,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <!-- ========== 底部灰色提示卡片（有数据版本，位置靠上） ========== -->
+                <!-- ========== 底部灰色提示卡片 ========== -->
                 <LinearLayout
                     android:id="@+id/llBottomTipHasData"
                     android:layout_width="315dp"
@@ -645,15 +639,9 @@
                         android:singleLine="true"
                         app:fontFamily="@font/montserrat_extrabold"
                         android:ellipsize="end"/>
-
-                    <TextView
-                        android:id="@+id/tvTipDiffHasData"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
                 </LinearLayout>
 
-                <!-- ========== 🎯 广告推荐区域（包含横线、标题、三个灰色卡片） ========== -->
+                <!-- ========== 🎯 广告推荐区域 ========== -->
                 <LinearLayout
                     android:id="@+id/llAdContainer"
                     android:layout_width="match_parent"

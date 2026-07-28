@@ -1,16 +1,15 @@
 package com.example.bmi.ui.result
 
 import com.example.bmi.data.database.RecommendApp
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.ui.bmigauge.BmiLevel
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.WeightUnit
 
 data class ResultState(
     val bmi: Double = 0.0,
     val weightInput: Double = 0.0,
     val weightUnit: String = WeightUnit.KG.name,
-    val heightInput: Double = 0.0,
     val heightUnit: String = HeightUnit.CM.name,
     val feet: Int = 0,
     val inches: Int = 0,

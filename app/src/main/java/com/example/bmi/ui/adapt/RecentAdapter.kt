@@ -1,4 +1,4 @@
-package com.example.bmi.ui.recent
+package com.example.bmi.ui.adapt
 
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
@@ -14,7 +14,7 @@ import java.util.Locale
 
 class RecentAdapter(
     private val onItemClick: (BmiRecord) -> Unit
-) : ListAdapter<BmiRecord, RecentAdapter.ViewHolder>(DiffCallback()) {
+) : ListAdapter<BmiRecord, RecentAdapter.ViewHolder>(DiffCallback()) {//DiffCallback构造函数传参
 
     companion object {
         private fun dpToPx(dp: Int, density: Float): Int {
@@ -22,6 +22,7 @@ class RecentAdapter(
         }
     }
 
+    //创建“空白卡片”
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemRecentRecordBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
@@ -29,6 +30,7 @@ class RecentAdapter(
         return ViewHolder(binding, onItemClick)
     }
 
+    //把数据“填”进卡片
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
@@ -51,10 +53,10 @@ class RecentAdapter(
             binding.tvLevelName.text = binding.root.context.getString(bmiLevel.statusTextRes)
 
 
-            // 3. 彩色圆点（纯代码动态创建）
+            // 3. 彩色圆点
             val density = binding.root.context.resources.displayMetrics.density
             val dotDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
+                shape = GradientDrawable.OVAL//椭圆
                 setColor(bmiLevel.cardBgColor)
                 setSize(
                     dpToPx(18, density),
@@ -77,10 +79,13 @@ class RecentAdapter(
         }
     }
 
+    //精确高效地只刷新有变化的那一项，而不是刷新整个列表。
     class DiffCallback : DiffUtil.ItemCallback<BmiRecord>() {
+        //判断是否是同一条数据（通过 id 比较）
         override fun areItemsTheSame(oldItem: BmiRecord, newItem: BmiRecord): Boolean =
             oldItem.id == newItem.id
 
+        //判断内容是否完全一致
         override fun areContentsTheSame(oldItem: BmiRecord, newItem: BmiRecord): Boolean =
             oldItem == newItem
     }
