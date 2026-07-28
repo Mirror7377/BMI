@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.database.RecommendApp
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.data.repository.BmiRepository
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.WeightUnit
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.utils.UnitConverter
@@ -52,12 +52,18 @@ class ResultViewModel @Inject constructor(
             val isFirstSave = countBefore == 0
 
             val currentState = _state.value
+            //todo weightInput使用？
             val finalWeightKg = if (currentState.weightUnit == WeightUnit.KG.name) {
                 currentState.weightInput
             } else {
                 UnitConverter.lbToKg(currentState.weightInput)
             }
-            val bmiLevel = BmiClassifier.classifyAdult(currentState.bmi)
+            val bmiLevel = if (currentState.age > 20) {
+                BmiClassifier.classifyAdult(currentState.bmi)
+            } else {
+                // 直接传入 String 性别（state.gender 就是 String）
+                BmiClassifier.classifyChild(currentState.age, currentState.gender, currentState.bmi)
+            }
             val currentTs = currentState.timestamp
             val timeOfDay = currentState.timeOfDay
 
@@ -82,8 +88,8 @@ class ResultViewModel @Inject constructor(
         }
     }
 
-    // ====================== 内部方法 ======================
     private fun loadFromArguments(args: Bundle) {
+        //指定要反序列化的目标类型
         val record = args.getParcelable("BMI_RECORD", BmiRecord::class.java) ?: return
 
         _state.update {
@@ -209,13 +215,13 @@ class ResultViewModel @Inject constructor(
     fun getRecommendedApps(bmiLevel: BmiLevel, gender: String): List<RecommendApp> {
         // 判断是否为 Normal 以下（体重过轻）
         // BmiLevel 的 ordinal 顺序: VERY_SEVERELY_UNDERWEIGHT(0), SEVERELY_UNDERWEIGHT(1), UNDERWEIGHT(2), NORMAL(3), ...
-        val isUnderNormal = bmiLevel.ordinal < BmiLevel.NORMAL.ordinal
+        val isUnderNormal = bmiLevel.ordinal < BmiLevel.NORMAL.ordinal//获取序号
 
         val ids = if (isUnderNormal) {
             // A. 结论为 normal 以下（体重过轻）
-            val pool12 = listOf(6, 7, 8).shuffled().take(2)
+            val pool12 = listOf(6, 7, 8).shuffled().take(2)//shuffled随机打乱集合元素顺序的函数
             val pool3 = listOf(5, 9, 10).shuffled().first()
-            pool12 + listOf(pool3)
+            pool12 + listOf(pool3)//将两个列表拼接（合并）成一个新的列表
         } else {
             // B. 结论为 normal 及以上
             val pool12 = if (gender == Gender.MALE.name) {

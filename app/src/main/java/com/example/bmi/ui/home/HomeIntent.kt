@@ -1,9 +1,9 @@
 package com.example.bmi.ui.home
 
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.TimeOfDay
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.TimeOfDay
+import com.example.bmi.data.enums.WeightUnit
 
 sealed class HomeIntent {
 

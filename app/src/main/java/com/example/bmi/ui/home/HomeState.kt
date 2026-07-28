@@ -1,9 +1,9 @@
 package com.example.bmi.ui.home
 
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.TimeOfDay
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.TimeOfDay
+import com.example.bmi.data.enums.WeightUnit
 
 data class HomeState(
     // 用户当前输入的原始值（UI 直接显示）
@@ -17,7 +17,6 @@ data class HomeState(
 
     // 用于显示统计图数据
     val weightKg: Double = 65.0,
-
     val heightCm: Double = 170.0,
 
     // 其他 UI 状态

@@ -1,4 +1,4 @@
-package com.example.bmi.ui.home.enums
+package com.example.bmi.data.enums
 
 enum class HeightUnit {
     CM, FT_IN

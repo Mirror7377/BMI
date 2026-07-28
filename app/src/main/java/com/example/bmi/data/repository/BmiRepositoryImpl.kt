@@ -48,6 +48,7 @@ class BmiRepositoryImpl @Inject constructor(
         return dao.getRecordCount()
     }
 
+    //在哪里使用？
     override suspend fun getMonthLatestRecords(year: Int, month: Int): List<BmiRecord> {
         val cal = Calendar.getInstance().apply {
             set(year, month, 1, 0, 0, 0)
@@ -69,10 +70,6 @@ class BmiRepositoryImpl @Inject constructor(
         return dao.getRecordsBetween(startTime, endTime)
     }
 
-    //获取历史数据
-    override suspend fun getAllSortedRecords(): Flow<List<BmiRecord>> {
-        return dao.getAllSortedRecords()
-    }
 
     override suspend fun insertAll(records: List<BmiRecord>) {
         return dao.insertAll(records)

@@ -3,8 +3,11 @@ package com.example.bmi.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.database.BmiRecord
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.TimeOfDay
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.data.repository.BmiRepository
-import com.example.bmi.ui.home.enums.*
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +19,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel

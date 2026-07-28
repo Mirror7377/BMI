@@ -20,7 +20,7 @@ class WeightChartView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // ===== 枚举（新增 MONTH） =====
+    // ===== 枚举 =====
     enum class ChartMode { DAY, WEEK, MONTH }
 
     // ===== 常量 =====
@@ -37,11 +37,9 @@ class WeightChartView @JvmOverloads constructor(
 
         const val DOT_RADIUS_NORMAL = 3f
         const val DOT_RADIUS_SELECTED = 4.5f
-
-        const val VALUE_LABEL_TOP_OFFSET = 8f
     }
 
-    // ===== 月份锚点（DAY / WEEK 使用） =====
+    // ===== 月份锚点 =====
     private val monthAnchors = mutableListOf<MonthAnchor>()
 
     private data class MonthAnchor(
@@ -273,7 +271,7 @@ class WeightChartView @JvmOverloads constructor(
         updateMonthAnchorPositions()
     }
 
-    // ---------- MONTH 模式（新增） ----------
+    // ---------- MONTH 模式 ----------
     private fun setDataMonth(data: List<DayWeightData>) {
         allData = data.sortedBy { it.date.timeInMillis }
         selectedDataIndex = null
@@ -282,7 +280,6 @@ class WeightChartView @JvmOverloads constructor(
         computeFixedYAxis(allData)
         updateLayoutMetrics()
 
-        // 默认滚动到最后 8 个月
         val targetStart = (allData.size - displayCount).coerceAtLeast(0)
         scrollOffset = targetStart.toFloat() * xInterval
         updateScrollBounds()
@@ -290,7 +287,6 @@ class WeightChartView @JvmOverloads constructor(
 
         invalidate()
         notifyRangeChanged()
-        // MONTH 模式不使用月份锚点，清空即可
         monthAnchors.clear()
         updateMonthAnchorPositions()
     }
@@ -360,15 +356,15 @@ class WeightChartView @JvmOverloads constructor(
         }
         val totalWidth = (allData.size - 1) * xInterval
         val visibleWidth = (displayCount - 1) * xInterval
-        maxScrollX = max(0f, totalWidth - visibleWidth)
         minScrollX = -xInterval / 2f
+        maxScrollX = max(0f, totalWidth - visibleWidth)
     }
 
     private fun clampScrollOffset() {
         scrollOffset = scrollOffset.coerceIn(minScrollX, maxScrollX)
     }
 
-    // ===== 日期范围回调（MONTH 模式特殊格式） =====
+    // ===== 日期范围回调 =====
     private fun notifyRangeChanged() {
         if (allData.isEmpty()) return
 
@@ -448,7 +444,6 @@ class WeightChartView @JvmOverloads constructor(
         canvas.restore()
     }
 
-    // ===== 各元素绘制 =====
     private fun drawEmptyState(canvas: Canvas) {
         textPaint.textSize = spToPx(14f)
         textPaint.color = Color.WHITE
@@ -509,13 +504,10 @@ class WeightChartView @JvmOverloads constructor(
         canvas.drawPath(fillPath, fillPaint)
     }
 
-    // ========== 横坐标绘制（DAY/WEEK 显示日，MONTH 显示月数字） ==========
-
     private fun drawXLabels(canvas: Canvas, startIdx: Int, visibleData: List<DayWeightData>) {
         val dateY = viewHeight - dpToPx(17.5f)
         textPaint.textAlign = Paint.Align.CENTER
 
-        // 计算当前可见区域在数据坐标系中的范围（canvas 已平移 -scrollOffset）
         val visibleLeft = scrollOffset + xStart
         val visibleRight = scrollOffset + viewWidth
 
@@ -530,7 +522,6 @@ class WeightChartView @JvmOverloads constructor(
                 ChartMode.MONTH -> (data.month + 1).toString()
             }
 
-            // 检查标签是否完全位于可见区域内
             val labelWidth = textPaint.measureText(label)
             val left = x - labelWidth / 2
             val right = x + labelWidth / 2
@@ -542,11 +533,9 @@ class WeightChartView @JvmOverloads constructor(
         textPaint.textAlign = Paint.Align.LEFT
     }
 
-    // ========== 月份/年份标签绘制 ==========
     private fun drawMonthLabel(canvas: Canvas, startIdx: Int, endIdx: Int, visibleData: List<*>) {
         when (chartMode) {
             ChartMode.DAY -> {
-                // Day 模式：每月 1 号显示月份英文缩写
                 var pos = -1
                 for (i in visibleData.indices) {
                     val dataIndex = startIdx + i
@@ -563,7 +552,6 @@ class WeightChartView @JvmOverloads constructor(
                     val right = x + textWidth / 2
                     val visibleLeft = scrollOffset + xStart
                     val visibleRight = scrollOffset + viewWidth
-                    // 仅当标签完全可见时才绘制
                     if (left >= visibleLeft && right <= visibleRight) {
                         canvas.drawText(text, x, monthLabelY, monthPaint)
                     }
@@ -571,7 +559,6 @@ class WeightChartView @JvmOverloads constructor(
             }
 
             ChartMode.WEEK -> {
-                // Week 模式：每月第一个周一显示月份英文缩写
                 for (anchor in monthAnchors) {
                     val x = anchor.x
                     val text = getMonthAbbr(anchor.month)
@@ -580,7 +567,6 @@ class WeightChartView @JvmOverloads constructor(
                     val right = x + textWidth / 2
                     val visibleLeft = scrollOffset + xStart
                     val visibleRight = scrollOffset + viewWidth
-                    // 仅当标签完全可见时才绘制
                     if (left >= visibleLeft && right <= visibleRight) {
                         canvas.drawText(text, x, monthLabelY, monthPaint)
                     }
@@ -588,12 +574,11 @@ class WeightChartView @JvmOverloads constructor(
             }
 
             ChartMode.MONTH -> {
-                // Month 模式：仅在 1 月（month == 0）的位置绘制年份
                 for (i in visibleData.indices) {
                     val dataIndex = startIdx + i
                     if (dataIndex >= allData.size) break
                     val data = allData[dataIndex]
-                    if (data.month == 0) {  // 1月
+                    if (data.month == 0) {
                         val x = xStart + dataIndex * xInterval
                         val text = data.year.toString()
                         val textWidth = monthPaint.measureText(text)
@@ -601,7 +586,6 @@ class WeightChartView @JvmOverloads constructor(
                         val right = x + textWidth / 2
                         val visibleLeft = scrollOffset + xStart
                         val visibleRight = scrollOffset + viewWidth
-                        // 仅当标签完全可见时才绘制
                         if (left >= visibleLeft && right <= visibleRight) {
                             canvas.drawText(text, x, monthLabelY, monthPaint)
                         }
@@ -675,21 +659,16 @@ class WeightChartView @JvmOverloads constructor(
 
         val label = String.format("%.1f kg", selectedWeight)
 
-        //=====================
-        // 容器参数
-        //=====================
         val paddingHorizontal = dpToPx(8f)
         val paddingTop = dpToPx(6f)
         val paddingBottom = dpToPx(6f)
 
         val textWidth = valuePaint.measureText(label)
-        val textHeight =
-            valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
+        val textHeight = valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
 
         val bgWidth = textWidth + paddingHorizontal * 2
         val bgHeight = textHeight + paddingTop + paddingBottom
 
-        // 背景距离圆点9dp
         val gap = dpToPx(9f)
 
         val bgLeft = point.x - bgWidth / 2
@@ -697,9 +676,6 @@ class WeightChartView @JvmOverloads constructor(
         val bgTop = bgBottom - bgHeight
         val bgRight = bgLeft + bgWidth
 
-        //=====================
-        // 绘制背景
-        //=====================
         canvas.drawRoundRect(
             bgLeft,
             bgTop,
@@ -710,30 +686,13 @@ class WeightChartView @JvmOverloads constructor(
             valueBgPaint
         )
 
-        //=====================
-        // 绘制文字
-        //=====================
         val fm = valuePaint.fontMetrics
-
         val textX = point.x
-        val textY = bgTop +
-                paddingTop -
-                fm.ascent
+        val textY = bgTop + paddingTop - fm.ascent
+        canvas.drawText(label, textX, textY, valuePaint)
 
-        canvas.drawText(
-            label,
-            textX,
-            textY,
-            valuePaint
-        )
-
-        //=====================
-        // 绘制底部三角形
-        //=====================
         val triangleHeight = dpToPx(3f)
-
         val triangleHalfWidth = dpToPx(5f)
-
         val triangleTop = bgBottom
         val triangleBottom = bgBottom + triangleHeight
         val triangleCenterX = point.x
@@ -744,11 +703,10 @@ class WeightChartView @JvmOverloads constructor(
             lineTo(triangleCenterX, triangleBottom)
             close()
         }
-
         canvas.drawPath(trianglePath, valueBgPaint)
     }
 
-    // ===== 数据点提取（自动过滤 null） =====
+    // ===== 数据点提取 =====
     private fun getDataPoints(startIdx: Int, visibleData: List<DayWeightData>): List<ChartPoint> {
         val points = mutableListOf<ChartPoint>()
         for (i in visibleData.indices) {
@@ -765,7 +723,6 @@ class WeightChartView @JvmOverloads constructor(
 
     private fun getFullDataPoints(): List<ChartPoint> {
         val points = mutableListOf<ChartPoint>()
-
         allData.forEachIndexed { index, data ->
             data.weight?.let {
                 points.add(
@@ -777,11 +734,10 @@ class WeightChartView @JvmOverloads constructor(
                 )
             }
         }
-
         return points
     }
 
-    // ===== 触摸事件（完全复用） =====
+    // ===== 触摸事件 =====
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (allData.isEmpty()) return false
 
@@ -948,12 +904,7 @@ class WeightChartView @JvmOverloads constructor(
         val y: Float
     )
 
-    // ========== 月份锚点管理 ==========
-
-    /**
-     * 重建所有月份锚点（DAY 模式：每月1号；WEEK 模式：该月份第一个周一，
-     * 若该月无周一则用该月第一个数据点，绝不跨月）
-     */
+    // ===== 月份锚点管理 =====
     private fun rebuildMonthAnchors() {
         monthAnchors.clear()
         if (allData.isEmpty()) return
@@ -1005,15 +956,11 @@ class WeightChartView @JvmOverloads constructor(
             }
 
             ChartMode.MONTH -> {
-                // MONTH 模式不使用锚点，清空即可
                 monthAnchors.clear()
             }
         }
     }
 
-    /**
-     * 根据当前布局参数更新所有锚点的像素坐标
-     */
     private fun updateMonthAnchorPositions() {
         for (anchor in monthAnchors) {
             anchor.x = xStart + anchor.dataIndex * xInterval

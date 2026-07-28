@@ -34,7 +34,7 @@ class RecentViewModel @Inject constructor(
         viewModelScope.launch {
             repository.observeAllRecords().collect { recordList ->
                 _state.update {
-                    it.copy(records = recordList, isLoading = false)
+                    it.copy(records = recordList)
                 }
             }
         }

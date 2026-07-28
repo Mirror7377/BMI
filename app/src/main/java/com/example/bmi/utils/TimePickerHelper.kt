@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import com.example.bmi.R
 import com.example.bmi.databinding.BottomSheetTimePickerBinding
-import com.example.bmi.ui.home.enums.TimeOfDay
+import com.example.bmi.data.enums.TimeOfDay
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 

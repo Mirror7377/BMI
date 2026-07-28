@@ -41,7 +41,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- 第一个容器 -->
+    <!-- 用户登录容器 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/profileContainer"
         android:layout_width="345dp"

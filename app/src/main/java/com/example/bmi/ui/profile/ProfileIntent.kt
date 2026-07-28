@@ -5,4 +5,6 @@ sealed class ProfileIntent {
     object Login : ProfileIntent()
     object Logout : ProfileIntent()
     data class ImportJson(val json: String) : ProfileIntent()
+
+    object ImportSampleData : ProfileIntent()
 }

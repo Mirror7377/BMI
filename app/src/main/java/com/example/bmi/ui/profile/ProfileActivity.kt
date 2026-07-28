@@ -42,7 +42,6 @@ class ProfileActivity : BaseActivity() {
     private lateinit var binding: ActivityProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
 
-    val REQUEST_LANGUAGE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,16 +66,19 @@ class ProfileActivity : BaseActivity() {
             }
         }
 
-        // Language 行（已改为容器）
+        // Language 行
         binding.llLanguageRow.setOnClickListener {
             val intent = Intent(this, LanguageActivity::class.java)
-            startActivityForResult(intent, REQUEST_LANGUAGE)
+            startActivity(intent)
         }
 
         // Rate Us 行（新容器）
         binding.llRateUs.setOnClickListener {
             val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
+            //Uri.parse(url) 将字符串 URL 转换成 Android 可识别的 Uri 对象。
+            //ACTION_VIEW 是一个系统级的 Intent 动作，Android 会寻找能处理 URL 的应用（比如浏览器、Play 商店客户端）来打开它。
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            //只有在确实有应用能处理时，才调用 startActivity(intent)。
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             }
@@ -88,17 +90,10 @@ class ProfileActivity : BaseActivity() {
         }
 
         binding.ivExtraIcon.setOnClickListener {
-            try {
-                val jsonString = assets.open("sample_records.json")
-                    .bufferedReader().use { it.readText() }
-                viewModel.handleIntent(ProfileIntent.ImportJson(jsonString))
-            } catch (e: Exception) {
-                Toast.makeText(this, "Failed to load sample data: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-            showSyncIssueDialog()
+            viewModel.handleIntent(ProfileIntent.ImportSampleData)
+            showSyncIssueDialog() // 弹窗提示（如果业务需要）
         }
 
-        // 注意：原来单独对 tvRateUs 和 tvFeedback 的监听已移除
     }
 
     private fun observeState() {
@@ -153,9 +148,6 @@ class ProfileActivity : BaseActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        is ProfileEffect.ShowToast -> {
-                            Toast.makeText(this@ProfileActivity, effect.message, Toast.LENGTH_SHORT).show()
-                        }
                         is ProfileEffect.NavigateBack -> finish()
                         is ProfileEffect.Success -> dialogSuccess()
                     }
@@ -204,11 +196,11 @@ class ProfileActivity : BaseActivity() {
             setCancelable(true)
             setCanceledOnTouchOutside(true)
             window?.setBackgroundDrawableResource(android.R.color.transparent)
-            val lp = window?.attributes
-            lp?.gravity = Gravity.BOTTOM
-            lp?.width = ViewGroup.LayoutParams.MATCH_PARENT
-            lp?.height = ViewGroup.LayoutParams.WRAP_CONTENT
-            window?.attributes = lp
+            val lp = window?.attributes//（获取当前窗口的布局参数对象）
+            lp?.gravity = Gravity.BOTTOM//底部弹出
+            lp?.width = ViewGroup.LayoutParams.MATCH_PARENT//占满
+            lp?.height = ViewGroup.LayoutParams.WRAP_CONTENT//自适应
+            window?.attributes = lp//（把修改后的参数对象设置回窗口）
         }
 
         dialogBinding.btnLogout.setOnClickListener {

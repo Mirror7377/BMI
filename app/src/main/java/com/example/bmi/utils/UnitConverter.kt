@@ -1,7 +1,7 @@
 package com.example.bmi.utils
 
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import java.math.BigDecimal
 import java.math.RoundingMode
 

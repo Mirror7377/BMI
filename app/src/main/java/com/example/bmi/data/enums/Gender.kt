@@ -1,5 +1,4 @@
-package com.example.bmi.ui.home.enums
-
+package com.example.bmi.data.enums
 
 enum class Gender {
     MALE, FEMALE

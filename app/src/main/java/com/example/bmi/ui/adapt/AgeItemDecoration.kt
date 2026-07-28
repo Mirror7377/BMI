@@ -20,12 +20,12 @@ class AgeItemDecoration(
         outRect.left = half
         outRect.right = half
 
-        // 第一个Item左边不要留9dp
+        // 第一个Item左边不留9dp
         if (parent.getChildAdapterPosition(view) == 0) {
             outRect.left = 0
         }
 
-        // 最后一个Item右边不要留9dp
+        // 最后一个Item右边不留9dp
         if (parent.getChildAdapterPosition(view) == state.itemCount - 1) {
             outRect.right = 0
         }

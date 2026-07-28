@@ -2,7 +2,7 @@ package com.example.bmi.ui.bmigauge
 
 import androidx.annotation.ColorInt
 import com.example.bmi.R
-import com.example.bmi.ui.home.enums.Gender
+import com.example.bmi.data.enums.Gender
 
 
 enum class ChildCategory {
@@ -26,32 +26,20 @@ object BmiClassifier {
         }
     }
 
-//    fun classifyChild(age: Int, gender: Gender, bmi: Double): ChildCategory {
-//        val row = getChildRow(age, gender)
-//        return when {
-//            bmi < row.underweight -> ChildCategory.UNDERWEIGHT
-//            bmi < row.normal -> ChildCategory.NORMAL
-//            bmi < row.overweight -> ChildCategory.OVERWEIGHT
-//            else -> ChildCategory.OBESE_CLASS_I
-//        }
-//    }
 
     fun classifyChild(age: Int, gender: String, bmi: Double): BmiLevel {
         return BmiConfigProvider.classifyChild(age, gender, bmi)
     }
 
-    fun getDialRange(age: Int, gender: Gender): Pair<Double, Double> {
-        return if (age in 2..20) {
-            val row = getChildRow(age, gender)
-            Pair(row.dialLow, row.dialHigh)
-        } else {
-            Pair(15.0, 41.0)  // 成人
-        }
-    }
 
-    private fun getChildRow(age: Int, gender: Gender): ChildRow {
+    fun getChildRow(age: Int, gender: Gender): ChildRow {
         val table = if (gender == Gender.MALE) maleTable else femaleTable
         return table[age] ?: table[age.coerceIn(2, 20)] ?: error("Age out of range")
+    }
+    // 新增：获取特定年龄性别的正常 BMI 范围（下限=underweight，上限=normal）
+    fun getNormalBmiRange(age: Int, gender: Gender): Pair<Double, Double> {
+        val row = getChildRow(age, gender)
+        return Pair(row.underweight, row.normal)
     }
 
     data class ChildRow(

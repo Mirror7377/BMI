@@ -26,9 +26,9 @@ import com.example.bmi.R
 import com.example.bmi.databinding.FragmentHomeBinding
 import com.example.bmi.ui.adapt.AgeAdapter
 import com.example.bmi.ui.adapt.AgeItemDecoration
-import com.example.bmi.ui.home.enums.Gender
-import com.example.bmi.ui.home.enums.HeightUnit
-import com.example.bmi.ui.home.enums.WeightUnit
+import com.example.bmi.data.enums.Gender
+import com.example.bmi.data.enums.HeightUnit
+import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.utils.DatePickerHelper
 import com.example.bmi.ui.profile.ProfileActivity
 import com.example.bmi.ui.result.ResultActivity
@@ -80,9 +80,9 @@ class HomeFragment : Fragment() {
             }
         }
 
-        observeState()
         setupListeners()
         setupAgeRecyclerView()
+        observeState()
         observeEffect()
     }
 
@@ -131,7 +131,7 @@ class HomeFragment : Fragment() {
             HeightUnit.CM -> {
                 binding.heightFtInGroup.visibility = View.GONE
                 binding.heightCmGroup.visibility = View.VISIBLE
-                binding.etCmValue.setText(state.heightCm.toString())
+                binding.etCmValue.setText(String.format("%.1f",state.heightCm))
             }
             HeightUnit.FT_IN -> {
                 binding.heightFtInGroup.visibility = View.VISIBLE
@@ -141,6 +141,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        //todo
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         binding.tvDateDisplay.text = dateFormat.format(Date(state.timestamp))
         binding.tvTimeOfDayDisplay.setText(state.timeOfDay.displayName)
@@ -240,6 +241,7 @@ class HomeFragment : Fragment() {
         val ages = (2..99).toList()
         ageAdapter = AgeAdapter(ages) { selectedAge ->
             viewModel.sendIntent(HomeIntent.AgeChanged(selectedAge))
+            //点击时调用
             scrollAgeToCenter(selectedAge)
         }
         binding.rvAgePicker.adapter = ageAdapter
@@ -251,7 +253,7 @@ class HomeFragment : Fragment() {
 
         //专门用来让 RecyclerView 在滚动停止时，自动将离中心最近的那个 Item 平滑地对齐到中心位置。
         snapHelper = LinearSnapHelper()
-        //吸到你的年龄滚轮
+        //吸到你的年龄滚轮,保证卡片在正中央
         snapHelper.attachToRecyclerView(binding.rvAgePicker)
 
         //滚动监听
@@ -263,6 +265,7 @@ class HomeFragment : Fragment() {
                         //查询索引
                         val pos = recyclerView.getChildAdapterPosition(it)
                         //不等于-1时
+                        //强行把中间的数字设为
                         if (pos != RecyclerView.NO_POSITION) viewModel.sendIntent(HomeIntent.AgeChanged(ages[pos]))
                     }
                 }
@@ -483,7 +486,7 @@ class HomeFragment : Fragment() {
         val unSelectedColor = ContextCompat.getColor(requireContext(), R.color.gender)
         val maleSelected = gender == Gender.MALE
         binding.genderCheck1.visibility = if (maleSelected) View.VISIBLE else View.GONE
-        binding.genderCheck2.visibility = if (!maleSelected) View.VISIBLE else View.GONE
+        binding.genderCheck2.visibility = if (maleSelected) View.GONE else View.VISIBLE
         binding.genderContainer1.setCardBackgroundColor(if (maleSelected) selectedColor else unSelectedColor)
         binding.genderContainer2.setCardBackgroundColor(if (maleSelected) unSelectedColor else selectedColor)
     }

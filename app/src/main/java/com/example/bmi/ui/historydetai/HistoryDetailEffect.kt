@@ -1,8 +1,7 @@
-package com.example.bmi.ui.historydetail
+package com.example.bmi.ui.historydetai
 
 sealed class HistoryDetailEffect {
     object NavigateBack : HistoryDetailEffect()
-    data class ShowError(val message: String) : HistoryDetailEffect()
 
     object NavigateToHome : HistoryDetailEffect()
 }
