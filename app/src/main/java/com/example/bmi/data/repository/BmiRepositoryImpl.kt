@@ -26,11 +26,7 @@ class BmiRepositoryImpl @Inject constructor(
         return dao.getAllRecords()
     }
 
-    override fun observeRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>> {
-        return dao.getRecordsInRange(start, end)
-    }
 
-    // BmiRepository.kt
     override suspend fun hasAnyRecord(): Boolean {
         return dao.hasAnyRecord()
     }
@@ -46,21 +42,6 @@ class BmiRepositoryImpl @Inject constructor(
     //获取数据总条数
     override suspend fun getRecordCount(): Int {
         return dao.getRecordCount()
-    }
-
-    //在哪里使用？
-    override suspend fun getMonthLatestRecords(year: Int, month: Int): List<BmiRecord> {
-        val cal = Calendar.getInstance().apply {
-            set(year, month, 1, 0, 0, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val startTime = cal.timeInMillis
-        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH))
-        cal.set(Calendar.HOUR_OF_DAY, 23)
-        cal.set(Calendar.MINUTE, 59)
-        cal.set(Calendar.SECOND, 59)
-        val endTime = cal.timeInMillis
-        return dao.getMonthLatestRecords(startTime, endTime)
     }
 
     override suspend fun getRecordsBetween(

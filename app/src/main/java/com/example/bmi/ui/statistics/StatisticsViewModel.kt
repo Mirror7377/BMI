@@ -205,7 +205,7 @@ class StatisticsViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                Log.e("StatisticsViewModel", "loadMonth error", e)
+                Log.e("StatisticsViewModel", "loadWeek error", e)
             }
         }
     }
@@ -301,7 +301,7 @@ class StatisticsViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                Log.e("StatisticsViewModel", "loadWeek error", e)
+                Log.e("StatisticsViewModel", "loadMonth error", e)
             }
         }
     }

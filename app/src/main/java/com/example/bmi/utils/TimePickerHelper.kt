@@ -36,10 +36,10 @@ class TimePickerHelper(
 
 
         val defaultPos = when (currentTimeOfDay) {
-            TimeOfDay.MORNING -> 0
-            TimeOfDay.AFTERNOON -> 1
-            TimeOfDay.EVENING -> 2
-            TimeOfDay.NIGHT -> 3
+            TimeOfDay.Morning -> 0
+            TimeOfDay.Afternoon -> 1
+            TimeOfDay.Evening -> 2
+            TimeOfDay.Night -> 3
         }
         selectedIndex = defaultPos
 
@@ -55,11 +55,11 @@ class TimePickerHelper(
         binding.btnTimeCancel.setOnClickListener { dialog.dismiss() }
         binding.btnTimeDone.setOnClickListener {
             val timeOfDay = when (selectedIndex) {
-                0 -> TimeOfDay.MORNING
-                1 -> TimeOfDay.AFTERNOON
-                2 -> TimeOfDay.EVENING
-                3 -> TimeOfDay.NIGHT
-                else -> TimeOfDay.MORNING
+                0 -> TimeOfDay.Morning
+                1 -> TimeOfDay.Afternoon
+                2 -> TimeOfDay.Evening
+                3 -> TimeOfDay.Night
+                else -> TimeOfDay.Morning
             }
             onTimeSelected(timeOfDay)
             dialog.dismiss()

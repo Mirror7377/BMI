@@ -44,18 +44,10 @@ ORDER BY
 """)
     fun getAllRecords(): Flow<List<BmiRecord>>//unixepoch 把时间戳转换成日期格式（比如 2026-07-28）
 
-    // 获取时间段内的记录（按时间戳升序）    //todo 确定历史记录排序顺序
-    //todo未使用
-    @Query("SELECT * FROM bmi_records WHERE timestamp >= :start AND timestamp < :end ORDER BY timestamp ASC")
-    fun getRecordsInRange(start: Long, end: Long): Flow<List<BmiRecord>>
-
     // 获取是否有数据
     @Query("SELECT EXISTS(SELECT 1 FROM bmi_records)")
     suspend fun hasAnyRecord(): Boolean
 
-    // 删除所有记录
-    @Query("DELETE FROM bmi_records")
-    suspend fun deleteAll()
 
     //根据id查询数据
     @Query("SELECT * FROM bmi_records WHERE id = :id")
@@ -68,21 +60,6 @@ ORDER BY
     @Query("SELECT COUNT(*) FROM bmi_records")
     suspend fun getRecordCount(): Int
 
-    //todo 未使用统计当天的最后一条
-    @Query("""
-    SELECT * FROM bmi_records 
-    WHERE timestamp BETWEEN :startTime AND :endTime
-    ORDER BY
-        CASE timeOfDay
-            WHEN 'Morning' THEN 1
-            WHEN 'Afternoon' THEN 2
-            WHEN 'Evening' THEN 3
-            WHEN 'Night' THEN 4
-            ELSE 0
-        END DESC,
-        timestamp DESC
-""")
-    suspend fun getMonthLatestRecords(startTime: Long, endTime: Long): List<BmiRecord>
 
     @Query("SELECT * FROM bmi_records WHERE timestamp BETWEEN :start AND :end ORDER BY timestamp ASC")
     suspend fun getRecordsBetween(start: Long, end: Long): List<BmiRecord>

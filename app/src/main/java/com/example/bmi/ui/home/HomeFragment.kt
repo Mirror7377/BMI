@@ -141,7 +141,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-        //todo
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         binding.tvDateDisplay.text = dateFormat.format(Date(state.timestamp))
         binding.tvTimeOfDayDisplay.setText(state.timeOfDay.displayName)
@@ -280,7 +279,6 @@ class HomeFragment : Fragment() {
             val index = viewModel.state.value.age - 2
             //把制定索引的数据滚动到正中间
             (binding.rvAgePicker.layoutManager as LinearLayoutManager).scrollToPosition(index)
-            //todo闪烁？
             binding.rvAgePicker.post {
                 //当前停在中央的那个卡片
                 snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let { view ->
@@ -356,8 +354,8 @@ class HomeFragment : Fragment() {
             WeightUnit.LB -> 2.0 to 551.0
             WeightUnit.KG -> 1.0 to 250.0
         }
-        val errorMsg = "Please input a valid weight (${min.toInt()}-${max.toInt()}) to calculate your BMI accurately"
 
+        val errorMsg = getString(R.string.error_weight_invalid)
         when {
             raw.isEmpty() -> {
                 val default = when (unit) {

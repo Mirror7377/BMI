@@ -1,38 +1,32 @@
 package com.example.bmi.ui.historydetai
 
 import android.animation.ValueAnimator
-import android.app.Dialog
 import android.content.Intent
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.RatingBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmi.BaseActivity
 import com.example.bmi.MainActivity
 import com.example.bmi.R
-import com.example.bmi.data.database.RecommendApp
-import com.example.bmi.databinding.ActivityHistoryDetailBinding
-import com.example.bmi.databinding.DialogBmiLegendBinding
-import com.example.bmi.databinding.DialogDiscardConfirmBinding
-import com.example.bmi.ui.bmigauge.BmiConfigProvider
-import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.data.enums.Gender
 import com.example.bmi.data.enums.HeightUnit
 import com.example.bmi.data.enums.TimeOfDay
 import com.example.bmi.data.enums.WeightUnit
+import com.example.bmi.databinding.ActivityHistoryDetailBinding
+import com.example.bmi.databinding.DialogBmiLegendBinding
+import com.example.bmi.ui.bmigauge.BmiConfigProvider
+import com.example.bmi.ui.bmigauge.BmiLevel
+import com.example.bmi.utils.BmiUiUtils
 import com.example.bmi.utils.UnitConverter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -41,8 +35,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.core.content.edit
-import com.example.bmi.ui.bmigauge.BmiClassifier
 
 @AndroidEntryPoint
 class HistoryDetailActivity : BaseActivity() {
@@ -89,7 +81,11 @@ class HistoryDetailActivity : BaseActivity() {
         }
 
         binding.tvDelete.setOnClickListener {
-            showDeleteConfirmDialog()
+            BmiUiUtils.showConfirmDialog(this) {
+                val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                prefs.edit { putBoolean("show_delete_success", true) }
+                viewModel.handleIntent(HistoryDetailIntent.DeleteRecord)
+            }
         }
 
         binding.statusContainer.setOnClickListener {
@@ -118,8 +114,6 @@ class HistoryDetailActivity : BaseActivity() {
                         is HistoryDetailEffect.NavigateBack -> finish()
                         is HistoryDetailEffect.NavigateToHome -> {
                             val intent = Intent(this@HistoryDetailActivity, MainActivity::class.java).apply {
-                                //FLAG_ACTIVITY_NEW_TASK在新的任务栈中启动目标 Activity
-                                //FLAG_ACTIVITY_CLEAR_TASK 在启动新 Activity 之前，清除目标 Activity 所在任务栈里的所有旧 Activity。
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             }
                             startActivity(intent)
@@ -146,7 +140,7 @@ class HistoryDetailActivity : BaseActivity() {
         // 3. 状态标签
         val bmiLevel = state.bmiLevel
         binding.tvBmiStatus.text = getString(bmiLevel.statusTextRes)
-        val radius = dpToPx(19.75f).toFloat()
+        val radius = BmiUiUtils.dpToPx(this, 19.75f).toFloat()
         val bg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = radius
@@ -184,11 +178,10 @@ class HistoryDetailActivity : BaseActivity() {
         val dateStr = dateFormat.format(Date(state.timestamp))
 
         val timeOfDayEnum = TimeOfDay.valueOf(state.timeOfDay)
-
         val timeStr = getString(timeOfDayEnum.displayName)
         binding.tvDividerDateTime.text = "$dateStr $timeStr"
 
-        // 6. 底部提示卡片
+        // 底部提示卡片
         renderBottomTip(
             bmiLevel = bmiLevel,
             userWeightInput = state.weightInput,
@@ -202,10 +195,10 @@ class HistoryDetailActivity : BaseActivity() {
             tvRange = binding.tvTipRangeHasData
         )
 
-        // 推荐 App
+        // 推荐 App（使用 BmiUiUtils）
         val recommendedApps = state.recommendedApps
         if (recommendedApps.size == 3) {
-            bindAppToCard(
+            BmiUiUtils.bindAppToCard(
                 binding.adCard1,
                 binding.ivAppIcon1,
                 binding.tvAppName1,
@@ -214,7 +207,7 @@ class HistoryDetailActivity : BaseActivity() {
                 binding.tvAppRating1,
                 recommendedApps[0]
             )
-            bindAppToCard(
+            BmiUiUtils.bindAppToCard(
                 binding.adCard2,
                 binding.ivAppIcon2,
                 binding.tvAppName2,
@@ -223,7 +216,7 @@ class HistoryDetailActivity : BaseActivity() {
                 binding.tvAppRating2,
                 recommendedApps[1]
             )
-            bindAppToCard(
+            BmiUiUtils.bindAppToCard(
                 binding.adCard3,
                 binding.ivAppIcon3,
                 binding.tvAppName3,
@@ -233,23 +226,9 @@ class HistoryDetailActivity : BaseActivity() {
                 recommendedApps[2]
             )
         }
-
     }
 
-
-    //todo 复用代码
-    private fun getStandardWeightRangeCm(heightCm: Double, age: Int, gender: String): Pair<Double, Double> {
-        val h = heightCm / 100.0
-        return if (age in 2..20) {
-            val genderEnum = if (gender == Gender.MALE.name) Gender.MALE else Gender.FEMALE
-            val (bmiLow, bmiHigh) = BmiClassifier.getNormalBmiRange(age, genderEnum)
-            Pair(bmiLow * h * h, bmiHigh * h * h)
-        } else {
-            // 成人固定标准
-            Pair(18.5 * h * h, 24.9 * h * h)
-        }
-    }
-
+    // ========== 底部提示卡片 ==========
     private fun renderBottomTip(
         bmiLevel: BmiLevel,
         userWeightInput: Double,
@@ -262,7 +241,7 @@ class HistoryDetailActivity : BaseActivity() {
         tvMain: TextView,
         tvRange: TextView
     ) {
-        val (stdMinKg, stdMaxKg) = getStandardWeightRangeCm(userHeightCm,age, gender)
+        val (stdMinKg, stdMaxKg) = BmiUiUtils.getStandardWeightRangeCm(userHeightCm, age, gender)
         val isUserKg = userWeightUnitStr == WeightUnit.KG.name
 
         val (stdMinShow, stdMaxShow, userWeightShow) = if (isUserKg) {
@@ -299,7 +278,7 @@ class HistoryDetailActivity : BaseActivity() {
             val diffText = String.format(" (%s%.1f%s)", diffSign, diffValue, unitStr)
             val fullText = "$rangeStr$diffText"
             val spannable = SpannableString(fullText)
-            val redColor = 0xFFFF3333.toInt()//染成红色
+            val redColor = 0xFFFF3333.toInt()
             spannable.setSpan(
                 ForegroundColorSpan(redColor),
                 rangeStr.length,
@@ -312,7 +291,6 @@ class HistoryDetailActivity : BaseActivity() {
     }
 
     // ---------- 图例弹窗 ----------
-    //todo 代码复用？
     private fun showBmiLegendDialog(
         bmiLevel: BmiLevel,
         age: Int,
@@ -359,33 +337,24 @@ class HistoryDetailActivity : BaseActivity() {
             dialog.dismiss()
         }
 
-        //给对话框设置监听器
         dialog.setOnShowListener {
-            //找到 BottomSheetDialog 里的“那个滑动的抽屉”
             val bottomSheet = dialog.findViewById<FrameLayout>(
                 com.google.android.material.R.id.design_bottom_sheet
             ) ?: return@setOnShowListener
 
-            //配置滑动的抽屉给
             val behavior = BottomSheetBehavior.from(bottomSheet)
-            //完全展开
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            //不要停在中间（半折叠状态）
             behavior.skipCollapsed = true
-            //允许完全隐藏
             behavior.isHideable = true
-            //预览高度为 0
             behavior.peekHeight = 0
 
             behavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
-                    //当面板状态改变时（比如用户松手、滑到最底部），会回调这个函数。
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             dialog.dismiss()
                         }
                     }
-                    //（滑动过程中触发）
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {}
                 }
             )
@@ -394,7 +363,6 @@ class HistoryDetailActivity : BaseActivity() {
         dialog.show()
     }
 
-    //todo 代码复用
     private fun applyLegendHighlight(
         binding: DialogBmiLegendBinding,
         currentLevel: BmiLevel,
@@ -405,7 +373,7 @@ class HistoryDetailActivity : BaseActivity() {
         val config = BmiConfigProvider.getConfig(age, gender)
         val splitPoints = config.splitPoints
 
-        val radius = dpToPx(15f).toFloat()
+        val radius = BmiUiUtils.dpToPx(this, 15f).toFloat()
         val whiteColor = 0xFFFFFFFF.toInt()
         val blackTextColor = 0xFF000000.toInt()
 
@@ -432,10 +400,10 @@ class HistoryDetailActivity : BaseActivity() {
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
 
         val childColors = mapOf(
-            2 to 0xFF5BB1F5.toInt(), // Underweight
-            3 to 0xFFA8C526.toInt(), // Normal
-            4 to 0xFFFECD2E.toInt(), // Overweight
-            5 to 0xFFFD9845.toInt()  // Obese I
+            2 to 0xFF5BB1F5.toInt(),
+            3 to 0xFFA8C526.toInt(),
+            4 to 0xFFFECD2E.toInt(),
+            5 to 0xFFFD9845.toInt()
         )
 
         fun getRangeText(index: Int): String {
@@ -512,69 +480,10 @@ class HistoryDetailActivity : BaseActivity() {
         }
     }
 
-    // ---------- 绑定 App 卡片 ----------
-    private fun bindAppToCard(
-        cardView: View,
-        iconView: ImageView,
-        nameView: TextView,
-        categoryView: TextView,
-        ratingBar: RatingBar,
-        ratingTextView: TextView,
-        app: RecommendApp?
-    ) {
-        if (app == null) {
-            cardView.visibility = View.GONE
-            return
-        }
-        cardView.visibility = View.VISIBLE
-
-        iconView.setImageResource(app.iconResId)
-        nameView.text = app.name
-        categoryView.text = app.category
-        ratingBar.rating = app.rating.toFloat()
-        ratingTextView.text = String.format("%.1f", app.rating)
-
-        cardView.setOnClickListener {
-            val url = "https://play.google.com/store/apps/details?id=${app.packageName}"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-        }
-    }
-
-    // ---------- 工具 ----------
-    private fun dpToPx(dp: Float): Int = (dp * resources.displayMetrics.density).toInt()
-
+    // ========== 工具 ==========
     override fun onDestroy() {
         bmiAnimator?.cancel()
         bmiAnimator = null
         super.onDestroy()
-    }
-
-    // ---------- 删除确认对话框 ----------
-    //todo 代码复用？
-    private fun showDeleteConfirmDialog() {
-        val dialogBinding = DialogDiscardConfirmBinding.inflate(layoutInflater)
-        val dialog = Dialog(this)
-        dialog.setContentView(dialogBinding.root)
-
-        //获取对话框的窗口对象（Window）
-        val window = dialog.window ?: return
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        //把窗口的默认内边距（Padding）去掉。系统有时候会给窗口加一点边距
-        window.decorView.setPadding(0, 0, 0, 0)
-        window.setGravity(Gravity.CENTER)//居中
-        window.setLayout(dpToPx(301f), dpToPx(154f))
-        dialog.setCancelable(true)//返回或点击遮罩层可以取消
-
-        dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
-        dialogBinding.tvDelete.setOnClickListener {
-            dialog.dismiss()
-            //获取一个名为 app_prefs 的本地存储文件（SharedPreferences）
-            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            prefs.edit { putBoolean("show_delete_success", true) }
-            viewModel.handleIntent(HistoryDetailIntent.DeleteRecord)
-        }
-        dialog.show()
     }
 }

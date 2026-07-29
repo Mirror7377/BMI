@@ -20,10 +20,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.example.bmi.BaseActivity
 import com.example.bmi.ui.profile.ProfileActivity
 
 @AndroidEntryPoint
-class FeedbackActivity : AppCompatActivity() {
+class FeedbackActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFeedbackBinding
     private val viewModel: FeedbackViewModel by viewModels()

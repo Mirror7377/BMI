@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,6 +64,7 @@ class HomeViewModel @Inject constructor(
         } else {
             UnitConverter.lbToKg(clamped)
         }
+
         updateState {
             copy(
                 weightInput = clamped,
@@ -94,9 +97,12 @@ class HomeViewModel @Inject constructor(
 
     private fun onHeightCmChanged(value: Double) {
         val clamped = value.coerceIn(1.0, 250.0)
+        val cmRounded = BigDecimal(clamped)
+            .setScale(2, RoundingMode.HALF_UP)
+            .toDouble()
         updateState {
             copy(
-                heightCm = clamped,
+                heightCm = cmRounded,
                 feetInput = UnitConverter.cmToFeet(clamped),
                 inchesInput = UnitConverter.cmToInches(clamped)
             )

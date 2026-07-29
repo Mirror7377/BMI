@@ -42,9 +42,11 @@ class BmiChartView @JvmOverloads constructor(
 
     override fun getYStep() = yStep
 
+    //从传入的数据列表中提取所有有效的 BMI 值，计算出一个“合理”的 Y 轴范围
     override fun updateYAxis(data: List<DayBmiData>) {
         val bmiList = data.mapNotNull { it.bmi }
         if (bmiList.isEmpty()) {
+            //为空设置默认值
             yMin = 0f
             yMax = 1f
             yStep = 0.2f
@@ -60,8 +62,11 @@ class BmiChartView @JvmOverloads constructor(
     }
 
     override fun valueToY(value: Float): Float {
+        //可以绘图的实际高度
         val drawableHeight = viewHeight - yPaddingTopPx - yPaddingBottomPx
+        //这个值在 Y 轴区间内处于 80% 的位置
         val ratio = (value - yMin) / (yMax - yMin)
+        //y顶部+反转比例高度，y向下为正
         return yPaddingTopPx + drawableHeight * (1 - ratio)
     }
 
@@ -74,25 +79,12 @@ class BmiChartView @JvmOverloads constructor(
     override fun getXLabel(data: DayBmiData): String {
         return when (chartMode) {
             ChartMode.DAY, ChartMode.WEEK -> data.dayOfMonth.toString()
+            //在 Calendar 类中，月份的索引是从 0 开始的
             ChartMode.MONTH -> (data.month + 1).toString()
         }
     }
 
-    override fun getRangeString(startDate: Calendar, endDate: Calendar): String {
-        return when (chartMode) {
-            ChartMode.DAY, ChartMode.WEEK -> {
-                "${formatDate(startDate)} ~ ${formatDate(endDate)}"
-            }
-            ChartMode.MONTH -> {
-                "${getMonthAbbr(startDate.get(Calendar.MONTH))} ${startDate.get(Calendar.YEAR)} ~ " +
-                        "${getMonthAbbr(endDate.get(Calendar.MONTH))} ${endDate.get(Calendar.YEAR)}"
-            }
-        }
-    }
-
-    override fun areDataEqual(d1: DayBmiData, d2: DayBmiData): Boolean = d1 == d2
-
-    // ===== DAY 模式（BMI 特有逻辑） =====
+    // ===== DAY 模式 =====
     override fun setDataDay(data: List<DayBmiData>) {
         val sorted = data.sortedBy { it.date.timeInMillis }
         val lastWithBmi = sorted.findLast { it.bmi != null }
@@ -109,15 +101,17 @@ class BmiChartView @JvmOverloads constructor(
             return
         }
 
+        //取出刚刚找到有数据的那一天的日期对象
         val latestDate = lastWithBmi.date
-        val cal = Calendar.getInstance().apply { time = latestDate.time }
-        cal.add(Calendar.DAY_OF_YEAR, -58)
-        val startDate = cal.clone() as Calendar
-        cal.add(Calendar.DAY_OF_YEAR, 59)
-        val endDate = cal
+        val endDate = Calendar.getInstance().apply { time = latestDate.time }
+        //一共60天的数据
+        endDate.add(Calendar.DAY_OF_YEAR, -58)
+        val startDate = endDate.clone() as Calendar
+        endDate.add(Calendar.DAY_OF_YEAR, 59)
 
         val allDates = mutableListOf<DayBmiData>()
-        var current = startDate.clone() as Calendar
+        val current = startDate.clone() as Calendar
+        //查找有数据的
         while (current <= endDate) {
             val bmi = sorted.find {
                 val d = it.date
@@ -132,18 +126,19 @@ class BmiChartView @JvmOverloads constructor(
         this.selectedDataIndex = null
         this.selectedValue = null
 
+        //初始Y轴数据
         updateYAxis(allDates)
         updateLayoutMetrics()
 
+        //计算偏移量显示最后的8个数据点
         val targetStart = (allData.size - displayCount).coerceAtLeast(0)
         this.scrollOffset = targetStart.toFloat() * xInterval
 
         updateScrollBounds()
         clampScrollOffset()
-        invalidate()
+        invalidate()//重新绘制它
         rebuildMonthAnchors()
         updateMonthAnchorPositions()
-        notifyRangeChanged()
     }
 
     // ===== 重写 drawDots（BMI 特有：选中时内外圈颜色） =====
