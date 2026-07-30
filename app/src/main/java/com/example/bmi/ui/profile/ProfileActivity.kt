@@ -13,6 +13,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -228,12 +229,12 @@ class ProfileActivity : BaseActivity() {
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
+        // 所有 Spannable 设置（原样）
         val fullText = "The function will be back once the issue is solved. We’d greatly appreciate your patience."
         val spannable = SpannableString(fullText)
         val firstPart = "The function will be back once the issue is solved."
         val start = 0
         val end = firstPart.length
-
         spannable.setSpan(
             ForegroundColorSpan(ContextCompat.getColor(this, R.color.splash_blue)),
             start, end,
@@ -244,14 +245,21 @@ class ProfileActivity : BaseActivity() {
             start, end,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-
         dialogBinding.tvDialogCombined.text = spannable
 
         dialogBinding.btnDialogDone.setOnClickListener {
             dialog.dismiss()
         }
 
+        // ====== 先显示对话框，再设置宽度 ======
         dialog.show()
+
+        // 设置宽度为屏幕宽度的 80%，高度自适应
+        val width = (resources.displayMetrics.widthPixels * 0.8).toInt()
+        val params = dialog.window?.attributes
+        params?.width = width
+        params?.height = WindowManager.LayoutParams.WRAP_CONTENT
+        dialog.window?.attributes = params
     }
 
 

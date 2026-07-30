@@ -101,5 +101,5 @@
     <string name="error_height_ft_invalid">정확한 BMI 계산을 위해 유효한 신장(1\' - 8\' 피트)을 입력하세요</string>
     <string name="error_height_inches_invalid">정확한 BMI 계산을 위해 유효한 신장(0 - 11 인치)을 입력하세요</string>
     <string name="error_height_full_invalid">정확한 BMI 계산을 위해 유효한 신장(1\' - 8\'2\'\')을 입력하세요</string>
-    <string name="error_weight_invalid">정확한 BMI 계산을 위해 유효한 체중(%d-%d)을 입력하세요</string>
+    <string name="error_weight_invalid">정확한 BMI 계산을 위해 유효한 체중(%.1f - %.1f)을 입력하세요</string>
 </resources>

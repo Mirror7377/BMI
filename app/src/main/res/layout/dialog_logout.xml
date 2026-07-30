@@ -99,7 +99,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/cancel"
+            android:text="@string/cancell"
             android:textColor="#000000"
             android:textSize="18sp"
             android:fontFamily="@font/montserrat_extrabold"

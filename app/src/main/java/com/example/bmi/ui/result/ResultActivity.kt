@@ -1,12 +1,15 @@
 package com.example.bmi.ui.result
 
 import android.animation.ValueAnimator
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -50,7 +53,6 @@ class ResultActivity : BaseActivity() {
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            // 使用 BmiUiUtils.showConfirmDialog
             BmiUiUtils.showConfirmDialog(this@ResultActivity) {
                 finish()
             }
@@ -447,16 +449,19 @@ class ResultActivity : BaseActivity() {
             dialog.dismiss()
         }
 
-        dialog.setOnShowListener {
-            val bottomSheet = dialog.findViewById<FrameLayout>(
-                com.google.android.material.R.id.design_bottom_sheet
-            ) ?: return@setOnShowListener
+        val bottomSheet = dialog.findViewById<FrameLayout>(
+            com.google.android.material.R.id.design_bottom_sheet
+        )
 
+        if (bottomSheet != null) {
             val behavior = BottomSheetBehavior.from(bottomSheet)
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            behavior.skipCollapsed = true
-            behavior.isHideable = true
-            behavior.peekHeight = 0
+
+            behavior.apply {
+                peekHeight = 0
+                state = BottomSheetBehavior.STATE_EXPANDED
+                skipCollapsed = true
+                isHideable = true
+            }
         }
 
         dialog.show()

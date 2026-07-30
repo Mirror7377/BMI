@@ -1,11 +1,14 @@
 package com.example.bmi.ui.display
 
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -23,6 +26,7 @@ import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
 import com.example.bmi.ui.bmigauge.BmiLevel
 import com.example.bmi.ui.recent.RecentIntent
+import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -71,9 +75,6 @@ class DisplayFragment : Fragment() {
     private fun setupListeners() {
         binding.tvRecent.setOnClickListener {
             viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.RECENT))
-        }
-        binding.root.setOnClickListener {
-            viewModel.handleIntent(DisplayIntent.NavigateTo(DisplayIntent.Destination.HOME))
         }
     }
 

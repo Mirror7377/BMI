@@ -110,24 +110,20 @@ class HomeViewModel @Inject constructor(
 
     private fun onHeightUnitChanged(unit: HeightUnit) {
         val currentCm = _state.value.heightCm
-        val feetInput = _state.value.feetInput
-        val inchesInput = _state.value.inchesInput
+
         if (unit == HeightUnit.CM) {
-            var heightCm = UnitConverter.feetInchToCm(feetInput, inchesInput)
-            updateState {
-                copy(heightUnit = unit,
-                    heightCm = heightCm
-                ) }
+            // 切换回厘米：只改单位，保留 heightCm
+            updateState { copy(heightUnit = unit) }
         } else {
+            // 切换到英尺/英寸：根据当前厘米计算显示值
             val rawFeet = UnitConverter.cmToFeet(currentCm)
             val rawInches = UnitConverter.cmToInches(currentCm)
 
-            val feet = rawFeet.coerceIn(1, 8) //限制为1-8
-            //限制英寸
+            val feet = rawFeet.coerceIn(1, 8)
             val inches = when {
-                rawFeet < 1 -> 0                 // 不足 1 英尺，强制 1'0"
-                feet == 8  -> rawInches.coerceIn(0, 2)  // 8 英尺时英寸上限 2
-                else       -> rawInches.coerceIn(0, 11)
+                rawFeet < 1 -> 0
+                feet == 8 -> rawInches.coerceIn(0, 2)
+                else -> rawInches.coerceIn(0, 11)
             }
 
             updateState {
@@ -135,6 +131,7 @@ class HomeViewModel @Inject constructor(
                     heightUnit = unit,
                     feetInput = feet,
                     inchesInput = inches
+                    // heightCm 保持不变
                 )
             }
         }

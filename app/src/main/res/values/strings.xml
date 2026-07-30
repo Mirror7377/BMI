@@ -111,5 +111,5 @@
     <string name="error_height_ft_invalid">Please input a valid height (1\' - 8\' ft) to calculate your BMI accurately</string>
     <string name="error_height_inches_invalid">Please input a valid height (0 - 11 in) to calculate your BMI accurately</string>
     <string name="error_height_full_invalid">Please input a valid height (1\' - 8\'2\'\') to calculate your BMI accurately</string>
-    <string name="error_weight_invalid">Please input a valid weight (%d-%d) to calculate your BMI accurately</string>
+    <string name="error_weight_invalid">Please input a valid weight (%.1f - %.1f) to calculate your BMI accurately</string>
 </resources>

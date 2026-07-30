@@ -94,5 +94,5 @@
     <string name="error_height_ft_invalid">请输入有效的身高（1英尺 - 8英尺）以准确计算您的BMI</string>
     <string name="error_height_inches_invalid">请输入有效身高（0 - 11 英寸）以准确计算您的BMI</string>
     <string name="error_height_full_invalid">请输入有效身高（1英尺 - 8英尺2英寸）以准确计算您的BMI</string>
-    <string name="error_weight_invalid">请输入有效的体重（%d-%d），以便准确计算您的BMI</string>
+    <string name="error_weight_invalid">请输入有效的体重(%.1f - %.1f)，以便准确计算您的BMI</string>
 </resources>

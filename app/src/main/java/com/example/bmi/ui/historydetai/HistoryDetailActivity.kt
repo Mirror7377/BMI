@@ -11,7 +11,9 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -58,6 +60,16 @@ class HistoryDetailActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val window = this.window
+
+//        window.statusBarColor =
+//            ContextCompat.getColor(this, R.color.white)
+//
+//        WindowInsetsControllerCompat(
+//            window,
+//            window.decorView
+//        ).isAppearanceLightStatusBars = true
 
         // 获取并校验 recordId
         val recordId = intent.getLongExtra("RECORD_ID", 0L)
@@ -308,6 +320,7 @@ class HistoryDetailActivity : BaseActivity() {
         dialog.setCanceledOnTouchOutside(true)
 
         val isChild = age in 2..20
+
         dialogBinding.tvDialogTitle.text = if (isChild) {
             getString(R.string.bmi_for_teenagers)
         } else {
@@ -322,16 +335,23 @@ class HistoryDetailActivity : BaseActivity() {
 
         if (isChild) {
             dialogBinding.tvAgeGender.visibility = View.VISIBLE
-            dialogBinding.tvAgeGender.text = getString(R.string.age_gender_format, age, genderText)
+            dialogBinding.tvAgeGender.text =
+                getString(R.string.age_gender_format, age, genderText)
         } else {
             dialogBinding.tvAgeGender.visibility = View.GONE
         }
 
         val config = BmiConfigProvider.getConfig(age, gender)
+
         dialogBinding.bmiGaugeDialog.applyConfig(config)
         dialogBinding.bmiGaugeDialog.setShowPointer(false)
 
-        applyLegendHighlight(dialogBinding, bmiLevel, age, gender)
+        applyLegendHighlight(
+            dialogBinding,
+            bmiLevel,
+            age,
+            gender
+        )
 
         dialogBinding.btnGotIt.setOnClickListener {
             dialog.dismiss()
@@ -343,21 +363,14 @@ class HistoryDetailActivity : BaseActivity() {
             ) ?: return@setOnShowListener
 
             val behavior = BottomSheetBehavior.from(bottomSheet)
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            behavior.skipCollapsed = true
-            behavior.isHideable = true
-            behavior.peekHeight = 0
 
-            behavior.addBottomSheetCallback(
-                object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-                            dialog.dismiss()
-                        }
-                    }
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-                }
-            )
+            behavior.apply {
+                peekHeight = 0
+                state = BottomSheetBehavior.STATE_EXPANDED
+                skipCollapsed = true
+                isHideable = true
+            }
+
         }
 
         dialog.show()

@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.bmi.databinding.ActivitySplashBinding
 import com.example.bmi.data.repository.BmiRepository
@@ -36,6 +38,16 @@ class SplashActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val window = this.window
+
+        window.statusBarColor =
+            ContextCompat.getColor(this, R.color.splash_blue)
+
+        WindowInsetsControllerCompat(
+            window,
+            window.decorView
+        ).isAppearanceLightStatusBars = false
 
         layoutViews()
         initState()

@@ -1,6 +1,7 @@
 package com.example.bmi.ui.result
 
 import android.os.Bundle
+import androidx.core.os.BundleCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.database.BmiRecord
@@ -84,7 +85,7 @@ class ResultViewModel @Inject constructor(
     }
 
     private fun loadFromArguments(args: Bundle) {
-        val record = args.getParcelable("BMI_RECORD", BmiRecord::class.java) ?: return
+        val record = BundleCompat.getParcelable(args, "BMI_RECORD", BmiRecord::class.java) ?: return
 
         _state.update {
             it.copy(

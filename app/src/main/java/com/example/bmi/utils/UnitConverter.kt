@@ -4,6 +4,7 @@ import com.example.bmi.data.enums.HeightUnit
 import com.example.bmi.data.enums.WeightUnit
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.math.roundToInt
 
 object UnitConverter {
 
@@ -13,7 +14,8 @@ object UnitConverter {
 
     // 身高
     fun cmToFeet(cm: Double): Int = (cm / 30.48).toInt()
-    fun cmToInches(cm: Double): Int = ((cm % 30.48) / 2.54).toInt()
+    // UnitConverter.kt
+    fun cmToInches(cm: Double): Int = ((cm % 30.48) / 2.54).roundToInt()
     fun feetInchToCm(feet: Int, inches: Int): Double = (feet * 12 + inches) * 2.54
 
 

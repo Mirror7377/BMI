@@ -36,7 +36,6 @@ class DisplayViewModel @Inject constructor(
     private fun loadLatestRecord() {
         viewModelScope.launch {
             repository.observeLatestRecord()
-                .take(1)//只取一次，避免重复监听
                 .collect { record ->
                     _state.update { it.copy(record = record) }
                 }

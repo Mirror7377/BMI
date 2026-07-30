@@ -101,5 +101,5 @@
     <string name="error_height_ft_invalid">Insira uma altura válida (1\' - 8\' pés) para calcular seu IMC com precisão</string>
     <string name="error_height_inches_invalid">Insira uma altura válida (0 - 11 pol) para calcular seu IMC com precisão</string>
     <string name="error_height_full_invalid">Insira uma altura válida (1\' - 8\'2\'\') para calcular seu IMC com precisão</string>
-    <string name="error_weight_invalid">Insira um peso válido (%d-%d) para calcular seu IMC com precisão</string>
+    <string name="error_weight_invalid">Insira um peso válido (%.1f - %.1f) para calcular seu IMC com precisão</string>
 </resources>

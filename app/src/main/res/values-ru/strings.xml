@@ -101,5 +101,5 @@
     <string name="error_height_ft_invalid">Введите корректный рост (1\' - 8\' футов) для точного расчёта ИМТ</string>
     <string name="error_height_inches_invalid">Введите корректный рост (0 - 11 дюймов) для точного расчёта ИМТ</string>
     <string name="error_height_full_invalid">Введите корректный рост (1\' - 8\'2\'\') для точного расчёта ИМТ</string>
-    <string name="error_weight_invalid">Введите корректный вес (%d-%d) для точного расчёта ИМТ</string>
+    <string name="error_weight_invalid">Введите корректный вес(%.1f - %.1f) для точного расчёта ИМТ</string>
 </resources>

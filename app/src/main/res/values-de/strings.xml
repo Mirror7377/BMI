@@ -101,5 +101,5 @@
     <string name="error_height_ft_invalid">Bitte geben Sie eine gültige Größe (1\' - 8\' Fuß) ein, um Ihren BMI genau zu berechnen</string>
     <string name="error_height_inches_invalid">Bitte geben Sie eine gültige Größe (0 - 11 Zoll) ein, um Ihren BMI genau zu berechnen</string>
     <string name="error_height_full_invalid">Bitte geben Sie eine gültige Größe (1\' - 8\'2\'\') ein, um Ihren BMI genau zu berechnen</string>
-    <string name="error_weight_invalid">Bitte geben Sie ein gültiges Gewicht (%d-%d) ein, um Ihren BMI genau zu berechnen</string>
+    <string name="error_weight_invalid">Bitte geben Sie ein gültiges Gewicht (%.1f - %.1f) ein, um Ihren BMI genau zu berechnen</string>
 </resources>

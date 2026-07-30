@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -353,7 +354,7 @@ class HomeFragment : Fragment() {
             WeightUnit.KG -> 1.0 to 250.0
         }
 
-        val errorMsg = getString(R.string.error_weight_invalid)
+        val errorMsg = getString(R.string.error_weight_invalid, min, max)
         when {
             raw.isEmpty() -> {
                 val default = when (unit) {
