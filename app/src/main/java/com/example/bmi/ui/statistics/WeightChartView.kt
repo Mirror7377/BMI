@@ -85,15 +85,18 @@ class WeightChartView @JvmOverloads constructor(
         val lastWithWeight = sorted.findLast { it.weight != null }
 
         if (lastWithWeight == null) {
-            allData = emptyList()
-            scrollOffset = 0f
-            selectedDataIndex = null
-            selectedValue = null
-            updateYAxis(emptyList())
+            this.allData = sorted
+            this.selectedDataIndex = null
+            this.selectedValue = null
+            updateYAxis(allData)
             updateLayoutMetrics()
+            val targetStart = (allData.size - displayCount).coerceAtLeast(0)
+            this.scrollOffset = targetStart.toFloat() * xInterval
             updateScrollBounds()
             clampScrollOffset()
             invalidate()
+            rebuildMonthAnchors()
+            updateMonthAnchorPositions()
             return
         }
 

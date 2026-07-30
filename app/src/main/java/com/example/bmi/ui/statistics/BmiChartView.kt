@@ -89,18 +89,20 @@ class BmiChartView @JvmOverloads constructor(
         val sorted = data.sortedBy { it.date.timeInMillis }
         val lastWithBmi = sorted.findLast { it.bmi != null }
         if (lastWithBmi == null) {
-            allData = emptyList()
-            scrollOffset = 0f
-            selectedDataIndex = null
-            selectedValue = null
-            updateYAxis(emptyList())
+            this.allData = sorted
+            this.selectedDataIndex = null
+            this.selectedValue = null
+            updateYAxis(allData)
             updateLayoutMetrics()
+            val targetStart = (allData.size - displayCount).coerceAtLeast(0)
+            this.scrollOffset = targetStart.toFloat() * xInterval
             updateScrollBounds()
             clampScrollOffset()
             invalidate()
+            rebuildMonthAnchors()
+            updateMonthAnchorPositions()
             return
         }
-
         //取出刚刚找到有数据的那一天的日期对象
         val latestDate = lastWithBmi.date
         val endDate = Calendar.getInstance().apply { time = latestDate.time }

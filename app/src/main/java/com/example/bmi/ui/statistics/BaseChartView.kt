@@ -317,8 +317,8 @@ abstract class BaseChartView<T>(
         //最大最小值占75%
         val dataSpan = maxVal - minVal
         val totalSpan = dataSpan / 0.75f
-        val bottomBlank = totalSpan * 0.1f
-        val topBlank = totalSpan * 0.15f
+        val bottomBlank = totalSpan * 0.05f
+        val topBlank = totalSpan * 0.20f
 
         //y轴显示的边界
         var axisMin = minVal - bottomBlank
