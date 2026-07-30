@@ -44,7 +44,7 @@ class BmiGaugeView @JvmOverloads constructor(
     private var currentMax: Float = 40.3f
     private var currentSplitPoints: List<Float> = emptyList()
     private var currentColors: List<Int> = emptyList()
-    private var currentLabels: List<Float> = emptyList()
+    private var currentLabels: List<Float> = emptyList()//仪表盘刻度上的数值列表
 
     // 当前BMI值及动画
     private var targetBmi: Float = 15.6f
@@ -77,7 +77,7 @@ class BmiGaugeView @JvmOverloads constructor(
         // 加载指针图形 (layer_8)
         pointerDrawable = ContextCompat.getDrawable(context, R.drawable.layer_8)
 
-        // 默认应用成年配置（作为备用）
+        // 默认应用成年配置
         applyConfig(BmiConfigProvider.getConfig(21, Gender.MALE.name))
     }
 
@@ -144,6 +144,7 @@ class BmiGaugeView @JvmOverloads constructor(
         // 圆心位置
         val cx = viewW / 2f
         val cy = viewH - dpToPx(pointerOverflowDp)
+        //扇环的中心半径
         val centerRadiusPx = dpToPx(centerRadiusDp)
         arcRect.set(
             cx - centerRadiusPx,
@@ -160,29 +161,27 @@ class BmiGaugeView @JvmOverloads constructor(
             val endAngle = bmiToAngle(splitPoints[i + 1])
             // 设置画笔颜色
             ringPaint.color = currentColors[i]
-                                //模具    起点角度                //扫过的角度               是否连接圆心        画笔
+                                //        起点角度                //扫过的角度               不连接圆心
             canvas.drawArc(arcRect, startAngle, endAngle - startAngle, false, ringPaint)
         }
 
         // 绘制数字刻度
-        // 确定“标签放在多远的半径上
-        val labelRadiusPx = dpToPx(158f)
+        val labelRadiusPx = dpToPx(158f)// 刻度文字所在半径
         val fontMetrics = labelPaint.fontMetrics//获取当前画笔对象的字体数据
-        //ascent文字最顶部   descent文字最底部    Y轴向下为正
+        //计算出文字从基线到几何中心的偏移量
         val textOffsetY = -(fontMetrics.ascent + fontMetrics.descent) / 2f
         currentLabels.forEach { value ->
             val angle = bmiToAngle(value)//角度
             val rad = Math.toRadians(angle.toDouble())//把角度转成弧度
-            //cos(rad) 和 sin(rad) 分别是角度在 X 轴和 Y 轴上的分量（方向向量）。
-            //乘以半径后，就得到了相对于圆心 (cx, cy) 的偏移量。
-            //加上圆心坐标，最终得到了 (x, y)
+
+            //得到刻度的坐标
             val x = cx + cos(rad).toFloat() * labelRadiusPx
             val y = cy + sin(rad).toFloat() * labelRadiusPx
             canvas.save()                         //  保存当前画布状态（备份）
             canvas.translate(x, y)                //  把原点（0,0）移动到 (x, y)
             canvas.rotate(angle + 90f)            //  旋转90度，此时文字垂直圆心
-            //格式化文本（去掉多余的 .0）
-            val text = if (value % 1 == 0f) value.toInt().toString() else String.format("%.1f", value)
+            //格式化文本
+            val text = String.format("%.1f", value)
             //绘制文字
             canvas.drawText(text, 0f, textOffsetY, labelPaint)
             //把之前 save() 的状态恢复，撤销 translate 和 rotate 的影响。
@@ -194,22 +193,18 @@ class BmiGaugeView @JvmOverloads constructor(
         if (showPointer) {
             pointerDrawable?.let { drawable ->
                 val ptrW = dpToPx(pointerWidthDp)//90
-                val ptrH = dpToPx(pointerHeightDp)//11
-                val anchorX = dpToPx(pointerAnchorOffsetXDp)// 旋转“枢轴”偏移量（79dp）留了底部圆心的半径11
+                val ptrH = dpToPx(pointerHeightDp)//22
+                val anchorX = dpToPx(pointerAnchorOffsetXDp)// 旋转轴（79dp）留了底部圆心的半径11
                 val targetAngle = bmiToAngle(displayBmi)//根据bmi值计算目标角度
 
                 canvas.save()
                 // 以表盘圆心 (cx, cy) 为轴旋转画布。
-        // 因为指针图片默认朝左（180°），而 bmiToAngle 返回 180°~360°，
-        // 所以减去 180° 能让图片的“基准朝左”恰好对准数值起始的 180° 方向。
                 canvas.rotate(targetAngle - 180f, cx, cy)
 
-                // 指针图片上的“旋转枢轴点”（锚点）距离图片左边界为 anchorX。
-                // 将左边界往左移 anchorX，使得这个枢轴点恰好落在表盘圆心 (cx, cy) 上。
+                //使得这个左上点恰好落在表盘圆心 (cx, cy) 上。
                 val left = cx - anchorX
-                // 垂直方向居中（让指针在 Y 轴上下对称）
                 val top = cy - ptrH / 2f
-                // 划定指针图片在屏幕上的实际显示区域（矩形框）
+                // 画一个矩形框放指针
                 drawable.setBounds(
                     left.toInt(),
                     top.toInt(),
@@ -217,9 +212,8 @@ class BmiGaugeView @JvmOverloads constructor(
                     (top + ptrH).toInt()
                 )
                 // 将指针绘制到画布上。
-                // 此时画布已被旋转，因此画出来的指针会随着画布旋转到目标角度。
                 drawable.draw(canvas)
-                // 恢复画布变换（撤销旋转），避免影响后续其他元素的绘制。
+                // 恢复画布变换（撤销旋转）
                 canvas.restore()
             }
         }

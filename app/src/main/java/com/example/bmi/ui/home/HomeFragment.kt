@@ -48,7 +48,6 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    //获取一个与当前 Fragment 生命周期绑定的 ViewModel 实例，并确保它在屏幕旋转等配置变更时不会被销毁重建。
     private val viewModel: HomeViewModel by viewModels()
 
     private lateinit var ageAdapter: AgeAdapter
@@ -68,7 +67,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 点击空白处收起键盘
         binding.root.apply {
             isClickable = true
             isFocusableInTouchMode = true
@@ -246,13 +244,12 @@ class HomeFragment : Fragment() {
         binding.rvAgePicker.adapter = ageAdapter
 
         if (binding.rvAgePicker.itemDecorationCount == 0) {
-            //添加卡片间距
+            //添加卡片间距 装饰器
             binding.rvAgePicker.addItemDecoration(AgeItemDecoration(resources.getDimensionPixelSize(R.dimen.age_item_space)))
         }
 
-        //专门用来让 RecyclerView 在滚动停止时，自动将离中心最近的那个 Item 平滑地对齐到中心位置。
         snapHelper = LinearSnapHelper()
-        //吸到你的年龄滚轮,保证卡片在正中央
+        //保证卡片在正中央
         snapHelper.attachToRecyclerView(binding.rvAgePicker)
 
         //滚动监听
@@ -260,11 +257,11 @@ class HomeFragment : Fragment() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 // 只有完全停止时才执行下面的逻辑
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    //找到当前居中的那个卡片 View。
                     snapHelper.findSnapView(recyclerView.layoutManager)?.let {
                         //查询索引
                         val pos = recyclerView.getChildAdapterPosition(it)
-                        //不等于-1时
-                        //强行把中间的数字设为
+                        //索引有效
                         if (pos != RecyclerView.NO_POSITION) viewModel.sendIntent(HomeIntent.AgeChanged(ages[pos]))
                     }
                 }
@@ -273,6 +270,7 @@ class HomeFragment : Fragment() {
 
         binding.rvAgePicker.post {
             //为了放到正中央
+            //左右内边距
             val sidePadding = (binding.rvAgePicker.width - resources.getDimensionPixelSize(R.dimen.age_item_width)) / 2
             binding.rvAgePicker.setPadding(sidePadding, 0, sidePadding, 0)
             //2-99
@@ -283,14 +281,10 @@ class HomeFragment : Fragment() {
                 //当前停在中央的那个卡片
                 snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let { view ->
                     binding.rvAgePicker.layoutManager?.let {
-                        //计算“物理中心”与“当前卡片中心”的像素差
-                        //it：是“RecyclerView 的 LayoutManager
-                        //view：是“离屏幕中心最近的那个卡片 View”
+                        //计算差值
                         snapHelper.calculateDistanceToFinalSnap(it, view)
                     }
                         ?.let {
-                            //[0]：水平方向（X 轴）需要滚动的像素距离。
-                            //[1]：垂直方向（Y 轴）需要滚动的像素距离。
                             binding.rvAgePicker.scrollBy(it[0], it[1])
                         }
                 }
@@ -332,15 +326,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun scrollAgeToCenter(age: Int) {
-        val target = age - 2
+        val target = age - 2//对应索引
         val current = snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let {
             binding.rvAgePicker.getChildAdapterPosition(it)
         } ?: -1
         if (current == target) return
+        //粗略滚动到中央
         binding.rvAgePicker.smoothScrollToPosition(target)
         binding.rvAgePicker.post {
+            //获取当前最靠近屏幕中心的 View
             snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let { view ->
-                binding.rvAgePicker.layoutManager?.let { snapHelper.calculateDistanceToFinalSnap(it, view) }
+                binding.rvAgePicker.layoutManager?.let {
+                    //计算将 view 吸附到屏幕中心所需的 X 和 Y 方向偏移量。
+                    snapHelper.calculateDistanceToFinalSnap(it, view) }
                     ?.let {
                     binding.rvAgePicker.smoothScrollBy(it[0], it[1])
                 }

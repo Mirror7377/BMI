@@ -39,7 +39,6 @@ object WheelPickerHelper {
 
     /**
      * 配置一个 RecyclerView 为滚轮选择器
-     *
      * @param recyclerView     目标 RecyclerView
      * @param context          上下文
      * @param data             数据列表
@@ -78,18 +77,16 @@ object WheelPickerHelper {
         recyclerView.stopScroll()
 
         // 计算尺寸
-        val itemHeightPx = dpToPx(context, itemHeightDp.toFloat())
-        val pickerHeightPx = dpToPx(context, pickerHeightDp.toFloat())
-        val padding = ((pickerHeightPx - itemHeightPx) / 2).toInt()
-        val offset = padding // 使 item 居中
+        val itemHeightPx = dpToPx(context, itemHeightDp.toFloat())//每个选项的高度
+        val pickerHeightPx = dpToPx(context, pickerHeightDp.toFloat())//滚轮整体的可见高度
+        val padding = ((pickerHeightPx - itemHeightPx) / 2).toInt()//滚轮在屏幕上上下内边距
 
-        // ---------- 复用或创建 LayoutManager ----------
+
         val lm = (recyclerView.layoutManager as? LinearLayoutManager)
             ?: LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false).also {
                 recyclerView.layoutManager = it
             }
 
-        // ---------- 复用或创建 Adapter ----------
         val adapter = if (recyclerView.adapter is WheelAdapter) {
             recyclerView.adapter as WheelAdapter
         } else {
@@ -102,7 +99,7 @@ object WheelPickerHelper {
         if (!isConfigured) {
             // 设置内边距
             recyclerView.setPadding(0, padding, 0, padding)
-            recyclerView.clipToPadding = false
+            recyclerView.clipToPadding = false//取消裁剪
 
             // 添加装饰器（横线）
             val halfWidth = if (isTimePicker) {
@@ -110,27 +107,33 @@ object WheelPickerHelper {
             } else {
                 dpToPx(context, lineWidthDpDate.toFloat()) / 2
             }
+            //装饰器
             recyclerView.addItemDecoration(
                 WheelDividerDecoration(context, halfWidth, itemHeightDp, lineColorRes, lineWidthDp)
             )
 
-            // ---------- 清除旧监听，避免重复 ----------
+            // ---------- 清除旧监听 ----------
             recyclerView.clearOnScrollListeners()
 
             // ---------- 添加滚动监听（用于更新渐变和选中回调） ----------
             recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    //设置渐变效果
                     updateWheelEffects(recyclerView)
                 }
 
+
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    // 滚动完全停止时
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         // 使用已附加的 SnapHelper 找到当前居中 View
                         val snapHelper = recyclerView.onFlingListener as? LinearSnapHelper
                         if (snapHelper != null) {
                             val snapView = snapHelper.findSnapView(lm) ?: return
+                            //计算出距离屏幕中心最近的那个子 View
                             val position = recyclerView.getChildAdapterPosition(snapView)
                             if (position != RecyclerView.NO_POSITION) {
+                                //位置有效
                                 onItemSelected(position)
                             }
                         }
@@ -140,20 +143,20 @@ object WheelPickerHelper {
                 }
             })
 
-            // ---------- 附加 LinearSnapHelper（仅一次） ----------
-            // 检查是否已经 attach（通过 onFlingListener 判断）
+            //确保只调用一次 从而保证滚轮的吸附行为稳定
             if (recyclerView.onFlingListener == null) {
                 LinearSnapHelper().attachToRecyclerView(recyclerView)
             }
 
-            // ---------- 解决与 BottomSheet 的滑动冲突 ----------
             recyclerView.setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
+                        //检查能否上下滑动
                         if (recyclerView.canScrollVertically(1) || recyclerView.canScrollVertically(-1)) {
                             recyclerView.parent?.requestDisallowInterceptTouchEvent(true)
                         }
                     }
+                    //恢复父布局的拦截权限
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         recyclerView.parent?.requestDisallowInterceptTouchEvent(false)
                     }
@@ -165,15 +168,17 @@ object WheelPickerHelper {
             configuredMap[recyclerView] = true
         }
 
-        // ---------- 数据提交与初始化滚动（每次更新都执行） ----------
+        // ---------- 数据提交与初始化滚动 提交新数据列表时 ----------
         adapter.submitList(data) {
             recyclerView.post {
                 val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return@post
 
+                //让 RecyclerView 滚动到目标位置
                 lm.scrollToPosition(defaultPosition)
 
                 recyclerView.post {
                     val targetView = lm.findViewByPosition(defaultPosition)
+                    // 精准微调偏移量
                     if (targetView != null) {
                         val centerY = recyclerView.height / 2f
                         val childCenterY = targetView.top + targetView.height / 2f
@@ -195,6 +200,7 @@ object WheelPickerHelper {
         if (recyclerView.childCount == 0) return
 
         val firstChild = recyclerView.getChildAt(0)
+        //获取列表顶部显示的那一项item的实际的高度
         var itemHeight = firstChild?.height?.toFloat() ?: 0f
         if (itemHeight == 0f) {
             itemHeight = dpToPx(recyclerView.context, DEFAULT_ITEM_HEIGHT_DP.toFloat())
@@ -205,9 +211,9 @@ object WheelPickerHelper {
 
         for (i in 0 until recyclerView.childCount) {
             val child = recyclerView.getChildAt(i)
-            // 通过 ViewHolder 获取 TextView，避免 findViewById
             val holder = recyclerView.getChildViewHolder(child) as? WheelAdapter.ViewHolder
             val tv = holder?.binding?.tvWheelItem
+            //当前 item 的垂直中心坐标
             val childCenterY = child.top + child.height / 2f
             val distance = abs(childCenterY - centerY)
             val ratio = (distance / maxDistance).coerceIn(0f, 1f)
@@ -267,8 +273,8 @@ object WheelPickerHelper {
         private val itemHeight = dpToPx(context, itemHeightDp.toFloat())
 
         override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-            val centerX = parent.width / 2f
-            val centerY = parent.height / 2f
+            val centerX = parent.width / 2f// 屏幕水平中心点
+            val centerY = parent.height / 2f// 屏幕垂直中心点
 
             // 上横线
             c.drawLine(

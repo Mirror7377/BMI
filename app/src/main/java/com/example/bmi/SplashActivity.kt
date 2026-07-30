@@ -36,6 +36,7 @@ class SplashActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         layoutViews()
         initState()
         binding.root.post {
@@ -81,15 +82,13 @@ class SplashActivity : BaseActivity() {
             duration = 800
         }
 
-        // 指针第一次摆动：-30° → 45°
         val firstNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, -30f, 45f).apply {
             duration = 800
         }
 
-        // 指针第二次摆动：45° → -45°（带弹性插值器）
         val secondNeedle = ObjectAnimator.ofFloat(binding.imgNeedle, View.ROTATION, 45f, -45f).apply {
             duration = 800
-            interpolator = PathInterpolator(0.25f, 0f, 0.1f, 0.1f)
+            interpolator = PathInterpolator(0.1f, 0f, 0.25f, 0.1f)
         }
 
         // 第一阶段：Logo 动画和第一次摆动同时进行

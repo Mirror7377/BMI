@@ -77,7 +77,6 @@ class HomeViewModel @Inject constructor(
         val state = _state.value
         if (state.weightUnit == unit) return
 
-        // 将当前 weightInput 从旧单位换算到新单位（保留原始输入精度）
         val newWeightInput = if (unit == WeightUnit.KG) {
             UnitConverter.lbToKg(state.weightInput).coerceIn(1.0, 250.0)
         } else {
@@ -119,7 +118,7 @@ class HomeViewModel @Inject constructor(
                 copy(heightUnit = unit,
                     heightCm = heightCm
                 ) }
-        } else { // FT_IN
+        } else {
             val rawFeet = UnitConverter.cmToFeet(currentCm)
             val rawInches = UnitConverter.cmToInches(currentCm)
 

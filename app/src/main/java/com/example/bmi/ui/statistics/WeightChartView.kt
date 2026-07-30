@@ -170,13 +170,13 @@ class WeightChartView @JvmOverloads constructor(
         val paddingBottom = dpToPx(6f)
 
         val textWidth = valuePaint.measureText(label)
-        //出当前字体下文字“从最高处到最低处”的精确像素高度  ascent（上升高度）  descent（下降高度）
+        //文字高度
         val textHeight = valuePaint.fontMetrics.descent - valuePaint.fontMetrics.ascent
 
         val bgWidth = textWidth + paddingHorizontal * 2
         val bgHeight = textHeight + paddingTop + paddingBottom
 
-        //定义了 “气泡弹窗（Tooltip）底部边缘” 与 “数据点（圆点）顶部边缘” 之间的固定垂直间距（空隙）。
+        //显示框和数据点的间距
         val gap = dpToPx(9f)
 
         //水平居中
@@ -198,15 +198,15 @@ class WeightChartView @JvmOverloads constructor(
 
         val fm = valuePaint.fontMetrics
         val textX = point.x
-        //                              基线为负
         val textY = bgTop + paddingTop - fm.ascent
+        //绘制文字
         canvas.drawText(label, textX, textY, valuePaint)
 
-        val triangleHeight = dpToPx(3f)    // 三角形的高度（3dp）
-        val triangleHalfWidth = dpToPx(5f)  // 三角形底边的一半宽度（5dp）
-        val triangleTop = bgBottom                 // 三角形的上边（底边）与背景框的下边对齐
-        val triangleBottom = bgBottom + triangleHeight  // 三角形的下边（尖角）位于背景下方 3dp 处
-        val triangleCenterX = point.x              // 三角形的水平中心与数据点 X 坐标对齐
+        val triangleHeight = dpToPx(3f)// 三角形的高度
+        val triangleHalfWidth = dpToPx(5f)// 三角形底边的一半宽度
+        val triangleTop = bgBottom// 三角形的底边与背景框的下边对齐
+        val triangleBottom = bgBottom + triangleHeight// 三角形的下边尖角位于背景下方 3dp 处
+        val triangleCenterX = point.x// 三角形的水平中心与数据点 X 坐标对齐
 
         val trianglePath = Path().apply {
             moveTo(triangleCenterX - triangleHalfWidth, triangleTop)          // 顶点1：左上

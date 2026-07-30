@@ -117,7 +117,7 @@ class BmiChartView @JvmOverloads constructor(
                 val d = it.date
                 d.get(Calendar.YEAR) == current.get(Calendar.YEAR) &&
                         d.get(Calendar.DAY_OF_YEAR) == current.get(Calendar.DAY_OF_YEAR)
-            }?.bmi
+            }?.bmi//无数据设为null
             allDates.add(DayBmiData(current.clone() as Calendar, bmi))
             current.add(Calendar.DAY_OF_YEAR, 1)
         }

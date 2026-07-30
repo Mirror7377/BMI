@@ -14,7 +14,7 @@ import java.util.Locale
 
 class RecentAdapter(
     private val onItemClick: (BmiRecord) -> Unit
-) : ListAdapter<BmiRecord, RecentAdapter.ViewHolder>(DiffCallback()) {//DiffCallback构造函数传参
+) : ListAdapter<BmiRecord, RecentAdapter.ViewHolder>(DiffCallback()) {
 
     companion object {
         private fun dpToPx(dp: Int, density: Float): Int {
@@ -22,7 +22,6 @@ class RecentAdapter(
         }
     }
 
-    //创建“空白卡片”
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemRecentRecordBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
@@ -30,7 +29,6 @@ class RecentAdapter(
         return ViewHolder(binding, onItemClick)
     }
 
-    //把数据“填”进卡片
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
@@ -54,6 +52,7 @@ class RecentAdapter(
 
 
             // 3. 彩色圆点
+            //获取当前当前设备屏幕的逻辑密度
             val density = binding.root.context.resources.displayMetrics.density
             val dotDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL//椭圆

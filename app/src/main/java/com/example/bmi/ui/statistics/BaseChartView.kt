@@ -24,9 +24,7 @@ abstract class BaseChartView<T>(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    // ===== 枚举 =====
 
-    // ===== 常量 =====
     // ===== 图表布局与绘制常量 =====
     protected companion object {
         // ---------- Y 轴边距 ----------
@@ -222,14 +220,18 @@ abstract class BaseChartView<T>(
         viewWidth = w.toFloat()
         viewHeight = h.toFloat()
 
+        //留白
         yPaddingTopPx = dpToPx(Y_PADDING_TOP)
         yPaddingBottomPx = dpToPx(Y_PADDING_BOTTOM)
         yLabelLeftPx = dpToPx(Y_LABEL_LEFT_MARGIN)
         xPaddingRightPx = dpToPx(X_PADDING_RIGHT)
 
+        //y轴可绘制区域
         yAvailableHeight = viewHeight - yPaddingTopPx - yPaddingBottomPx
+        //y轴步长
         yInterval = yAvailableHeight / (Y_LABEL_COUNT - 1)
 
+        //月份/年份的y轴位置
         monthLabelY = dpToPx(MONTH_TOP_MARGIN) + monthPaint.textSize / 2
 
         if (allData.isNotEmpty()) {
@@ -297,10 +299,8 @@ abstract class BaseChartView<T>(
         //所有数据都相同
         if (minVal == maxVal) {
             val value = minVal
-            //取绝对值，用来判断数值的大小尺度。
             val absVal = abs(value)
-            //absVal < 4（比如 BMI 在 0~4 之间），步长取 max(absVal/4, 0.1)。
-            // 这样步长至少是 0.1，且会随着数值增大而略微增大（比如值=2，步长=0.5）。
+
             val step = if (absVal < 4f) {
                 max(absVal / 4f, 0.1f)
             } else {
@@ -314,11 +314,13 @@ abstract class BaseChartView<T>(
             return Triple(axisMin, axisMax, step)
         }
 
+        //最大最小值占75%
         val dataSpan = maxVal - minVal
         val totalSpan = dataSpan / 0.75f
-        val bottomBlank = totalSpan * 0.05f
-        val topBlank = totalSpan * 0.20f
+        val bottomBlank = totalSpan * 0.1f
+        val topBlank = totalSpan * 0.15f
 
+        //y轴显示的边界
         var axisMin = minVal - bottomBlank
         var axisMax = maxVal + topBlank
 
@@ -328,7 +330,6 @@ abstract class BaseChartView<T>(
 
         //将轴最小值向下对齐到步长的整数倍
         axisMin = kotlin.math.floor(axisMin / step) * step
-        //从新的 axisMin 出发，重新计算 axisMax
         axisMax = axisMin + step * (Y_LABEL_COUNT - 1)
 
         return Triple(axisMin, axisMax, step)
@@ -341,7 +342,7 @@ abstract class BaseChartView<T>(
             maxScrollX = 0f
             return
         }
-        //整个数据序列从第 1 个点到最后一个点铺开的总长度
+
         val totalWidth = (allData.size - 1) * xInterval
         //屏幕一次性可以显示的长度
         val visibleWidth = (displayCount - 1) * xInterval
@@ -378,7 +379,7 @@ abstract class BaseChartView<T>(
         updateMonthAnchorPositions()
     }
 
-    //找出Y轴上的最大宽度
+    //找出Y轴上最大宽度的数字
     protected open fun calculateMaxYLabelWidth(): Float {
         var maxWidth = 0f
         for (i in 0 until Y_LABEL_COUNT) {
@@ -415,7 +416,7 @@ abstract class BaseChartView<T>(
         val endIdx = min(startIdx + displayCount + 1, allData.size)
         //返回当前索引下的视图
         val visibleSubList = allData.subList(startIdx, endIdx)
-        //将x，y移动制定距离    scrollOffset触摸交互
+        //滑倒最右侧
         canvas.translate(-scrollOffset, 0f)
 
         //画竖线
@@ -447,10 +448,11 @@ abstract class BaseChartView<T>(
         textPaint.textSize = spToPx(12f)
     }
 
+    //绘制y轴标签
     protected fun drawYLabels(canvas: Canvas) {
         for (i in 0 until Y_LABEL_COUNT) {
             val value = getYMin() + i * getYStep()
-            //          图表顶部的留白
+
             val y = yPaddingTopPx + (Y_LABEL_COUNT - 1 - i) * yInterval
             val label = String.format("%.1f", value)
             canvas.drawText(label, yLabelLeftPx, y + textPaint.textSize / 3, textPaint)
@@ -487,8 +489,8 @@ abstract class BaseChartView<T>(
             }
         }
 
-        val lastX = points.last().x
-        val firstX = points.first().x
+        val lastX = points.last().x// 最后一个数据点的 X 坐标（最右侧）
+        val firstX = points.first().x// 最后一个数据点的 X 坐标（最右侧）
         val bottomY = viewHeight - yPaddingBottomPx
 
         fillPath.lineTo(lastX, bottomY)   // 从最后一个数据点垂直向下到底部
@@ -500,14 +502,13 @@ abstract class BaseChartView<T>(
         val bottomColor = Color.argb(0, 255, 255, 255)
 
         val shader = LinearGradient(
-            0f, yPaddingTopPx,                               // 起点坐标 (左上角)
-            0f, viewHeight - yPaddingBottomPx,               // 终点坐标 (左下角)
-            intArrayOf(topColor, midColor, bottomColor),     // 颜色数组（从上到下）
-            floatArrayOf(0f, 0.5f, 1f),                      // 位置数组（0% → 50% → 100%）
-            Shader.TileMode.CLAMP                            // 边界延伸模式
+            0f, yPaddingTopPx, // 渐变起点
+            0f, viewHeight - yPaddingBottomPx, // 渐变终点
+            intArrayOf(topColor, midColor, bottomColor),
+            floatArrayOf(0f, 0.5f, 1f),
+            Shader.TileMode.CLAMP
         )
         fillPaint.shader = shader
-        //应用着色器并绘制路径
         canvas.drawPath(fillPath, fillPaint)
     }
 
@@ -516,12 +517,12 @@ abstract class BaseChartView<T>(
         //底部留白17.5
         val dateY = viewHeight - dpToPx(17.5f)
         textPaint.textAlign = Paint.Align.CENTER
+        //可见的左右边界
         val visibleLeft = scrollOffset + xStart
         val visibleRight = scrollOffset + viewWidth
         for (i in visibleData.indices) {
             val dataIndex = startIdx + i
             if (dataIndex >= allData.size) break
-            //取出当前索引对应的数据对象
             val data = allData[dataIndex]
             //计算数据点的屏幕 X 坐标
             val x = xStart + dataIndex * xInterval
@@ -549,7 +550,7 @@ abstract class BaseChartView<T>(
                 //在当前的可见数据子列表中
                 for (i in visibleData.indices) {
                     val dataIndex = startIdx + i
-                    //当当前索引的数据值为1时，
+                    //值为1绘制月份
                     if (getDayOfMonth(allData[dataIndex]) == 1 && dataIndex < allData.size) {
                         pos = dataIndex
                         break
@@ -635,8 +636,8 @@ abstract class BaseChartView<T>(
         path.moveTo(points[0].x, points[0].y)
 
         for (i in 1 until points.size) {
-            val p1 = points[i - 1]
-            val p2 = points[i]
+            val p1 = points[i - 1]//起点
+            val p2 = points[i]//终点
             val dy = abs(p2.y - p1.y)
 
             if (dy <= 1f) {
@@ -691,6 +692,7 @@ abstract class BaseChartView<T>(
 
         val label = getSelectedValueLabel(selectedValue!!)
 
+        //背景内边距
         val paddingHorizontal = dpToPx(8f)
         val paddingTop = dpToPx(6f)
         val paddingBottom = dpToPx(6f)
@@ -782,16 +784,16 @@ abstract class BaseChartView<T>(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (!scroller.isFinished) {
-                    scroller.abortAnimation()
+                    scroller.abortAnimation()// 停止正在进行的惯性滚动
                 }
-                lastTouchX = event.x
+                lastTouchX = event.x//记录按下的位置
                 isDragging = false
                 if (velocityTracker == null) {
-                    velocityTracker = VelocityTracker.obtain()
+                    velocityTracker = VelocityTracker.obtain()//  创建速度追踪器
                 } else {
                     velocityTracker?.clear()
                 }
-                velocityTracker?.addMovement(event)
+                velocityTracker?.addMovement(event)// 记录本次触摸事件
                 selectedDataIndex = null
                 selectedValue = null
                 parent?.requestDisallowInterceptTouchEvent(true)
@@ -799,17 +801,17 @@ abstract class BaseChartView<T>(
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val dx = lastTouchX - event.x
-                velocityTracker?.addMovement(event)
+                val dx = lastTouchX - event.x          // 计算本次移动的距离
+                velocityTracker?.addMovement(event)    // 记录移动事件
                 if (!isDragging && abs(dx) > touchSlop) {
-                    isDragging = true
+                    isDragging = true                  // 达到阈值，标记为拖拽
                     parent?.requestDisallowInterceptTouchEvent(true)
                 }
                 if (isDragging) {
-                    var newOffset = scrollOffset + dx
-                    newOffset = newOffset.coerceIn(minScrollX, maxScrollX)
-                    scrollOffset = newOffset
-                    lastTouchX = event.x
+                    var newOffset = scrollOffset + dx  // 计算新的滚动偏移
+                    newOffset = newOffset.coerceIn(minScrollX, maxScrollX) //限制边界
+                    scrollOffset = newOffset           // 更新偏移
+                    lastTouchX = event.x               // 更新上次触摸位置
                     invalidate()
                 }
                 return true
@@ -818,10 +820,10 @@ abstract class BaseChartView<T>(
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 velocityTracker?.addMovement(event)
                 if (isDragging) {
-                    velocityTracker?.computeCurrentVelocity(1000)
+                    velocityTracker?.computeCurrentVelocity(1000)// 计算当前速度（px/秒）
                     val velocityX = velocityTracker?.xVelocity ?: 0f
                     if (abs(velocityX) > 500f) {
-                        scroller.fling(
+                        scroller.fling(// 启动惯性滚动
                             scrollOffset.toInt(), 0,
                             -velocityX.toInt(), 0,
                             minScrollX.toInt(), maxScrollX.toInt(),
@@ -832,7 +834,7 @@ abstract class BaseChartView<T>(
                     }
                     parent?.requestDisallowInterceptTouchEvent(false)
                 } else {
-                    handleClick(event.x, event.y)
+                    handleClick(event.x, event.y)// 处理点击事件
                 }
                 isDragging = false
                 velocityTracker?.recycle()
