@@ -41,20 +41,6 @@ class StatisticsViewModel @Inject constructor(
 
     // ========== Day 模式加载 ==========
     private fun loadDay() {
-        // 先使用缓存（如果存在）
-        val cachedBmi = _state.value.dayBmiCache
-        val cachedWeight = _state.value.dayWeightCache
-        //缓存存在
-        if (cachedBmi.isNotEmpty() || cachedWeight.isNotEmpty()) {
-            _state.update {
-                it.copy(
-                    mode = ChartMode.DAY,
-                    bmiData = cachedBmi,
-                    weightData = cachedWeight
-                )
-            }
-        }
-
         viewModelScope.launch {
             try {
                 val endDate = Calendar.getInstance()//当前时间
@@ -62,16 +48,16 @@ class StatisticsViewModel @Inject constructor(
                 startDate.add(Calendar.DAY_OF_YEAR, -60)//往前推60天
 
                 val records = repository.getRecordsBetween(startDate.timeInMillis, endDate.timeInMillis)
+                //获取 day-bmi数据
                 val bmiData = buildDayRangeData(startDate, endDate, records)
+                //获取 day-weight数据
                 val weightData = buildWeightDayRangeData(startDate, endDate, records)
 
                 _state.update {
                     it.copy(
                         mode = ChartMode.DAY,
                         bmiData = bmiData,
-                        weightData = weightData,
-                        dayBmiCache = bmiData,
-                        dayWeightCache = weightData
+                        weightData = weightData
                     )
                 }
             } catch (e: Exception) {
@@ -82,23 +68,10 @@ class StatisticsViewModel @Inject constructor(
 
     // ========== Week 模式加载 ==========
     private fun loadWeek() {
-        // 先使用缓存
-        val cachedBmi = _state.value.weekBmiCache
-        val cachedWeight = _state.value.weekWeightCache
-        if (cachedBmi.isNotEmpty() || cachedWeight.isNotEmpty()) {
-            _state.update {
-                it.copy(
-                    mode = ChartMode.WEEK,
-                    bmiData = cachedBmi,
-                    weightData = cachedWeight
-                )
-            }
-        }
-
         viewModelScope.launch {
             try {
                 val today = Calendar.getInstance()
-                val thisWeekMonday = getWeekStart(today)//返回的是本周一的00:00:00 2026-07-27 00:00:00
+                val thisWeekMonday = getWeekStart(today)//返回的是本周一的时间 2026-07-27 00:00:00
 
                 val mondays = mutableListOf<Calendar>()
                 //循环从 i = 52（一年前）开始
@@ -109,7 +82,7 @@ class StatisticsViewModel @Inject constructor(
                     //最终包含 53 个周一
                     mondays.add(monday)
                 }
-                //d当前时间的下周一的占位符,不显示数据
+                //当前时间的下周一的占位符,不显示数据
                 val nextMonday = thisWeekMonday.clone() as Calendar
                 nextMonday.add(Calendar.DAY_OF_YEAR, 7)
                 mondays.add(nextMonday)
@@ -183,7 +156,7 @@ class StatisticsViewModel @Inject constructor(
                                 weightValidDays++
                             }
                         }
-                        //把游标 currentDay 往后推 1 天
+                        //++天数
                         currentDay.add(Calendar.DAY_OF_YEAR, 1)
                     }
 
@@ -199,9 +172,7 @@ class StatisticsViewModel @Inject constructor(
                     it.copy(
                         mode = ChartMode.WEEK,
                         bmiData = weekBmiList,
-                        weightData = weekWeightList,
-                        weekBmiCache = weekBmiList,
-                        weekWeightCache = weekWeightList
+                        weightData = weekWeightList
                     )
                 }
             } catch (e: Exception) {
@@ -212,17 +183,6 @@ class StatisticsViewModel @Inject constructor(
 
     // ========== Month 模式加载 ==========
     private fun loadMonth() {
-        val cachedBmi = _state.value.monthBmiCache
-        val cachedWeight = _state.value.monthWeightCache
-        if (cachedBmi.isNotEmpty() || cachedWeight.isNotEmpty()) {
-            _state.update {
-                it.copy(
-                    mode = ChartMode.MONTH,
-                    bmiData = cachedBmi,
-                    weightData = cachedWeight
-                )
-            }
-        }
 
         viewModelScope.launch {
             try {
@@ -282,6 +242,7 @@ class StatisticsViewModel @Inject constructor(
                     val weightList = weightMonthMap[key]
                     val avgWeight = if (weightList.isNullOrEmpty()) null else weightList.average().toFloat()
 
+                    //设置日期为当月1日
                     val date = current.clone() as Calendar
                     date.set(Calendar.DAY_OF_MONTH, 1)
 
@@ -295,9 +256,7 @@ class StatisticsViewModel @Inject constructor(
                     it.copy(
                         mode = ChartMode.MONTH,
                         bmiData = bmiResult,
-                        weightData = weightResult,
-                        monthBmiCache = bmiResult,
-                        monthWeightCache = weightResult
+                        weightData = weightResult
                     )
                 }
             } catch (e: Exception) {
@@ -323,7 +282,7 @@ class StatisticsViewModel @Inject constructor(
         while (current <= endDate) {
             //从当前的 current 日期中，提取“年份”和“这一年的第几天”。
             val key = current.get(Calendar.YEAR) to current.get(Calendar.DAY_OF_YEAR)
-            //拿着刚才生成的 key，去 latestPerDay 这个 Map 里查找。
+            //根据 key，去 latestPerDay 这个 Map 里查找
             val record = latestPerDay[key]
             val bmi = record?.bmi?.toFloat()
             //创建一个 DayBmiData 对象，日期是 current 的克隆，BMI 值是刚取出的 bmi
@@ -358,7 +317,7 @@ class StatisticsViewModel @Inject constructor(
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
         val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)//返回数字 1 ~ 7对应周1-周日
-        val diff = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - Calendar.MONDAY//计算差值
+        val diff = if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - Calendar.MONDAY//计算回退的天数
         cal.add(Calendar.DAY_OF_YEAR, -diff)//找到周1
         return cal
     }

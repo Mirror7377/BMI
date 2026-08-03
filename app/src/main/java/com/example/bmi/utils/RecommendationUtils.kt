@@ -104,12 +104,10 @@ object RecommendationUtils {
         val isUnderNormal = bmiLevel.ordinal < BmiLevel.NORMAL.ordinal
 
         val ids = if (isUnderNormal) {
-            // 体重过轻：推荐增重、力量训练类 App
             val pool12 = listOf(6, 7, 8).shuffled().take(2)
             val pool3 = listOf(5, 9, 10).shuffled().first()
             pool12 + listOf(pool3)
         } else {
-            // 正常及以上：根据性别推荐
             val pool12 = if (gender == Gender.MALE.name) {
                 listOf(2, 3, 6, 7, 8).shuffled().take(2)
             } else {

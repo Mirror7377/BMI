@@ -88,6 +88,7 @@ class BmiChartView @JvmOverloads constructor(
     override fun setDataDay(data: List<DayBmiData>) {
         val sorted = data.sortedBy { it.date.timeInMillis }
         val lastWithBmi = sorted.findLast { it.bmi != null }
+        //无数据
         if (lastWithBmi == null) {
             this.allData = sorted
             this.selectedDataIndex = null
@@ -113,7 +114,7 @@ class BmiChartView @JvmOverloads constructor(
 
         val allDates = mutableListOf<DayBmiData>()
         val current = startDate.clone() as Calendar
-        //查找有数据的
+        //生成数据列表，无数据的为null
         while (current <= endDate) {
             val bmi = sorted.find {
                 val d = it.date

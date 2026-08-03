@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bmi.MainActivity
+import com.example.bmi.data.enums.ChartMode
 import com.example.bmi.databinding.FragmentStatisticsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,7 +45,6 @@ class StatisticsFragment : Fragment() {
         setupPeriodSwitcher()
         observeUiState()
 
-        // 保留原有的更新按钮点击事件
         binding.tvBmiUpdate.setOnClickListener {
             (requireActivity() as? MainActivity)?.goToHome()
         }
@@ -104,5 +104,16 @@ class StatisticsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 获取当前选中的模式（默认 Day）
+        val currentMode = viewModel.uiState.value.mode
+        when (currentMode) {
+            ChartMode.DAY -> viewModel.dispatch(StatisticsIntent.LoadDay)
+            ChartMode.WEEK -> viewModel.dispatch(StatisticsIntent.LoadWeek)
+            ChartMode.MONTH -> viewModel.dispatch(StatisticsIntent.LoadMonth)
+        }
     }
 }

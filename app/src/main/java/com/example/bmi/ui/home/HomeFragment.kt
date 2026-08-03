@@ -97,7 +97,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun renderState(state: HomeState) {
-        //获取当前依附的activity实例
         val context = requireContext()
         val selectedColor = ContextCompat.getColor(context, R.color.text_black)
         val unselectedColor = ContextCompat.getColor(context, R.color.bg_text)
@@ -244,6 +243,7 @@ class HomeFragment : Fragment() {
         }
         binding.rvAgePicker.adapter = ageAdapter
 
+        //装饰器数量为0
         if (binding.rvAgePicker.itemDecorationCount == 0) {
             //添加卡片间距 装饰器
             binding.rvAgePicker.addItemDecoration(AgeItemDecoration(resources.getDimensionPixelSize(R.dimen.age_item_space)))
@@ -262,7 +262,7 @@ class HomeFragment : Fragment() {
                     snapHelper.findSnapView(recyclerView.layoutManager)?.let {
                         //查询索引
                         val pos = recyclerView.getChildAdapterPosition(it)
-                        //索引有效
+                        //索引有效修改当前选中的年龄
                         if (pos != RecyclerView.NO_POSITION) viewModel.sendIntent(HomeIntent.AgeChanged(ages[pos]))
                     }
                 }
@@ -274,10 +274,10 @@ class HomeFragment : Fragment() {
             //左右内边距
             val sidePadding = (binding.rvAgePicker.width - resources.getDimensionPixelSize(R.dimen.age_item_width)) / 2
             binding.rvAgePicker.setPadding(sidePadding, 0, sidePadding, 0)
-            //2-99
+            //默认值为25
             val index = viewModel.state.value.age - 2
-            //把制定索引的数据滚动到正中间
             (binding.rvAgePicker.layoutManager as LinearLayoutManager).scrollToPosition(index)
+            //把制定索引的数据滚动到正中间
             binding.rvAgePicker.post {
                 //当前停在中央的那个卡片
                 snapHelper.findSnapView(binding.rvAgePicker.layoutManager)?.let { view ->
@@ -307,9 +307,11 @@ class HomeFragment : Fragment() {
 
         val itemWidthPx = resources.getDimensionPixelSize(R.dimen.age_item_width)
         val spacePx = resources.getDimensionPixelSize(R.dimen.age_item_space)
+        //一个卡片周期的距离
         val unitPx = itemWidthPx + spacePx
         val maxDistance = 2.5f * unitPx
         val centerX = recycler.width / 2f
+        //颜色混合计算器
         val argbEvaluator = ArgbEvaluator()
         val startColor = ContextCompat.getColor(requireContext(), R.color.bg_start)
         val endColor = ContextCompat.getColor(requireContext(), R.color.bg_end)
@@ -364,10 +366,6 @@ class HomeFragment : Fragment() {
                 editText.setText(String.format("%.2f", default))
                 CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
-            }
-            raw.toDoubleOrNull() == null -> {
-                editText.setText(String.format("%.2f", viewModel.state.value.weightInput))
-                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
                 val value = raw.toDouble()
@@ -441,10 +439,6 @@ class HomeFragment : Fragment() {
             raw.isEmpty() -> {
                 editText.setText("0")
                 viewModel.sendIntent(HomeIntent.InchesChanged(0))
-            }
-            raw.toIntOrNull() == null -> {
-                editText.setText(viewModel.state.value.inchesInput.toString())
-                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsgInches)
             }
             else -> {
                 val value = raw.toInt()

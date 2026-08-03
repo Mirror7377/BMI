@@ -20,13 +20,13 @@ object BmiConfigProvider {
             0xFFF67D3C.toInt(),  // Obese Class II
             0xFFF04E46.toInt()   // Obese Class III
         ),
-        labels = listOf(17.0f, 18.5f, 25.0f, 30.0f, 35.0f, 40.0f)
+        labels = listOf(16.0f,17.0f, 18.5f, 25.0f, 30.0f, 35.0f, 40.0f)
     )
 
     // -------- 儿童数据（2~20岁，括号内范围优先） --------
     private val childRangeMap = mapOf(
         // 女童
-        Pair(2, Gender.FEMALE) to 14.0f..20.0f,   // 括号内 (14~20)
+        Pair(2, Gender.FEMALE) to 13.0f..20.0f,
         Pair(3, Gender.FEMALE) to 13.0f..19.0f,
         Pair(4, Gender.FEMALE) to 13.0f..19.0f,
         Pair(5, Gender.FEMALE) to 13.0f..19.0f,
@@ -124,7 +124,7 @@ object BmiConfigProvider {
             adultConfig
         } else {
             val range = childRangeMap[Pair(age, genderEnum)]
-                ?: 14.0f..20.0f//给一个默认值
+                ?: 13.0f..20.0f//给一个默认值
             val triple = childSplitMap[Pair(age, genderEnum)]
                 ?: Triple(14.4f, 18.0f, 19.1f)//给一个默认值
             // 将 Triple 转为 List<Float>，因为 BmiGaugeConfig 需要 splitPoints 和 labels 为 List<Float>

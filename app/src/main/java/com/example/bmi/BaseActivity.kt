@@ -17,11 +17,9 @@ abstract class BaseActivity : AppCompatActivity() {
 
     //在 布局解析和资源加载之前修改语言设置
     override fun attachBaseContext(newBase: Context) {
-        // 从 SharedPreferences 读取保存的语言代码
         val prefs = newBase.getSharedPreferences("settings", MODE_PRIVATE)
         val langCode = prefs.getString("language", "en") ?: "en"
 
-        // 构造 Locale 对象
         val locale = Locale.forLanguageTag(langCode)
         //设为默认语言
         Locale.setDefault(locale)

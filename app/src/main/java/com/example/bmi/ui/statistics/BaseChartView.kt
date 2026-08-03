@@ -210,7 +210,7 @@ abstract class BaseChartView<T>(
     init {
         isClickable = true
         isFocusable = true
-        setWillNotDraw(false)
+        setWillNotDraw(false)//需要调用ondraw
     }
 
     // ===== 尺寸与布局 =====
@@ -296,7 +296,7 @@ abstract class BaseChartView<T>(
         minVal: Float,
         maxVal: Float
     ): Triple<Float, Float, Float> {
-        //所有数据都相同
+
         if (minVal == maxVal) {
             val value = minVal
             val absVal = abs(value)
@@ -344,7 +344,7 @@ abstract class BaseChartView<T>(
         }
 
         val totalWidth = (allData.size - 1) * xInterval
-        //屏幕一次性可以显示的长度
+        //当前屏幕一次性可以显示的长度
         val visibleWidth = (displayCount - 1) * xInterval
         //允许向左多滑出半个间隔
         minScrollX = -xInterval / 2f
@@ -360,6 +360,7 @@ abstract class BaseChartView<T>(
 
     // ===== 布局度量 =====
     protected fun updateLayoutMetrics() {
+        //找出Y轴上最宽度的数字
         val maxLabelWidth = calculateMaxYLabelWidth()
         // Y 轴标签的右边界
         val yLabelRightX = yLabelLeftPx + maxLabelWidth
@@ -379,7 +380,7 @@ abstract class BaseChartView<T>(
         updateMonthAnchorPositions()
     }
 
-    //找出Y轴上最大宽度的数字
+    //找出Y轴上最宽度的数字
     protected open fun calculateMaxYLabelWidth(): Float {
         var maxWidth = 0f
         for (i in 0 until Y_LABEL_COUNT) {
@@ -407,16 +408,16 @@ abstract class BaseChartView<T>(
         val clipRight = viewWidth
         val clipBottom = viewHeight
         canvas.save()//保存
-        //挡板，只有这个区域的数据才会显示
+        //只有这个区域的数据才会显示
         canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom)
 
         //获取当前可见的最左侧索引的下标
         val startIdx = visibleStartIndex.toInt()
         //多取一个点作为缓冲
         val endIdx = min(startIdx + displayCount + 1, allData.size)
-        //返回当前索引下的视图
+        //返回当前能看到的8个点
         val visibleSubList = allData.subList(startIdx, endIdx)
-        //滑倒最右侧
+        //移动画布滑倒最右侧
         canvas.translate(-scrollOffset, 0f)
 
         //画竖线
@@ -435,17 +436,11 @@ abstract class BaseChartView<T>(
         drawDots(canvas, startIdx, visibleSubList)
         drawSelectedValue(canvas, startIdx, visibleSubList)
 
-        canvas.restore()
+        canvas.restore()//回撤画布到save状态
     }
 
-    // ===== 绘制方法 =====
     protected fun drawEmptyState(canvas: Canvas) {
-        textPaint.textSize = spToPx(14f)
-        textPaint.color = Color.WHITE
-        textPaint.alpha = 0x80
         canvas.drawText("No Data", viewWidth / 2, viewHeight / 2, textPaint)
-        textPaint.alpha = 0xFF
-        textPaint.textSize = spToPx(12f)
     }
 
     //绘制y轴标签
@@ -490,7 +485,7 @@ abstract class BaseChartView<T>(
         }
 
         val lastX = points.last().x// 最后一个数据点的 X 坐标（最右侧）
-        val firstX = points.first().x// 最后一个数据点的 X 坐标（最右侧）
+        val firstX = points.first().x// 第一个数据点的 X 坐标（最左侧）
         val bottomY = viewHeight - yPaddingBottomPx
 
         fillPath.lineTo(lastX, bottomY)   // 从最后一个数据点垂直向下到底部
@@ -703,8 +698,10 @@ abstract class BaseChartView<T>(
         val bgWidth = textWidth + paddingHorizontal * 2
         val bgHeight = textHeight + paddingTop + paddingBottom
 
+        //点到文字的间隙
         val gap = dpToPx(9f)
 
+        //计算出背景框的坐标
         val bgLeft = point.x - bgWidth / 2
         val bgBottom = point.y - getSelectedDotRadius() - gap
         val bgTop = bgBottom - bgHeight
@@ -715,27 +712,30 @@ abstract class BaseChartView<T>(
             bgTop,
             bgRight,
             bgBottom,
-            dpToPx(5f),
+            dpToPx(5f),//圆角
             dpToPx(5f),
             valueBgPaint
         )
 
         val fm = valuePaint.fontMetrics
+        //绘制文字的坐标
         val textX = point.x
         val textY = bgTop + paddingTop - fm.ascent
         canvas.drawText(label, textX, textY, valuePaint)
 
+        //定义小三角的宽高
         val triangleHeight = dpToPx(3f)
         val triangleHalfWidth = dpToPx(5f)
         val triangleTop = bgBottom
         val triangleBottom = bgBottom + triangleHeight
+        //三角形的水平中心最表
         val triangleCenterX = point.x
 
         val trianglePath = Path().apply {
-            moveTo(triangleCenterX - triangleHalfWidth, triangleTop)
-            lineTo(triangleCenterX + triangleHalfWidth, triangleTop)
-            lineTo(triangleCenterX, triangleBottom)
-            close()
+            moveTo(triangleCenterX - triangleHalfWidth, triangleTop)//起始点
+            lineTo(triangleCenterX + triangleHalfWidth, triangleTop)//过渡点
+            lineTo(triangleCenterX, triangleBottom)//终点
+            close()//闭合为三角形
         }
         canvas.drawPath(trianglePath, valueBgPaint)
     }
@@ -768,7 +768,7 @@ abstract class BaseChartView<T>(
             val y = valueToY(value)
             points.add(ChartPoint(i, x, y))
         }
-        return points
+        return points//得到非null的数据点
     }
 
     protected data class ChartPoint(
@@ -793,7 +793,7 @@ abstract class BaseChartView<T>(
                 } else {
                     velocityTracker?.clear()
                 }
-                velocityTracker?.addMovement(event)// 记录本次触摸事件
+                velocityTracker?.addMovement(event)// 记录触摸事件
                 selectedDataIndex = null
                 selectedValue = null
                 parent?.requestDisallowInterceptTouchEvent(true)
@@ -817,13 +817,13 @@ abstract class BaseChartView<T>(
                 return true
             }
 
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP -> {
                 velocityTracker?.addMovement(event)
                 if (isDragging) {
-                    velocityTracker?.computeCurrentVelocity(1000)// 计算当前速度（px/秒）
+                    velocityTracker?.computeCurrentVelocity(1000)
                     val velocityX = velocityTracker?.xVelocity ?: 0f
                     if (abs(velocityX) > 500f) {
-                        scroller.fling(// 启动惯性滚动
+                        scroller.fling(
                             scrollOffset.toInt(), 0,
                             -velocityX.toInt(), 0,
                             minScrollX.toInt(), maxScrollX.toInt(),
@@ -832,10 +832,21 @@ abstract class BaseChartView<T>(
                         )
                         postInvalidateOnAnimation()
                     }
-                    parent?.requestDisallowInterceptTouchEvent(false)
                 } else {
-                    handleClick(event.x, event.y)// 处理点击事件
+                    //点击逻辑
+                    handleClick(event.x, event.y)
                 }
+                //始终释放父容器拦截权限，无论是否拖拽
+                parent?.requestDisallowInterceptTouchEvent(false)
+                isDragging = false
+                velocityTracker?.recycle()
+                velocityTracker = null
+                return true
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                velocityTracker?.addMovement(event)
+                parent?.requestDisallowInterceptTouchEvent(false)
                 isDragging = false
                 velocityTracker?.recycle()
                 velocityTracker = null
@@ -903,7 +914,7 @@ abstract class BaseChartView<T>(
 
         when (chartMode) {
             ChartMode.DAY -> {
-                for (i in allData.indices) {
+                for (i in allData.indices) {//allData.indices当前列表所有有效索引的集合
                     //如果当前数据的“日”是 1 号。创建锚点
                     if (getDayOfMonth(allData[i]) == 1) {
                         monthAnchors.add(MonthAnchor(getMonth(allData[i]), i))
@@ -945,6 +956,7 @@ abstract class BaseChartView<T>(
 
     //遍历所有月份锚点,重新计算每个锚点应处的精确像素位置
     protected fun updateMonthAnchorPositions() {
+        if (monthAnchors.isEmpty()) return
         for (anchor in monthAnchors) {
             //xStart图表绘图区域的起始 X 坐标
             anchor.x = xStart + anchor.dataIndex * xInterval

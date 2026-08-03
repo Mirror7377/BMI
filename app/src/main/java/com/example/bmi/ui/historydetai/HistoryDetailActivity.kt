@@ -61,15 +61,6 @@ class HistoryDetailActivity : BaseActivity() {
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val window = this.window
-
-//        window.statusBarColor =
-//            ContextCompat.getColor(this, R.color.white)
-//
-//        WindowInsetsControllerCompat(
-//            window,
-//            window.decorView
-//        ).isAppearanceLightStatusBars = true
 
         // 获取并校验 recordId
         val recordId = intent.getLongExtra("RECORD_ID", 0L)
@@ -89,7 +80,7 @@ class HistoryDetailActivity : BaseActivity() {
     // ========== 设置监听器（点击事件） ==========
     private fun setupListeners() {
         binding.ivBack.setOnClickListener {
-            viewModel.handleIntent(HistoryDetailIntent.BackPressed)
+            finish()
         }
 
         binding.tvDelete.setOnClickListener {
@@ -346,29 +337,26 @@ class HistoryDetailActivity : BaseActivity() {
         dialogBinding.bmiGaugeDialog.applyConfig(config)
         dialogBinding.bmiGaugeDialog.setShowPointer(false)
 
-        applyLegendHighlight(
-            dialogBinding,
-            bmiLevel,
-            age,
-            gender
-        )
+        applyLegendHighlight(dialogBinding, bmiLevel, age, gender)
 
         dialogBinding.btnGotIt.setOnClickListener {
             dialog.dismiss()
         }
 
+        //在弹窗展示出来前执行
         dialog.setOnShowListener {
             val bottomSheet = dialog.findViewById<FrameLayout>(
+                //可拖拽的白色面板容器
                 com.google.android.material.R.id.design_bottom_sheet
             ) ?: return@setOnShowListener
 
             val behavior = BottomSheetBehavior.from(bottomSheet)
 
             behavior.apply {
-                peekHeight = 0
-                state = BottomSheetBehavior.STATE_EXPANDED
-                skipCollapsed = true
-                isHideable = true
+                peekHeight = 0//完全折叠
+                state = BottomSheetBehavior.STATE_EXPANDED//完全展开
+                skipCollapsed = true//跳过折叠状态
+                isHideable = true//允许下滑关闭
             }
 
         }

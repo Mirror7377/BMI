@@ -131,7 +131,6 @@ class HomeViewModel @Inject constructor(
                     heightUnit = unit,
                     feetInput = feet,
                     inchesInput = inches
-                    // heightCm 保持不变
                 )
             }
         }

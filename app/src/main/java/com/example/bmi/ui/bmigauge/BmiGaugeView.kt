@@ -106,13 +106,12 @@ class BmiGaugeView @JvmOverloads constructor(
         gaugeAnimator?.cancel()//取消旧动画
 
 
-        //多方法复用
         if (!animate) {
             //不需要动画
             displayBmi = targetBmi//把显示值“瞬间”设为目标值
             //标记首次加载：isFirstLoad = false
             isFirstLoad = false
-            invalidate()//数值变了，视图必须刷新,会调用onDraw(Canvas) 方法。去绘制指针
+            invalidate()
             return
         }
 
@@ -122,9 +121,10 @@ class BmiGaugeView @JvmOverloads constructor(
         } else {
             displayBmi
         }
-
+        //动画数值区间
         gaugeAnimator = ValueAnimator.ofFloat(startValue, targetBmi).apply {
             duration = 800
+            //设定动画的效果是 “先加速，后减速”。
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener {
                 //刷新数据
@@ -161,7 +161,7 @@ class BmiGaugeView @JvmOverloads constructor(
             val endAngle = bmiToAngle(splitPoints[i + 1])
             // 设置画笔颜色
             ringPaint.color = currentColors[i]
-                                //        起点角度                //扫过的角度               不连接圆心
+                                //        起点角度                //扫过的角度
             canvas.drawArc(arcRect, startAngle, endAngle - startAngle, false, ringPaint)
         }
 
@@ -177,11 +177,15 @@ class BmiGaugeView @JvmOverloads constructor(
             //得到刻度的坐标
             val x = cx + cos(rad).toFloat() * labelRadiusPx
             val y = cy + sin(rad).toFloat() * labelRadiusPx
-            canvas.save()                         //  保存当前画布状态（备份）
+            canvas.save()                         //  保存当前画布状态
             canvas.translate(x, y)                //  把原点（0,0）移动到 (x, y)
             canvas.rotate(angle + 90f)            //  旋转90度，此时文字垂直圆心
-            //格式化文本
-            val text = String.format("%.1f", value)
+            // 判断是否为整数（浮点数取模 1.0 等于 0）
+            val text = if (value % 1.0f == 0.0f) {
+                value.toInt().toString()  // 16.0 -> "16"
+            } else {
+                String.format("%.1f", value) // 18.5 -> "18.5"
+            }
             //绘制文字
             canvas.drawText(text, 0f, textOffsetY, labelPaint)
             //把之前 save() 的状态恢复，撤销 translate 和 rotate 的影响。
@@ -192,16 +196,16 @@ class BmiGaugeView @JvmOverloads constructor(
         // 绘制指针
         if (showPointer) {
             pointerDrawable?.let { drawable ->
-                val ptrW = dpToPx(pointerWidthDp)//90
-                val ptrH = dpToPx(pointerHeightDp)//22
+                val ptrW = dpToPx(pointerWidthDp)
+                val ptrH = dpToPx(pointerHeightDp)
                 val anchorX = dpToPx(pointerAnchorOffsetXDp)// 旋转轴（79dp）留了底部圆心的半径11
                 val targetAngle = bmiToAngle(displayBmi)//根据bmi值计算目标角度
 
                 canvas.save()
-                // 以表盘圆心 (cx, cy) 为轴旋转画布。
+                //旋转指针
                 canvas.rotate(targetAngle - 180f, cx, cy)
 
-                //使得这个左上点恰好落在表盘圆心 (cx, cy) 上。
+
                 val left = cx - anchorX
                 val top = cy - ptrH / 2f
                 // 画一个矩形框放指针
@@ -237,6 +241,7 @@ class BmiGaugeView @JvmOverloads constructor(
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, resources.displayMetrics)
     }
 
+    //清理动画资源（防止内存泄漏）
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         gaugeAnimator?.cancel()

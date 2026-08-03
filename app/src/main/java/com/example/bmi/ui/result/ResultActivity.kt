@@ -52,6 +52,7 @@ class ResultActivity : BaseActivity() {
     )
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
+
         override fun handleOnBackPressed() {
             BmiUiUtils.showConfirmDialog(this@ResultActivity) {
                 finish()
@@ -180,14 +181,14 @@ class ResultActivity : BaseActivity() {
             else -> String.format("%.1f cm", state.heightCm)
         }
 
-        // 3. 性别（从资源读取）
+        // 3. 性别
         val genderText = when (state.gender) {
             Gender.MALE.name -> getString(R.string.gender_male)
             Gender.FEMALE.name -> getString(R.string.gender_female)
             else -> getString(R.string.gender_male)
         }
 
-        // 4. 年龄（从资源读取，带占位符）
+        // 4. 年龄
         val ageText = getString(R.string.age_years_old, state.age)
 
         // 5. 组装完整信息
@@ -256,9 +257,11 @@ class ResultActivity : BaseActivity() {
 
     // ---------- 辅助方法 ----------
     private fun animateBmiNumber(targetBmi: Double) {
-        bmiAnimator?.cancel()
+        bmiAnimator?.cancel()//取消动画
+        //执行动画
         bmiAnimator = ValueAnimator.ofFloat(0f, targetBmi.toFloat()).apply {
             duration = 800
+            //监听并刷新
             addUpdateListener { animation ->
                 val current = animation.animatedValue as Float
                 binding.tvBmiValue.text = String.format("%.1f", current)
@@ -323,6 +326,7 @@ class ResultActivity : BaseActivity() {
             val fullText = "$rangeStr$diffText"
             val spannable = SpannableString(fullText)
             val redColor = 0xFFFF3333.toInt()
+            //高亮红色
             spannable.setSpan(
                 ForegroundColorSpan(redColor),
                 rangeStr.length,
@@ -443,6 +447,7 @@ class ResultActivity : BaseActivity() {
         dialogBinding.bmiGaugeDialog.applyConfig(config)
         dialogBinding.bmiGaugeDialog.setShowPointer(false)
 
+        //高亮显示当前
         applyLegendHighlight(dialogBinding, bmiLevel, age, gender)
 
         dialogBinding.btnGotIt.setOnClickListener {
@@ -457,10 +462,10 @@ class ResultActivity : BaseActivity() {
             val behavior = BottomSheetBehavior.from(bottomSheet)
 
             behavior.apply {
-                peekHeight = 0
-                state = BottomSheetBehavior.STATE_EXPANDED
-                skipCollapsed = true
-                isHideable = true
+                peekHeight = 0//弹窗在“折叠状态”下露出的高度设为 0
+                state = BottomSheetBehavior.STATE_EXPANDED//完全展开
+                skipCollapsed = true//跳过“折叠态”
+                isHideable = true//允许弹窗完全滑出屏幕底部
             }
         }
 
@@ -501,6 +506,7 @@ class ResultActivity : BaseActivity() {
             binding.tvLevelRange4, binding.tvLevelRange5, binding.tvLevelRange6, binding.tvLevelRange7
         )
 
+        //可见的bmi level
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
 
         val childColors = mapOf(
@@ -530,6 +536,7 @@ class ResultActivity : BaseActivity() {
 
             val shouldShow = index in visibleIndices
             if (!shouldShow) {
+                //没有该索引则隐藏
                 layout.visibility = View.GONE
                 return@forEachIndexed
             }

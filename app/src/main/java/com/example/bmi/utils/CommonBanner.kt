@@ -9,7 +9,7 @@ import com.example.bmi.databinding.CommonBannerBinding
 object CommonBanner {
 
     fun show(
-        activity: Activity,//当前的 Activity 实例
+        activity: Activity,
         @DrawableRes iconRes: Int,
         message: String
     ) {
@@ -34,7 +34,7 @@ object CommonBanner {
         binding.layoutSuccess.post {
 
             binding.layoutSuccess.postDelayed({
-                // 延迟 2000 毫秒 , 2 秒 后执行移除操作。
+                // 显示 2 秒
                 // root.removeView(binding.root) 会把 Banner 从根布局中移除，彻底销毁这个视图。
                 root.removeView(binding.root)
             }, 2000)

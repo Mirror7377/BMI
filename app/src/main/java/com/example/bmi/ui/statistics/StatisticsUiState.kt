@@ -5,12 +5,5 @@ import com.example.bmi.data.enums.ChartMode
 data class StatisticsUiState(
     val mode: ChartMode = ChartMode.DAY,
     val bmiData: List<DayBmiData> = emptyList(),
-    val weightData: List<DayWeightData> = emptyList(),
-    // 各模式缓存（用于快速切换）
-    val dayBmiCache: List<DayBmiData> = emptyList(),
-    val dayWeightCache: List<DayWeightData> = emptyList(),
-    val weekBmiCache: List<DayBmiData> = emptyList(),
-    val weekWeightCache: List<DayWeightData> = emptyList(),
-    val monthBmiCache: List<DayBmiData> = emptyList(),
-    val monthWeightCache: List<DayWeightData> = emptyList()
+    val weightData: List<DayWeightData> = emptyList()
 )

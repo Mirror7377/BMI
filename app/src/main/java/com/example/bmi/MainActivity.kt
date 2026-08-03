@@ -115,7 +115,6 @@ class MainActivity : BaseActivity() {
         }
 
         currentTag = "Home"
-        setStatusBarGray()
     }
 
     private fun navigateToDisplay() {
@@ -145,7 +144,6 @@ class MainActivity : BaseActivity() {
         }
 
         currentTag = "Display"
-        setStatusBarWhite()
     }
 
     private fun navigateToStatistics() {
@@ -175,7 +173,6 @@ class MainActivity : BaseActivity() {
         }
 
         currentTag = "Statistics"
-        setStatusBarGray()
     }
 
     fun goToHome() {
@@ -212,27 +209,4 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setStatusBarGray() {
-        val window = this.window
-
-        window.statusBarColor =
-            ContextCompat.getColor(this, R.color.bg_gray)
-
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).isAppearanceLightStatusBars = true
-    }
-
-    private fun setStatusBarWhite() {
-        val window = this.window
-
-        window.statusBarColor =
-            ContextCompat.getColor(this, R.color.white)
-
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).isAppearanceLightStatusBars = true
-    }
 }

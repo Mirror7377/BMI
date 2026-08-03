@@ -20,6 +20,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.doOnTextChanged
 import com.example.bmi.BaseActivity
 import com.example.bmi.ui.profile.ProfileActivity
 
@@ -39,7 +40,7 @@ class FeedbackActivity : BaseActivity() {
 
         //设置一个 窗口插入监听器
         ViewCompat.setOnApplyWindowInsetsListener(binding.feedbackContainer) { view, insets ->
-            //从 insets 中提取 键盘输入法（IME）的底部插入高度
+            //提取键盘输入法的底部高度
             val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
             //动态更新 feedbackContainer 的 bottomMargin 属性。
             view.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -71,17 +72,17 @@ class FeedbackActivity : BaseActivity() {
         }
 
         // 输入框监听（控制按钮启用/禁用）
-        binding.etFeedback.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                val hasText = !s.isNullOrBlank()
-                updateSaveButtonState(hasText)
-            }
-        })
+        binding.etFeedback.doOnTextChanged { text, _, _, _ ->
+            val hasText = !text.isNullOrBlank()
+            updateSaveButtonState(hasText)
+        }
     }
 
     private fun updateSaveButtonState(enabled: Boolean) {
+        // 控制可点击状态
+        binding.btnSave.isEnabled = enabled
+
+        // 改变背景色
         val bgColor = if (enabled) {
             ContextCompat.getColor(this, R.color.splash_blue)
         } else {

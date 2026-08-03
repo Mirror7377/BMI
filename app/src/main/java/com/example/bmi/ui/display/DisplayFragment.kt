@@ -148,7 +148,7 @@ class DisplayFragment : Fragment() {
         val colorBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadius = radius
-            setColor(bmiLevel.cardBgColor)//动态颜色
+            setColor(bmiLevel.cardBgColor)
         }
         binding.statusContainer.background = colorBg
         binding.statusIcon.visibility = View.GONE
@@ -227,6 +227,7 @@ class DisplayFragment : Fragment() {
                     else -> colors.getOrElse(index) { 0xFF000000.toInt() }
                 }
             } else {
+                //返回 colors 列表里对应位置的那个颜色,无效索引为0xFF000000
                 colors.getOrElse(index) { 0xFF000000.toInt() }
             }
         }

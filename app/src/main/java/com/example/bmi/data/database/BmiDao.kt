@@ -24,7 +24,8 @@ interface BmiDao {
             WHEN 'Evening' THEN 3
             WHEN 'Night' THEN 4
             ELSE 0
-        END DESC
+        END DESC,
+        createTime DESC
     LIMIT 1;
 """)
     fun getLatestRecord(): Flow<BmiRecord?>
@@ -40,7 +41,8 @@ ORDER BY
         WHEN 'Evening' THEN 3
         WHEN 'Night' THEN 4
         ELSE 0
-    END DESC;
+    END DESC,
+    createTime DESC
 """)
     fun getAllRecords(): Flow<List<BmiRecord>>//unixepoch 把时间戳转换成日期格式（比如 2026-07-28）
 

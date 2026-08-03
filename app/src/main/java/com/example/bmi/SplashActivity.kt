@@ -40,14 +40,9 @@ class SplashActivity : BaseActivity() {
         setContentView(binding.root)
 
         val window = this.window
-
         window.statusBarColor =
             ContextCompat.getColor(this, R.color.splash_blue)
 
-        WindowInsetsControllerCompat(
-            window,
-            window.decorView
-        ).isAppearanceLightStatusBars = false
 
         layoutViews()
         initState()
@@ -66,7 +61,7 @@ class SplashActivity : BaseActivity() {
     //根据实际屏幕尺寸与设计尺寸的比例
     private fun layoutViews() {
         val dm = resources.displayMetrics//获取当前设备信息
-        val sw = dm.widthPixels.toFloat()
+        val sw = dm.widthPixels.toFloat()//获取px宽高
         val sh = dm.heightPixels.toFloat()
 
         //取两者中的较小值作为最终缩放比例。
@@ -86,7 +81,6 @@ class SplashActivity : BaseActivity() {
 
         //Logo 容器动画：同时执行上移和淡入
         val logoMove = AnimatorSet().apply {
-            //并行播放括号内的所有动画
             playTogether(
                 ObjectAnimator.ofFloat(binding.logoContainer, View.TRANSLATION_Y, 100f * scale, 0f),
                 ObjectAnimator.ofFloat(binding.logoContainer, View.ALPHA, 0f, 1f)
@@ -103,7 +97,7 @@ class SplashActivity : BaseActivity() {
             interpolator = PathInterpolator(0.1f, 0f, 0.25f, 0.1f)
         }
 
-        // 第一阶段：Logo 动画和第一次摆动同时进行
+        // Logo 动画和第一次摆动同时进行
         val firstStage = AnimatorSet().apply {
             playTogether(logoMove, firstNeedle)
         }

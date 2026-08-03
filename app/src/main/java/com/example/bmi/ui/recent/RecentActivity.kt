@@ -46,7 +46,7 @@ class RecentActivity : BaseActivity() {
         binding.recyclerView.apply {
             //设置列表的排列方式为垂直线性排列
             layoutManager = LinearLayoutManager(this@RecentActivity)
-            //把之前创建好的 RecentAdapter（你写的那个充满数据绑定逻辑的适配器）安装到 RecyclerView 上。
+            //设置适配器
             adapter = this@RecentActivity.adapter
         }
     }

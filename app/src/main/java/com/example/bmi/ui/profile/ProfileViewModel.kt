@@ -98,6 +98,7 @@ class ProfileViewModel @Inject constructor(private val repository: BmiRepository
             try {
                 // 1. 读取文件（在后台线程）
                 val jsonString = application.assets.open("sample_records.json")
+                    //包装成字符流
                     .bufferedReader().use { it.readText() }
 
                 // 2. 解析 JSON（Gson 解析也耗 CPU，也在后台线程）

@@ -32,7 +32,6 @@ class HistoryDetailViewModel @Inject constructor(
         when (intent) {
             is HistoryDetailIntent.LoadRecord -> loadRecord(intent.id)
             HistoryDetailIntent.DeleteRecord -> deleteRecord()
-            HistoryDetailIntent.BackPressed -> navigateBack()
         }
     }
 
@@ -87,18 +86,12 @@ class HistoryDetailViewModel @Inject constructor(
                 // 3. 根据结果发送不同 Effect
                 if (remainingCount == 0) {
                     _effect.emit(HistoryDetailEffect.NavigateToHome)
-                } else {
+                }else {
                     _effect.emit(HistoryDetailEffect.NavigateBack)
                 }
             } else {
                 Log.w("HistoryDetailViewModel", "No record to delete")
             }
-        }
-    }
-
-    private fun navigateBack() {
-        viewModelScope.launch {
-            _effect.emit(HistoryDetailEffect.NavigateBack)
         }
     }
 }

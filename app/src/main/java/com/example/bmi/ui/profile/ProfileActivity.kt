@@ -88,7 +88,7 @@ class ProfileActivity : BaseActivity() {
 
         binding.ivExtraIcon.setOnClickListener {
             viewModel.handleIntent(ProfileIntent.ImportSampleData)
-            showSyncIssueDialog() // 弹窗提示（如果业务需要）
+            showSyncIssueDialog()
         }
 
     }
@@ -167,7 +167,7 @@ class ProfileActivity : BaseActivity() {
             setCanceledOnTouchOutside(true)
             window?.setBackgroundDrawableResource(android.R.color.transparent)
             val lp = window?.attributes
-            lp?.gravity = Gravity.BOTTOM
+            lp?.gravity = Gravity.BOTTOM//底部弹出
             lp?.width = ViewGroup.LayoutParams.MATCH_PARENT
             lp?.height = ViewGroup.LayoutParams.WRAP_CONTENT
             window?.attributes = lp
@@ -196,6 +196,7 @@ class ProfileActivity : BaseActivity() {
             setContentView(dialogBinding.root)
             setCancelable(true)
             setCanceledOnTouchOutside(true)
+            //设为全透明
             window?.setBackgroundDrawableResource(android.R.color.transparent)
             val lp = window?.attributes//（获取当前窗口的布局参数对象）
             lp?.gravity = Gravity.BOTTOM//底部弹出

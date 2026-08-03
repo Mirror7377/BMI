@@ -152,7 +152,7 @@ class DatePickerHelper(
     private fun getDaysForMonth(year: Int, month: Int): List<String> {
         //将日历的日期设置为 year 年 month 月 1 日
         val cal = Calendar.getInstance().apply { set(year, month - 1, 1) }
-        //获取改月的最大天数
+        //获取该月的最大天数
         val maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
         //修正为当前日或最大日
         val limit = if (year == currentYear && month == currentMonth) currentDay else maxDay

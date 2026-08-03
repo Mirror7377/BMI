@@ -20,13 +20,12 @@ object DensityUtil {
         //调用函数
         applyDensity(appDisplayMetrics, targetDensity)
 
-        // 监听系统字体缩放变化，重新设置 scaledDensity
         application.registerComponentCallbacks(object : ComponentCallbacks {
-            //系统配置改变时触发：当系统设置发生变化时（如语言、屏幕方向、字体大小等），此方法会被调用。
+            //系统配置改变时触发：当改变屏幕方向、字体大小等此方法会被调用。
             override fun onConfigurationChanged(newConfig: Configuration) {
                 //读取系统最新的字体缩放系数。
                 val fontScale = newConfig.fontScale
-                //得到新的 sp 缩放因子，并更新全局配置
+                //更新全局字体配置
                 appDisplayMetrics.scaledDensity = targetDensity * fontScale
 
             }
@@ -34,6 +33,7 @@ object DensityUtil {
         })
     }
 
+    //activity重建时
     fun setDensity(activity: Activity) {
         //获取当前 Activity 的屏幕数据
         val activityDisplayMetrics = activity.resources.displayMetrics
@@ -46,11 +46,12 @@ object DensityUtil {
         //设置逻辑密度 决定了 1dp 等于多少像素（px）
         metrics.density = density
         //屏幕密度 DPI
+        //density（逻辑密度） = densityDpi（物理 DPI） / 160
         metrics.densityDpi = (density * 160).toInt()
 
         // 获取当前系统的字体缩放比例
         val fontScale = Resources.getSystem().configuration.fontScale
-        //得到新的 sp 缩放因子，并更新全局配置
+        //并更新全局文字配置
         metrics.scaledDensity = density * fontScale
     }
 }

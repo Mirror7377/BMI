@@ -19,6 +19,7 @@ import com.example.bmi.R
 import com.example.bmi.databinding.ItemWheelPickerBinding
 import kotlin.math.abs
 import java.util.WeakHashMap
+import androidx.core.view.isEmpty
 
 /**
  * 滚轮选择器辅助工具
@@ -115,7 +116,7 @@ object WheelPickerHelper {
             // ---------- 清除旧监听 ----------
             recyclerView.clearOnScrollListeners()
 
-            // ---------- 添加滚动监听（用于更新渐变和选中回调） ----------
+            // ---------- 添加滚动监听 ----------
             recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     //设置渐变效果
@@ -197,7 +198,7 @@ object WheelPickerHelper {
 
     // ---------- 更新渐变效果（中间加深，两端淡化） ----------
     fun updateWheelEffects(recyclerView: RecyclerView) {
-        if (recyclerView.childCount == 0) return
+        if (recyclerView.isEmpty()) return
 
         val firstChild = recyclerView.getChildAt(0)
         //获取列表顶部显示的那一项item的实际的高度
@@ -267,7 +268,7 @@ object WheelPickerHelper {
         private val paint = Paint().apply {
             color = ContextCompat.getColor(context, colorRes)
             strokeWidth = dpToPx(context, lineWidthDp)
-            isAntiAlias = true
+            isAntiAlias = true//抗锯齿
         }
 
         private val itemHeight = dpToPx(context, itemHeightDp.toFloat())
