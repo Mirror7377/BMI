@@ -131,7 +131,7 @@ class DisplayFragment : Fragment() {
             else -> Gender.MALE
         }
 
-        val bmiLevel = if (age < 20) {
+        val bmiLevel = if (age <= 20) {
             BmiConfigProvider.classifyChild(age, gender.name, record.bmi)
         } else {
             BmiClassifier.classifyAdult(record.bmi)
@@ -186,7 +186,7 @@ class DisplayFragment : Fragment() {
 
     // ========== 图例绑定 ==========
     private fun bindBmiLegend(currentLevel: BmiLevel, age: Int, gender: String) {
-        val isChild = age < 20
+        val isChild = age <= 20
         val config = BmiConfigProvider.getConfig(age, gender)
         val splitPoints = config.splitPoints
         val colors = config.colors

@@ -510,10 +510,10 @@ class ResultActivity : BaseActivity() {
         val visibleIndices = if (isChild) listOf(2, 3, 4, 5) else (0..7).toList()
 
         val childColors = mapOf(
-            2 to 0xFF5BB1F5.toInt(),
-            3 to 0xFFA8C526.toInt(),
+            2 to 0xFF0099F2.toInt(),
+            3 to 0xFF54A529.toInt(),
             4 to 0xFFFECD2E.toInt(),
-            5 to 0xFFFD9845.toInt()
+            5 to 0xFFFFA100.toInt()
         )
 
         fun getRangeText(index: Int): String {

@@ -367,6 +367,11 @@ class HomeFragment : Fragment() {
                 CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 viewModel.sendIntent(HomeIntent.WeightChanged(default))
             }
+            raw.toDoubleOrNull() == null -> {
+                val lastValid = viewModel.state.value.weightInput
+                editText.setText(String.format("%.2f", lastValid))
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
+            }
             else -> {
                 val value = raw.toDouble()
                 val clamped = value.coerceIn(min, max)
@@ -388,6 +393,10 @@ class HomeFragment : Fragment() {
                 editText.setText("170.0")
                 CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
                 viewModel.sendIntent(HomeIntent.HeightCmChanged(170.0))
+            }
+            raw.toDoubleOrNull() == null -> {
+                editText.setText(String.format("%.1f", viewModel.state.value.heightCm))
+                CommonBanner.show(requireActivity(), R.drawable.warning, errorMsg)
             }
             else -> {
                 val value = raw.toDouble()
