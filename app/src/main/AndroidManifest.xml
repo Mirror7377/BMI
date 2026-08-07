@@ -14,7 +14,7 @@
         android:name=".MyApplication">
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.splash.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.BMI.Splash">
             <intent-filter>
