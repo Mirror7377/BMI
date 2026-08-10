@@ -1,287 +1,85 @@
 package com.example.bmi.ui.profile
 
-import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.view.Gravity
-import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.runtime.*
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.bmi.BaseActivity
-import com.example.bmi.R
-import com.example.bmi.databinding.ActivityProfileBinding
-import com.example.bmi.databinding.DialogLoginBinding
-import com.example.bmi.databinding.DialogLogoutBinding
-import com.example.bmi.databinding.DialogSyncIssueBinding
 import com.example.bmi.ui.feedback.FeedbackActivity
 import com.example.bmi.ui.language.LanguageActivity
-import com.example.bmi.utils.CommonBanner
+import com.example.bmi.ui.profile.components.LoginDialog
+import com.example.bmi.ui.profile.components.LogoutDialog
+import com.example.bmi.ui.theme.BmiTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import java.util.Locale
 
 @AndroidEntryPoint
-class ProfileActivity : BaseActivity() {
+class ProfileActivity : ComponentActivity() {
 
-    private lateinit var binding: ActivityProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
-
+    private var showLoginDialog by mutableStateOf(false)
+    private var showUserInfoDialog by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        enableEdgeToEdge()
 
-        setupListeners()
-        observeState()
-        observeEffect()
+        setContent {
+            val viewModel = hiltViewModel<ProfileViewModel>()
 
-        viewModel.handleIntent(ProfileIntent.Init)
-    }
-
-    private fun setupListeners() {
-        binding.ivBack.setOnClickListener { finish() }
-
-        binding.profileContainer.setOnClickListener {
-            viewModel.handleIntent(ProfileIntent.AvatarClicked)
-        }
-
-        // Language 行
-        binding.llLanguageRow.setOnClickListener {
-            val intent = Intent(this, LanguageActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Rate Us 行（新容器）
-        binding.llRateUs.setOnClickListener {
-            val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
-            //Uri.parse(url) 将字符串 URL 转换成 Android 可识别的 Uri 对象。
-            //ACTION_VIEW 是一个系统级的 Intent 动作，Android 会寻找能处理 URL 的应用（比如浏览器、Play 商店客户端）来打开它。
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            //只有在确实有应用能处理时，才调用 startActivity(intent)。
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            }
-        }
-
-        // Feedback 行（新容器）
-        binding.llFeedback.setOnClickListener {
-            startActivity(Intent(this, FeedbackActivity::class.java))
-        }
-
-        binding.ivExtraIcon.setOnClickListener {
-            viewModel.handleIntent(ProfileIntent.ImportSampleData)
-            showSyncIssueDialog()
-        }
-
-    }
-
-    private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    renderState(state)
-                }
-            }
-        }
-    }
-
-    private fun renderState(state: ProfileState) {
-        val isLoggedIn = state.isLoggedIn
-
-        binding.tvBackupRestore.isVisible = !isLoggedIn
-        binding.tvSync.isVisible = !isLoggedIn
-
-        binding.loginGroup.isVisible = isLoggedIn
-        if (isLoggedIn) {
-            binding.tvNameLogin.text = state.userName
-            binding.tvEmailLogin.text = state.userEmail
-        }
-
-        binding.ivBackupIcon.isVisible = true
-        binding.ivExtraIcon.isVisible = true
-
-        updateBackupIconConstraints(isLoggedIn)
-    }
-
-    private fun updateBackupIconConstraints(isLoggedIn: Boolean) {
-        val params = binding.ivBackupIcon.layoutParams as ConstraintLayout.LayoutParams
-        if (isLoggedIn) {
-            params.startToEnd = binding.tvNameLogin.id
-            params.topToTop = binding.tvNameLogin.id
-            params.bottomToBottom = binding.tvNameLogin.id
-            //ConstraintLayout.LayoutParams.UNSET 清空“旧约束”，防止位置错乱
-            params.startToStart = ConstraintLayout.LayoutParams.UNSET
-            params.endToEnd = ConstraintLayout.LayoutParams.UNSET
-        } else {
-            params.startToEnd = binding.tvBackupRestore.id
-            params.topToTop = binding.tvBackupRestore.id
-            params.bottomToBottom = binding.tvBackupRestore.id
-            params.startToStart = ConstraintLayout.LayoutParams.UNSET
-            params.endToEnd = ConstraintLayout.LayoutParams.UNSET
-        }
-        //把修改后的参数重新绑定给图标
-        binding.ivBackupIcon.layoutParams = params
-        //强制触发重绘和重新测量
-        binding.ivBackupIcon.requestLayout()
-    }
-
-    private fun observeEffect() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.effect.collect { effect ->
-                    when (effect) {
-                        is ProfileEffect.ShowUserInfoDialog -> showUserInfoDialog()
-                        is ProfileEffect.ShowLoginDialog -> showLoginDialog()
-                        is ProfileEffect.Success -> dialogSuccess()
+            BmiTheme {
+                ProfileScreen(
+                    viewModel = viewModel,
+                    onNavigateToLanguage = {
+                        startActivity(Intent(this, LanguageActivity::class.java))
+                    },
+                    onNavigateToFeedback = {
+                        startActivity(Intent(this, FeedbackActivity::class.java))
+                    },
+                    onShowLoginDialog = { showLoginDialog = true },
+                    onShowUserInfoDialog = { showUserInfoDialog = true },
+                    onNavigateBack = { finish() },
+                    onRateUs = {
+                        val url = "https://play.google.com/store/apps/details?id=bmicalculator.bmi.calculator.weightlosstracker"
+                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                        if (intent.resolveActivity(packageManager) != null) {
+                            startActivity(intent)
+                        }
                     }
+                )
+
+                // 登录弹窗
+                if (showLoginDialog) {
+                    LoginDialog(
+                        onDismiss = { showLoginDialog = false },
+                        onLogin = {
+                            showLoginDialog = false
+                            viewModel.handleIntent(ProfileIntent.Login)
+                        }
+                    )
+                }
+
+                // 登出弹窗
+                if (showUserInfoDialog) {
+                    LogoutDialog(
+                        onDismiss = { showUserInfoDialog = false },
+                        onLogout = {
+                            showUserInfoDialog = false
+                            viewModel.handleIntent(ProfileIntent.Logout)
+                        }
+                    )
                 }
             }
         }
-    }
-
-    // ---------- 弹窗方法 ----------
-
-    private fun showLoginDialog() {
-        val dialogBinding = DialogLoginBinding.inflate(layoutInflater)
-        val dialog = Dialog(this).apply {
-            setContentView(dialogBinding.root)
-            setCancelable(true)
-            setCanceledOnTouchOutside(true)
-            window?.setBackgroundDrawableResource(android.R.color.transparent)
-            val lp = window?.attributes
-            lp?.gravity = Gravity.BOTTOM//底部弹出
-            lp?.width = ViewGroup.LayoutParams.MATCH_PARENT
-            lp?.height = ViewGroup.LayoutParams.WRAP_CONTENT
-            window?.attributes = lp
-        }
-
-        dialogBinding.btnLogin.setOnClickListener {
-            dialog.dismiss()
-            // 直接显示登录成功 Banner
-            CommonBanner.show(
-                this,
-                R.drawable.login,
-                "Logged in successfully."
-            )
-            viewModel.handleIntent(ProfileIntent.Login)
-        }
-        dialogBinding.btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun showUserInfoDialog() {
-        val dialogBinding = DialogLogoutBinding.inflate(layoutInflater)
-        val dialog = Dialog(this).apply {
-            setContentView(dialogBinding.root)
-            setCancelable(true)
-            setCanceledOnTouchOutside(true)
-            //设为全透明
-            window?.setBackgroundDrawableResource(android.R.color.transparent)
-            val lp = window?.attributes//（获取当前窗口的布局参数对象）
-            lp?.gravity = Gravity.BOTTOM//底部弹出
-            lp?.width = ViewGroup.LayoutParams.MATCH_PARENT//占满
-            lp?.height = ViewGroup.LayoutParams.WRAP_CONTENT//自适应
-            window?.attributes = lp//（把修改后的参数对象设置回窗口）
-        }
-
-        dialogBinding.btnLogout.setOnClickListener {
-            dialog.dismiss()
-            // 直接显示登出成功 Banner
-            CommonBanner.show(
-                this,
-                R.drawable.logout,
-                "Logged out successfully."
-            )
-            viewModel.handleIntent(ProfileIntent.Logout)
-        }
-        dialogBinding.btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-    private fun showSyncIssueDialog() {
-        val dialogBinding = DialogSyncIssueBinding.inflate(layoutInflater)
-        val dialog = AlertDialog.Builder(this).apply {
-            setView(dialogBinding.root)
-            setCancelable(true)
-        }.create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        // 所有 Spannable 设置（原样）
-        val fullText = "The function will be back once the issue is solved. We’d greatly appreciate your patience."
-        val spannable = SpannableString(fullText)
-        val firstPart = "The function will be back once the issue is solved."
-        val start = 0
-        val end = firstPart.length
-        spannable.setSpan(
-            ForegroundColorSpan(ContextCompat.getColor(this, R.color.splash_blue)),
-            start, end,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        spannable.setSpan(
-            StyleSpan(Typeface.BOLD),
-            start, end,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        dialogBinding.tvDialogCombined.text = spannable
-
-        dialogBinding.btnDialogDone.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        // ====== 先显示对话框，再设置宽度 ======
-        dialog.show()
-
-        // 设置宽度为屏幕宽度的 80%，高度自适应
-        val width = (resources.displayMetrics.widthPixels * 0.8).toInt()
-        val params = dialog.window?.attributes
-        params?.width = width
-        params?.height = WindowManager.LayoutParams.WRAP_CONTENT
-        dialog.window?.attributes = params
-    }
-
-
-    fun dialogSuccess(){
-        CommonBanner.show(
-            this,
-            R.drawable.check_circle,
-            "import records successfully."
-        )
     }
 
     override fun onResume() {
         super.onResume()
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        val feedbackContent = prefs.getString("feedback_content", null)
-        if (!feedbackContent.isNullOrEmpty()) {
-            prefs.edit().remove("feedback_content").apply()
-            // 从资源文件读取带占位符的模板，并用 feedbackContent 替换 %s
-            val message = getString(R.string.feedback_thanks_message, feedbackContent)
-            CommonBanner.show(this, R.drawable.check_circle, message)
-        }
+        viewModel.checkFeedbackContent()
     }
-
 }

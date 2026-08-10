@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @HiltViewModel
 class FeedbackViewModel @Inject constructor(
@@ -56,9 +57,9 @@ class FeedbackViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // 保存到 SharedPreferences
-                prefs.edit()
-                    .putString("feedback_content", currentState.feedbackText)
-                    .apply()
+                prefs.edit {
+                    putString("feedback_content", currentState.feedbackText)
+                }
 
                 // 发送导航效果
                 _effect.emit(FeedbackEffect.NavigateBack)

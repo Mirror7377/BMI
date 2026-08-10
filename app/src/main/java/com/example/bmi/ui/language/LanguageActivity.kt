@@ -28,6 +28,9 @@ class LanguageActivity : ComponentActivity() {
                         }
                         startActivity(intent)
                         finish()
+                    },
+                    onNavigateBack = {
+                        finish()
                     }
                 )
             }

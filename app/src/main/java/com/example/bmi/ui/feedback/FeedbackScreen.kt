@@ -2,6 +2,7 @@ package com.example.bmi.ui.feedback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,7 +31,6 @@ fun FeedbackScreen(
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    val focusRequester = remember { FocusRequester() }
 
 
     // 监听 Effect
@@ -61,10 +61,14 @@ fun FeedbackScreen(
             // 返回箭头
             Icon(
                 painter = painterResource(id = R.drawable.arrow_left),
-                contentDescription = "Back",
+                contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable { viewModel.handleIntent(FeedbackIntent.NavigateBack) },
+                    .clickable(
+                        onClick = { viewModel.handleIntent(FeedbackIntent.NavigateBack) },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
                 tint = Color(0xFF222222)
             )
 
@@ -104,8 +108,7 @@ fun FeedbackScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .focusRequester(focusRequester),
+                        .weight(1f),
                     placeholder = {
                         Text(
                             text = stringResource(R.string.feedback_or_suggestion),

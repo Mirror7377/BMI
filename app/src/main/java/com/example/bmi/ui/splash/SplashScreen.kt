@@ -32,7 +32,7 @@ fun SplashScreen(
     val screenWidthDp = configuration.screenWidthDp.dp.value
     val screenHeightDp = configuration.screenHeightDp.dp.value
 
-    // 缩放比例（用于控制图片大小）
+    // 缩放比例
     val scale = remember(screenWidthDp, screenHeightDp) {
         minOf(
             screenWidthDp / DESIGN_WIDTH,
@@ -41,7 +41,7 @@ fun SplashScreen(
     }
 
     // 动画状态
-    val fadeAlpha = remember { Animatable(0f) }
+    val fadeAlpha = remember { Animatable(0.3f) }
     val translationY = remember { Animatable(150f * scale) }
     val rotation = remember { Animatable(-30f) }
 
@@ -129,11 +129,11 @@ fun SplashScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = screenWidthDp.dp * 0.1f)
-                .offset(y = translationY.value.dp) // ① 布局级别的位移（无裁剪）
+                .padding(start = screenWidthDp.dp * 0.075f)
+                .offset(y = translationY.value.dp)
                 .graphicsLayer {
-                    alpha = fadeAlpha.value         // ② 透明度动画（现在不再冲突）
-                    clip = false                    // 🔥 关闭图形层的裁剪，根治截断问题
+                    alpha = fadeAlpha.value
+                    clip = false
                 }
         ) {
             // 1. 扇环 + 指针

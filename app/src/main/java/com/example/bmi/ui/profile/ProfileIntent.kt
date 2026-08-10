@@ -1,11 +1,10 @@
 package com.example.bmi.ui.profile
 
 sealed class ProfileIntent {
-    object Init : ProfileIntent()
-    object Login : ProfileIntent()
-    object Logout : ProfileIntent()
-    data class ImportJson(val json: String) : ProfileIntent()
-
-    object ImportSampleData : ProfileIntent()
-    object AvatarClicked : ProfileIntent()
+    data object Init : ProfileIntent()
+    data object Login : ProfileIntent()
+    data object Logout : ProfileIntent()
+    data object AvatarClicked : ProfileIntent()
+    data object ImportSampleData : ProfileIntent()
+    data object ToggleSync : ProfileIntent()
 }

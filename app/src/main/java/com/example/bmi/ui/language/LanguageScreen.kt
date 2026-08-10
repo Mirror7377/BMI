@@ -35,7 +35,8 @@ import com.example.bmi.R
 @Composable
 fun LanguageScreen(
     viewModel: LanguageViewModel,
-    onNavigateToMain: () -> Unit
+    onNavigateToMain: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     // 订阅状态
     val state by viewModel.state.collectAsState()
@@ -87,7 +88,11 @@ fun LanguageScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable { onNavigateToMain() },
+                    .clickable(
+                        onClick = onNavigateBack,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
                 tint = Color(0xFF222222) // text_black
             )
 
