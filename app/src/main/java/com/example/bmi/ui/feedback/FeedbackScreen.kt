@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,7 @@ fun FeedbackScreen(
     viewModel: FeedbackViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
 
     // 监听 Effect

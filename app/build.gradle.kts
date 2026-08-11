@@ -41,11 +41,19 @@ android {
 
     buildFeatures {
         viewBinding = true
-        // ===== 启用 Compose =====
         compose = true
     }
 
-    // ===== Compose 编译器配置 (使用 kotlin-compose 插件后，此配置可选，保留以显式控制) =====
+    // ===== 新增：Compose 编译器报告配置 =====
+    // 启用后，编译时会在 app/build/compose_reports/ 下生成 app-compose-report.txt
+    // 该文件详细列出了每个 Composable 函数的重组作用域、稳定性等信息
+    composeCompiler {
+        reportsDestination = file("${layout.buildDirectory.get()}/compose_reports")
+        // 如需更深入的稳定性分析，可取消下面注释并创建 stability-config.txt 文件
+        // stabilityConfigurationFile = file("stability-config.txt")
+    }
+
+    // ===== Compose 编译器版本控制（与 composeCompiler 共存） =====
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
@@ -58,7 +66,7 @@ android {
 }
 
 dependencies {
-    // ===== 原有依赖 (保持不变) =====
+    // ===== 原有依赖 =====
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
@@ -81,20 +89,16 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.14.0")
 
-    // ===== 新增 Compose 依赖 =====
-    // BOM - 统一管理版本
+    // ===== Compose 依赖 =====
     implementation(platform(libs.androidx.compose.bom))
 
-    // Compose 核心库
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.material3)
 
-    // 预览 (debug 时使用)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // Compose 与 Activity / ViewModel / Hilt 集成
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.navigation.compose)

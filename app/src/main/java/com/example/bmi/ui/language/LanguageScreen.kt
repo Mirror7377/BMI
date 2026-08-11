@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 
 /**
@@ -39,7 +40,7 @@ fun LanguageScreen(
     onNavigateBack: () -> Unit
 ) {
     // 订阅状态
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val selectedLanguage = state.selectedLanguage
 
     // 订阅 Effect（导航事件）

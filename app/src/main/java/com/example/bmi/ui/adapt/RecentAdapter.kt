@@ -12,6 +12,7 @@ import com.example.bmi.ui.bmigauge.BmiClassifier
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+//todo 不再需要
 class RecentAdapter(
     private val onItemClick: (BmiRecord) -> Unit
 ) : ListAdapter<BmiRecord, RecentAdapter.ViewHolder>(DiffCallback()) {

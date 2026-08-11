@@ -19,8 +19,7 @@ import com.example.bmi.ui.theme.BmiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ProfileActivity : ComponentActivity() {
-
+class ProfileActivity : BaseActivity() {
     private val viewModel: ProfileViewModel by viewModels()
     private var showLoginDialog by mutableStateOf(false)
     private var showUserInfoDialog by mutableStateOf(false)
@@ -30,8 +29,6 @@ class ProfileActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val viewModel = hiltViewModel<ProfileViewModel>()
-
             BmiTheme {
                 ProfileScreen(
                     viewModel = viewModel,

@@ -17,6 +17,7 @@ import com.example.bmi.R
 import kotlinx.coroutines.joinAll
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -101,7 +102,7 @@ fun SplashScreen(
         viewModel.checkData()
     }
 
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.isReady) {
         if (state.isReady) onNavigate(state.hasData)
     }

@@ -18,7 +18,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
+import com.example.bmi.ui.profile.components.CustomSwitch
 import com.example.bmi.utils.CommonBanner
 import kotlin.Unit
 
@@ -33,11 +35,12 @@ fun ProfileScreen(
     onNavigateBack: () -> Unit,
     onRateUs: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     // Banner 状态（本地管理）
     var bannerState by remember { mutableStateOf(CommonBanner.initialState()) }
 
+    var isSyncEnabled by remember { mutableStateOf(state.isSyncEnabled) }
     // 监听 Effect
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -302,11 +305,10 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        Switch(
-                            checked = state.isSyncEnabled,
-                            onCheckedChange = {
-                                //viewModel.handleIntent(ProfileIntent.ToggleSync)
-                            }
+                        CustomSwitch(
+                            checked = isSyncEnabled,
+                            onCheckedChange = { isChecked ->
+                                isSyncEnabled = isChecked}
                         )
                     }
                 }
