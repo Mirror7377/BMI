@@ -22,7 +22,8 @@ compose-bom = "2025.02.00"                    # Compose BOM 统一版本管理
 activity-compose = "1.10.1"                   # activity-compose 集成
 lifecycle-viewmodel-compose = "2.8.7"         # ViewModel Compose 扩展
 hilt-navigation-compose = "1.2.0"             # Hilt Navigation Compose 集成
-compose-compiler = "1.5.15"                   # Compose 编译器 (与 Kotlin 2.4.0 兼容)
+compose-compiler = "1.5.15"
+composeMaterial3 = "1.6.2"                   # Compose 编译器 (与 Kotlin 2.4.0 兼容)
 
 [libraries]
 # ===== 原有库 (保留全部) =====
@@ -58,6 +59,7 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel-compose" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
 
 [plugins]
 # ===== 原有插件 (保留全部) =====
