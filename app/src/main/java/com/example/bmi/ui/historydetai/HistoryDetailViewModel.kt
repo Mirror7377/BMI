@@ -31,7 +31,8 @@ class HistoryDetailViewModel @Inject constructor(
     fun handleIntent(intent: HistoryDetailIntent) {
         when (intent) {
             is HistoryDetailIntent.LoadRecord -> loadRecord(intent.id)
-            HistoryDetailIntent.DeleteRecord -> deleteRecord()
+            is HistoryDetailIntent.DeleteRecord -> deleteRecord()
+            is HistoryDetailIntent.ShowBmiLegend -> showBmiLegend()
         }
     }
 
@@ -45,27 +46,14 @@ class HistoryDetailViewModel @Inject constructor(
                     } else {
                         BmiClassifier.classifyChild(record.age, record.gender, record.bmi)
                     }
-                    val apps = RecommendationUtils.getRecommendedApps(level, record.gender)
+                    val apps = RecommendationUtils.getRecommendedApps(level, record.gender)  // 新增
                     _state.update {
                         it.copy(
-                            recordId = id,
-                            bmi = record.bmi,
-                            weightInput = record.weightInput,
-                            weightUnit = record.weightUnit,
-                            heightUnit = record.heightUnit,
-                            feet = record.feetInput ?: 0,
-                            inches = record.inchesInput ?: 0,
-                            age = record.age,
-                            gender = record.gender,
-                            heightCm = record.heightCm,
+                            record = record,
                             bmiLevel = level,
-                            recommendedApps = apps,
-                            timestamp = record.timestamp,
-                            timeOfDay = record.timeOfDay
+                            recommendedApps = apps  // 新增
                         )
                     }
-                } else {
-                    Log.w("HistoryDetailViewModel", "Record not found")
                 }
             } catch (e: Exception) {
                 Log.e("HistoryDetailViewModel", "Error loading detail: ${e.message}")
@@ -73,9 +61,9 @@ class HistoryDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteRecord() {
+    private fun deleteRecord() {
         viewModelScope.launch {
-            val id = _state.value.recordId
+            val id = _state.value.record?.id ?: return@launch
             if (id != 0L) {
                 // 1. 执行删除
                 repository.deleteRecord(id)
@@ -86,12 +74,16 @@ class HistoryDetailViewModel @Inject constructor(
                 // 3. 根据结果发送不同 Effect
                 if (remainingCount == 0) {
                     _effect.emit(HistoryDetailEffect.NavigateToHome)
-                }else {
+                } else {
                     _effect.emit(HistoryDetailEffect.NavigateBack)
                 }
-            } else {
-                Log.w("HistoryDetailViewModel", "No record to delete")
             }
+        }
+    }
+
+    private fun showBmiLegend() {
+        viewModelScope.launch {
+            _effect.emit(HistoryDetailEffect.ShowBmiLegend)
         }
     }
 }

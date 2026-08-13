@@ -87,7 +87,6 @@ fun RecentScreen(
         }
 
         if (records.isEmpty()) {
-            //todo 和history一样返回home页
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -106,7 +105,7 @@ fun RecentScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 15.dp, vertical = 15.dp),
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)// 项间距
             ) {
                 items(
@@ -150,7 +149,7 @@ private fun RecentItem(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -162,8 +161,8 @@ private fun RecentItem(
                 .padding(
                     start = 20.dp,
                     end = 15.dp,
-                    top = 15.dp,
-                    bottom = 15.dp
+                    top = 12.dp,
+                    bottom = 12.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -177,8 +176,6 @@ private fun RecentItem(
                     fontSize = 28.sp,
                     fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
                 )
-
-                Spacer(modifier = Modifier.height(2.dp))
 
                 // 第二行：等级名称 + 彩色圆点（水平排列）
                 Row(

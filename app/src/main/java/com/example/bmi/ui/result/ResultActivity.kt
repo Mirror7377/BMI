@@ -31,9 +31,6 @@ class ResultActivity : BaseActivity() {
                     viewModel.handleIntent(ResultIntent.Init(intent.extras))
                 }
 
-                var showDiscardDialog by remember { mutableStateOf(false) }
-                var showBmiLegend by remember { mutableStateOf(false) }
-
                 ResultScreen(
                     viewModel = viewModel,
                     onNavigateBack = { finish() },
@@ -42,53 +39,8 @@ class ResultActivity : BaseActivity() {
                         val target = if (isFirstSave) "display" else "statistics"
                         prefs.edit { putString("post_save_target", target) }
                         finish()
-                    },
-                    onShowDiscardDialog = { showDiscardDialog = true },
-                    onShowBmiLegend = { showBmiLegend = true }
+                    }
                 )
-
-                // 丢弃确认对话框
-                if (showDiscardDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDiscardDialog = false },
-                        title = { Text(text = "Discard Record") },
-                        text = { Text(text = "Are you sure you want to discard this record?") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    showDiscardDialog = false
-                                    finish()
-                                }
-                            ) {
-                                Text("Discard")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showDiscardDialog = false }
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
-
-                // BMI 图例弹窗
-                if (showBmiLegend) {
-                    // 这里应使用 ModalBottomSheet，但为了简化，暂时用 AlertDialog 占位
-                    AlertDialog(
-                        onDismissRequest = { showBmiLegend = false },
-                        title = { Text("BMI Legend") },
-                        text = { Text("BMI Legend content here") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = { showBmiLegend = false }
-                            ) {
-                                Text("Got it")
-                            }
-                        }
-                    )
-                }
             }
         }
     }
