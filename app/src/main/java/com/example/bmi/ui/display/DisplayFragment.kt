@@ -14,7 +14,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.bmi.MainActivity
 import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.databinding.FragmentDisplayBinding
@@ -25,6 +24,7 @@ import com.example.bmi.ui.recent.RecentActivity
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
 import com.example.bmi.ui.bmigauge.BmiLevel
+import com.example.bmi.ui.main.MainActivity
 import com.example.bmi.ui.recent.RecentIntent
 import com.example.bmi.utils.CommonBanner
 import dagger.hilt.android.AndroidEntryPoint

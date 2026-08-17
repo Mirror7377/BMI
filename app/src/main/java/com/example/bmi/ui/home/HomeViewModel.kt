@@ -1,5 +1,6 @@
 package com.example.bmi.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.database.BmiRecord
@@ -35,7 +36,9 @@ class HomeViewModel @Inject constructor(
     // ---------- 副作用（导航事件） ----------
     private val _effect = MutableSharedFlow<HomeEffect>()
     val effect: SharedFlow<HomeEffect> = _effect.asSharedFlow()
-
+    init {
+        Log.d("HomeVM", "HomeViewModel 创建了")
+    }
     // ---------- Intent 处理 ----------
     fun sendIntent(intent: HomeIntent) {
         when (intent) {
@@ -95,6 +98,10 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onHeightCmChanged(value: Double) {
+        Log.d(
+            "HeightChanged",
+            "收到 HeightCmChanged = $value"
+        )
         val clamped = value.coerceIn(1.0, 250.0)
         val cmRounded = BigDecimal(clamped)
             .setScale(2, RoundingMode.HALF_UP)
@@ -109,6 +116,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onHeightUnitChanged(unit: HeightUnit) {
+        Log.d("HeightUnitChanged", "切换到 ${unit.name}, heightCm = ${_state.value.heightCm}")
         val currentCm = _state.value.heightCm
 
         if (unit == HeightUnit.CM) {
@@ -137,6 +145,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onFeetChanged(feet: Int) {
+        Log.d(
+            "CM_DEBUG",
+            "!!! onFeetChanged: feet=$feet, " +
+                    "oldHeightCm=${_state.value.heightCm}, " +
+                    "inches=${_state.value.inchesInput}"
+        )
         val clamped = feet.coerceIn(1, 8)
         var currentInches = _state.value.inchesInput
         // 若英尺为8且英寸超过2，自动修正为2
@@ -154,6 +168,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onInchesChanged(inches: Int) {
+        Log.d(
+            "CM_DEBUG",
+            "!!! onInchesChanged: inches=$inches, " +
+                    "oldHeightCm=${_state.value.heightCm}, " +
+                    "feet=${_state.value.feetInput}"
+        )
         val currentFeet = _state.value.feetInput
         val maxInches = if (currentFeet == 8) 2 else 11
         val clamped = inches.coerceIn(0, maxInches)
@@ -200,7 +220,7 @@ class HomeViewModel @Inject constructor(
         )
 
         // 根据年龄分类
-        val isAdult = state.age >= 18
+        val isAdult = state.age > 20
         val category = if (isAdult) {
             BmiClassifier.classifyAdult(bmi)
         } else {

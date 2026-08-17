@@ -15,7 +15,7 @@
 
         <!-- 👇 MainActivity 现在成为启动页 -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>

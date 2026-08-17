@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.bmi.BaseActivity
-import com.example.bmi.MainActivity
+import com.example.bmi.ui.main.MainActivity
 import com.example.bmi.ui.theme.BmiTheme
 import dagger.hilt.android.AndroidEntryPoint
 

@@ -1,6 +1,5 @@
 package com.example.bmi.ui.splash
 
-import com.example.bmi.MainActivity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.bmi.ui.main.MainActivity
 import com.example.bmi.ui.splash.SplashScreen
 import com.example.bmi.ui.splash.SplashViewModel
 import com.example.bmi.ui.theme.BmiTheme
