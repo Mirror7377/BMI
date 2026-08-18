@@ -27,6 +27,7 @@ import com.example.bmi.ui.home.HomeScreen
 import com.example.bmi.ui.navigation.Screen
 import com.example.bmi.ui.recent.RecentActivity
 import com.example.bmi.ui.result.ResultActivity
+import com.example.bmi.ui.statistics.StatisticsScreen
 import com.example.bmi.ui.theme.BmiTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -88,7 +89,12 @@ class MainActivity : BaseActivity() {
                                 startActivity(Intent(this@MainActivity, RecentActivity::class.java))
                             }
                         )
-                        Screen.Statistics -> PlaceholderScreen("Statistics (Coming Soon)")
+                        Screen.Statistics -> StatisticsScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onNavigateToHome = {
+                                mainViewModel.navigateTo(Screen.Home)
+                            }
+                        )
                     }
                 }
             }
