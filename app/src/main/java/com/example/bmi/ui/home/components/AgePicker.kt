@@ -20,6 +20,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,14 +50,14 @@ fun AgePicker(
     onAgeSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val focusManager = LocalFocusManager.current
     val ages = remember { (2..99).toList() }
-    val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
 
     val itemWidth = 47.dp
     val itemSpace = 18.dp
-
     val itemWidthPx = with(density) { itemWidth.toPx() }
     val itemSpacePx = with(density) { itemSpace.toPx() }
     val itemUnitPx = itemWidthPx + itemSpacePx
@@ -65,37 +67,40 @@ fun AgePicker(
     var isUserScrolling by remember { mutableStateOf(false) }
     var lastSelectedAge by remember { mutableStateOf(selectedAge) }
 
-    // 初始定位
-    LaunchedEffect(Unit) {
-        val index = (selectedAge - 2).coerceIn(0, ages.lastIndex)
-        listState.scrollToItem(index)
-    }
+    val initialIndex = (selectedAge - 2).coerceIn(0, ages.lastIndex)
 
-    // 外部年龄变化时同步滚动
+    // 使用 initialFirstVisibleItemIndex 让第一帧直接停在正确位置
+    // 配合 contentPadding 左右各 130dp，目标项会自动居中
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+
+
     LaunchedEffect(selectedAge) {
         if (isUserScrolling) return@LaunchedEffect
         if (selectedAge == lastSelectedAge) return@LaunchedEffect
 
         val targetIndex = (selectedAge - 2).coerceIn(0, ages.lastIndex)
         lastSelectedAge = selectedAge
+        //执行滚动
         listState.animateScrollToItem(targetIndex)
     }
 
-    // 监听滑动状态，滚动停止后自动吸附并回调
+
     LaunchedEffect(listState.isScrollInProgress) {
         if (listState.isScrollInProgress) {
+            focusManager.clearFocus()
             isUserScrolling = true
             return@LaunchedEffect
         }
-
         if (!isUserScrolling) return@LaunchedEffect
 
         val layoutInfo = listState.layoutInfo
         val visibleItems = layoutInfo.visibleItemsInfo
-        if (visibleItems.isEmpty()) return@LaunchedEffect
+        if (visibleItems.isEmpty()) {
+            isUserScrolling = false
+            return@LaunchedEffect
+        }
 
         val center = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-
         val centerItem = visibleItems.minByOrNull { item ->
             abs(item.offset + item.size / 2 - center)
         }
@@ -103,18 +108,16 @@ fun AgePicker(
         centerItem?.let { item ->
             val itemCenter = item.offset + item.size / 2
             val distance = itemCenter - center
-
             if (distance != 0) {
                 listState.animateScrollBy(distance.toFloat())
             }
 
-            val finalLayoutInfo = listState.layoutInfo
-            val finalCenter = (finalLayoutInfo.viewportStartOffset + finalLayoutInfo.viewportEndOffset) / 2
-
-            val finalItem = finalLayoutInfo.visibleItemsInfo.minByOrNull { finalItem ->
-                abs(finalItem.offset + finalItem.size / 2 - finalCenter)
+            // 吸附后再精确取一次中心项，确保回调正确
+            val finalInfo = listState.layoutInfo
+            val finalCenter = (finalInfo.viewportStartOffset + finalInfo.viewportEndOffset) / 2
+            val finalItem = finalInfo.visibleItemsInfo.minByOrNull {
+                abs(it.offset + it.size / 2 - finalCenter)
             }
-
             finalItem?.let {
                 val age = ages[it.index]
                 if (age != lastSelectedAge) {
@@ -123,8 +126,46 @@ fun AgePicker(
                 }
             }
         }
-
         isUserScrolling = false
+    }
+
+    // ============================================================
+    // 统一计算所有可见项的渐变参数
+    // 避免每个 item 独立读取 listState 导致多帧颜色不一致
+    // ============================================================
+    val visibleItemEffects by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val visible = layoutInfo.visibleItemsInfo
+            if (visible.isEmpty()) return@derivedStateOf emptyMap<Int, Pair<Float, Color>>()
+
+            val center = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
+            val maxDistance = itemUnitPx * 2f
+
+            visible.associate { item ->
+                val itemCenter = item.offset + item.size / 2f
+                val distance = abs(itemCenter - center)
+                val ratio = (distance / maxDistance).coerceIn(0f, 1f)
+                val alpha = 1f - ratio * 0.65f
+                val color = lerp(Color.Black, Color(0xFFBBBBBB), ratio)
+                item.index to (alpha to color)
+            }
+        }
+    }
+
+    // ============================================================
+    // 布局就绪前的 fallback：根据与 initialIndex 的距离估算
+    // 保证第一帧就有正确的渐变，不会从全黑/全灰跳变
+    // ============================================================
+    val fallbackEffects = remember(initialIndex) {
+        val maxDistance = itemUnitPx * 2f
+        ages.indices.associateWith { idx ->
+            val distance = abs(idx - initialIndex) * itemUnitPx
+            val ratio = (distance / maxDistance).coerceIn(0f, 1f)
+            val alpha = 1f - ratio * 0.65f
+            val color = lerp(Color.Black, Color(0xFFBBBBBB), ratio)
+            (alpha to color)
+        }
     }
 
     Card(
@@ -156,30 +197,10 @@ fun AgePicker(
                         items = ages,
                         key = { _, age -> age }
                     ) { index, age ->
-                        val itemInfo = listState.layoutInfo.visibleItemsInfo.firstOrNull {
-                            it.index == index
-                        }
-
-                        val viewportCenter = (
-                                listState.layoutInfo.viewportStartOffset +
-                                        listState.layoutInfo.viewportEndOffset
-                                ) / 2f
-
-                        val itemCenter = itemInfo?.let {
-                            it.offset + it.size / 2f
-                        }
-
-                        val distance = if (itemCenter != null) {
-                            abs(itemCenter - viewportCenter)
-                        } else {
-                            Float.MAX_VALUE
-                        }
-
-                        val maxDistance = itemUnitPx * 2f
-                        val ratio = (distance / maxDistance).coerceIn(0f, 1f)
-                        val alpha = 1f - ratio * 0.65f
-                        val textColor = lerp(Color.Black, Color(0xFFBBBBBB), ratio)
-                        val scale = 1f - ratio * 0.10f
+                        // 优先使用精确计算，未就绪时使用 fallback，彻底避免闪烁
+                        val (alpha, textColor) = visibleItemEffects[index]
+                            ?: fallbackEffects[index]
+                            ?: (1f to Color.Black)
 
                         Box(
                             modifier = Modifier
@@ -189,6 +210,7 @@ fun AgePicker(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() }
                                 ) {
+                                    focusManager.clearFocus()
                                     lastSelectedAge = age
                                     onAgeSelected(age)
                                     coroutineScope.launch {
@@ -206,8 +228,6 @@ fun AgePicker(
                                 ),
                                 modifier = Modifier.graphicsLayer {
                                     this.alpha = alpha
-                                    scaleX = scale
-                                    scaleY = scale
                                 }
                             )
                         }

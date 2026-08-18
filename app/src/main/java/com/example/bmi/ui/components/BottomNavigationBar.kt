@@ -22,13 +22,11 @@ fun BottomNavigationBar(
     currentScreen: Screen,
     onNavigate: (Screen) -> Unit
 ) {
-    // 读取 XML 中定义的颜色（bottom_nav_color）
-    val navColor = colorResource(R.color.bottom_nav_color)
 
     NavigationBar(
         containerColor = Color.White,        // 白色背景，与旧 XML 一致
         tonalElevation = 0.dp,               // 去掉 M3 默认阴影
-        modifier = Modifier.height(56.dp)    // 与旧 XML 高度一致
+        modifier = Modifier.height(60.dp)    // 与旧 XML 高度一致
     ) {
         // 定义导航项：Screen 映射到 (图标资源, 文字资源)
         val items = listOf(

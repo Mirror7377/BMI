@@ -65,6 +65,7 @@ fun HomeScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val onAgeSelected = remember { { age: Int -> viewModel.sendIntent(HomeIntent.AgeChanged(age)) } }
 
     // ---- 体重输入框状态 ----
     var weightText by remember { mutableStateOf(String.format("%.2f", state.weightInput)) }
@@ -221,13 +222,13 @@ fun HomeScreen(
                                 }
                             },
                             textStyle = TextStyle(
-                                fontSize = 25.sp,
+                                fontSize = 27.sp,
                                 fontFamily = boldFont,
                                 color = textBlack,
                                 textAlign = TextAlign.Center
                             ),
                             modifier = Modifier
-                                .width(91.dp)
+                                .width(100.dp)
                                 .height(37.dp)
                                 .background(Color.Transparent)
                                 .onFocusChanged { focusState ->
@@ -235,17 +236,16 @@ fun HomeScreen(
                                         val trimmed = weightText.trim()
                                         if (trimmed.isNotEmpty()) {
                                             val validValue = trimmed.toDoubleOrNull()
-
                                             if (validValue != null) {
-                                                viewModel.sendIntent(
-                                                    HomeIntent.WeightChanged(validValue)
-                                                )
+                                                viewModel.sendIntent(HomeIntent.WeightChanged(validValue))
                                             } else {
                                                 weightText = String.format("%.2f", state.weightInput)
                                             }
                                         } else {
                                             weightText = String.format("%.2f", state.weightInput)
                                         }
+                                        // ✅ 关键：无论上面如何，最终都从 state 同步一次，确保显示限定后的值
+                                        weightText = String.format("%.2f", state.weightInput)
                                         weightEdited = false
                                     }
                                 },
@@ -295,7 +295,7 @@ fun HomeScreen(
                                             }
                                         },
                                         textStyle = TextStyle(
-                                            fontSize = 25.sp,
+                                            fontSize = 27.sp,
                                             fontFamily = boldFont,
                                             color = textBlack,
                                             textAlign = TextAlign.Center
@@ -309,7 +309,6 @@ fun HomeScreen(
                                                     val trimmed = feetText.trim()
                                                     if (trimmed.isNotEmpty()) {
                                                         val value = trimmed.toIntOrNull()
-
                                                         if (value != null) {
                                                             viewModel.sendIntent(
                                                                 HomeIntent.FeetChanged(value)
@@ -369,7 +368,7 @@ fun HomeScreen(
                                             }
                                         },
                                         textStyle = TextStyle(
-                                            fontSize = 25.sp,
+                                            fontSize = 27.sp,
                                             fontFamily = boldFont,
                                             color = textBlack,
                                             textAlign = TextAlign.Center
@@ -440,22 +439,20 @@ fun HomeScreen(
                                     }
                                 },
                                 textStyle = TextStyle(
-                                    fontSize = 25.sp,
+                                    fontSize = 27.sp,
                                     fontFamily = boldFont,
                                     color = textBlack,
                                     textAlign = TextAlign.Center
                                 ),
                                 modifier = Modifier
-                                    .width(91.dp)
+                                    .width(100.dp)
                                     .height(37.dp)
                                     .background(Color.Transparent)
                                     .onFocusChanged { focusState ->
                                         if (!focusState.isFocused && cmEdited) {
                                             val trimmed = cmText.trim()
-
                                             if (trimmed.isNotEmpty()) {
                                                 val validValue = trimmed.toDoubleOrNull()
-
                                                 if (validValue != null) {
                                                     viewModel.sendIntent(HomeIntent.HeightCmChanged(validValue))
                                                 } else {
@@ -464,6 +461,8 @@ fun HomeScreen(
                                             } else {
                                                 cmText = String.format("%.1f", state.heightCm)
                                             }
+                                            // 从 state 同步最新值
+                                            cmText = String.format("%.1f", state.heightCm)
                                             cmEdited = false
                                         }
                                     },
@@ -588,12 +587,10 @@ fun HomeScreen(
             // ---- 年龄卡片 ----
             AgePicker(
                 selectedAge = state.age,
-                onAgeSelected = { age ->
-                    viewModel.sendIntent(HomeIntent.AgeChanged(age))
-                },
+                onAgeSelected = onAgeSelected,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp)
+                    .width(335.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             // ---- 性别 ----
@@ -629,6 +626,7 @@ fun HomeScreen(
                         indication = null,
                         interactionSource = noRippleInteractionSource
                     ) {
+                        focusManager.clearFocus()
                         viewModel.sendIntent(HomeIntent.Calculate)
                     },
                 shape = RoundedCornerShape(28.75.dp),
@@ -785,7 +783,7 @@ fun GenderCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = (-17).dp)
+                    .offset(y = (-12).dp)
             )
             if (isSelected) {
                 Image(

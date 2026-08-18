@@ -22,8 +22,10 @@ import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.bmi.BaseActivity
 import com.example.bmi.ui.components.BottomNavigationBar
+import com.example.bmi.ui.display.DisplayScreen
 import com.example.bmi.ui.home.HomeScreen
 import com.example.bmi.ui.navigation.Screen
+import com.example.bmi.ui.recent.RecentActivity
 import com.example.bmi.ui.result.ResultActivity
 import com.example.bmi.ui.theme.BmiTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -65,6 +67,7 @@ class MainActivity : BaseActivity() {
                             )
                         }
                     }
+                    //自动计算出底部导航栏占用的空间innerPadding
                 ) { innerPadding ->
                     // 根据当前屏幕显示对应的 Composable
                     when (currentScreen) {
@@ -79,8 +82,12 @@ class MainActivity : BaseActivity() {
                                 )
                             }
                         )
-                        // 🔥 关键点：Display 和 Statistics 只显示占位符，完全不加载旧的 Fragment
-                        Screen.Display -> PlaceholderScreen("Display (Coming Soon)")
+                        Screen.Display -> DisplayScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onNavigateToRecent = {
+                                startActivity(Intent(this@MainActivity, RecentActivity::class.java))
+                            }
+                        )
                         Screen.Statistics -> PlaceholderScreen("Statistics (Coming Soon)")
                     }
                 }

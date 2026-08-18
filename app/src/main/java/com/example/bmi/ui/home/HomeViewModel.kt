@@ -168,12 +168,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onInchesChanged(inches: Int) {
-        Log.d(
-            "CM_DEBUG",
-            "!!! onInchesChanged: inches=$inches, " +
-                    "oldHeightCm=${_state.value.heightCm}, " +
-                    "feet=${_state.value.feetInput}"
-        )
         val currentFeet = _state.value.feetInput
         val maxInches = if (currentFeet == 8) 2 else 11
         val clamped = inches.coerceIn(0, maxInches)

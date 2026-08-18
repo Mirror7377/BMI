@@ -71,15 +71,8 @@ fun HistoryDetailScreen(
     ) {
         if (record == null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No data available",
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.montserrat_regular))
-                )
-            }
+                modifier = Modifier.fillMaxSize()
+            )
         } else {
             // ===== 顶部导航栏 =====
             Row(

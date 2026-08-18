@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,20 +88,7 @@ fun RecentScreen(
         }
 
         if (records.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No records yet.\nStart tracking your BMI!",
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.montserrat_regular)),
-                    color = Color(0xFF888888),
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
+            Box(modifier = Modifier.fillMaxSize())
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -155,7 +143,7 @@ private fun RecentItem(
         ),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -163,70 +151,116 @@ private fun RecentItem(
                     end = 15.dp,
                     top = 12.dp,
                     bottom = 12.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                )
         ) {
-            // ---- 左侧区域：BMI 数值 + 等级信息（垂直排列） ----
+
+            // ============================================================
+            // 左侧：BMI + 状态
+            // 正常占据左侧区域
+            // 但是状态文字允许视觉上超出这个区域
+            // ============================================================
+
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.align(Alignment.CenterStart)
             ) {
-                // 第一行：BMI 数值
+
+                // BMI 数值
                 Text(
                     text = String.format("%.1f", record.bmi),
                     fontSize = 28.sp,
-                    fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                    fontFamily = FontFamily(
+                        Font(R.font.montserrat_extrabold)
+                    )
                 )
 
-                // 第二行：等级名称 + 彩色圆点（水平排列）
+                // 状态
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 彩色圆点
+
                     Box(
                         modifier = Modifier
                             .size(18.dp)
                             .clip(CircleShape)
-                            .background(Color(bmiLevel.cardBgColor))
+                            .background(
+                                Color(bmiLevel.cardBgColor)
+                            )
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Spacer(
+                        modifier = Modifier.width(8.dp)
+                    )
+
                     Text(
-                        text = stringResource(bmiLevel.statusTextRes),
+                        text = stringResource(
+                            bmiLevel.statusTextRes
+                        ),
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                        fontFamily = FontFamily(
+                            Font(R.font.montserrat_regular)
+                        ),
+
+                        // 只允许一行
+                        maxLines = 1,
+
+                        // 禁止自动换行
+                        softWrap = false,
+
+                        // 超出自己的布局范围后继续绘制
+                        overflow = TextOverflow.Visible
                     )
                 }
             }
 
-            // ---- 右侧：日期 + 箭头（水平排列） ----
+
+            // ============================================================
+            // 右侧：日期 + 时段 + 箭头
+            //
+            // 独立定位，不受左侧状态文字长度影响
+            // ============================================================
+
             Row(
+                modifier = Modifier.align(
+                    Alignment.CenterEnd
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 日期 + 时段（右对齐）
+
                 Column(
                     horizontalAlignment = Alignment.End
                 ) {
+
                     Text(
                         text = dateStr,
                         fontSize = 14.sp,
-                        fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                        fontFamily = FontFamily(
+                            Font(R.font.montserrat_regular)
+                        ),
                         lineHeight = 14.sp
                     )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(
+                        modifier = Modifier.height(2.dp)
+                    )
 
                     Text(
                         text = record.timeOfDay,
                         fontSize = 14.sp,
-                        fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                        fontFamily = FontFamily(
+                            Font(R.font.montserrat_regular)
+                        ),
                         lineHeight = 14.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(
+                    modifier = Modifier.width(12.dp)
+                )
 
-                // 右箭头（垂直居中）
                 Icon(
-                    painter = painterResource(id = R.drawable.arrow_right),
+                    painter = painterResource(
+                        id = R.drawable.arrow_right
+                    ),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
