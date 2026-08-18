@@ -1,4 +1,4 @@
-package com.example.bmi.ui.navigation
+package com.example.bmi.data.enums
 
 enum class Screen {
     Home,

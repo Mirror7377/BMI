@@ -16,14 +16,13 @@ import androidx.core.content.edit
 import com.example.bmi.R
 import com.example.bmi.data.database.RecommendApp
 import com.example.bmi.data.enums.Gender
-import com.example.bmi.databinding.DialogDiscardConfirmBinding
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.ui.bmigauge.BmiLevel
 
 object BmiUiUtils {
 
     /**
-     * 绑定推荐 App 卡片（完全一致）
+     * 绑定推荐 App 卡片
      */
     fun bindAppToCard(
         cardView: View,
@@ -55,31 +54,7 @@ object BmiUiUtils {
         }
     }
 
-    /**
-     * 显示统一的“确认丢弃/删除”对话框
-     */
-    fun showConfirmDialog(
-        activity: Activity,
-        onConfirm: () -> Unit
-    ) {
-        val dialogBinding = DialogDiscardConfirmBinding.inflate(
-            activity.layoutInflater
-        )
-        val dialog = Dialog(activity).apply {
-            setContentView(dialogBinding.root)
-            window?.apply {
-                setBackgroundDrawableResource(android.R.color.transparent)
-                setGravity(Gravity.CENTER)
-                setLayout(dpToPx(activity, 301f), dpToPx(activity, 154f))
-            }
-        }
-        dialogBinding.tvCancel.setOnClickListener { dialog.dismiss() }
-        dialogBinding.tvDelete.setOnClickListener {
-            dialog.dismiss()
-            onConfirm.invoke()
-        }
-        dialog.show()
-    }
+
 
     /**
     * 获取该身高对应的正常体重范围（公斤）
@@ -99,10 +74,4 @@ object BmiUiUtils {
         }
     }
 
-    /**
-     * dp → px 转换
-     */
-    fun dpToPx(context: Context, dp: Float): Int {
-        return (dp * context.resources.displayMetrics.density).toInt()
-    }
 }

@@ -36,9 +36,7 @@ class HomeViewModel @Inject constructor(
     // ---------- 副作用（导航事件） ----------
     private val _effect = MutableSharedFlow<HomeEffect>()
     val effect: SharedFlow<HomeEffect> = _effect.asSharedFlow()
-    init {
-        Log.d("HomeVM", "HomeViewModel 创建了")
-    }
+
     // ---------- Intent 处理 ----------
     fun sendIntent(intent: HomeIntent) {
         when (intent) {

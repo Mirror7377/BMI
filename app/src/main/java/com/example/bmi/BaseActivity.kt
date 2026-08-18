@@ -2,7 +2,6 @@ package com.example.bmi
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.bmi.utils.DensityUtil
 import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity

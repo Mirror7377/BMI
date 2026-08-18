@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 import com.example.bmi.ui.profile.components.CustomSwitch
-import com.example.bmi.utils.CommonBanner
-import kotlin.Unit
+import com.example.bmi.utils.Banner
+import com.example.bmi.utils.rememberBannerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,10 +37,9 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // Banner 状态（本地管理）
-    var bannerState by remember { mutableStateOf(CommonBanner.initialState()) }
+    // Banner 状态（新版）
+    val bannerState = rememberBannerState()
 
-    var isSyncEnabled by remember { mutableStateOf(state.isSyncEnabled) }
     // 监听 Effect
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -48,22 +47,19 @@ fun ProfileScreen(
                 is ProfileEffect.ShowLoginDialog -> onShowLoginDialog()
                 is ProfileEffect.ShowUserInfoDialog -> onShowUserInfoDialog()
                 is ProfileEffect.ImportSuccess -> {
-                    bannerState = CommonBanner.showBanner(
-                        currentState = bannerState,
+                    bannerState.show(
                         iconRes = R.drawable.check_circle,
                         message = "Import records successfully."
                     )
                 }
                 is ProfileEffect.ShowFeedbackBanner -> {
-                    bannerState = CommonBanner.showBanner(
-                        currentState = bannerState,
+                    bannerState.show(
                         iconRes = R.drawable.check_circle,
                         message = effect.message
                     )
                 }
                 is ProfileEffect.ShowBanner -> {
-                    bannerState = CommonBanner.showBanner(
-                        currentState = bannerState,
+                    bannerState.show(
                         iconRes = effect.iconRes,
                         message = effect.message
                     )
@@ -95,9 +91,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(24.dp)
                         .clickable(
-                            onClick = {
-                                onNavigateBack()
-                            },
+                            onClick = onNavigateBack,
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         )
@@ -136,7 +130,6 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (state.isLoggedIn) {
-                        // 已登录状态（保持不变）
                         Image(
                             painter = painterResource(id = R.drawable.utx),
                             contentDescription = null,
@@ -149,14 +142,12 @@ fun ProfileScreen(
                             Text(
                                 text = state.userName,
                                 fontSize = 16.sp,
-                                fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
-
+                                fontFamily = FontFamily(Font(R.font.montserrat_extrabold))
                             )
                             Text(
                                 text = state.userEmail,
                                 fontSize = 14.sp,
-                                fontFamily = FontFamily(Font(R.font.montserrat_regular)),
-
+                                fontFamily = FontFamily(Font(R.font.montserrat_regular))
                             )
                         }
 
@@ -177,7 +168,6 @@ fun ProfileScreen(
                             tint = Color.Unspecified
                         )
                     } else {
-                        // 未登录状态 - 调整为：文字 + group图标 + 右侧导入图标
                         Row(
                             modifier = Modifier.weight(1f),
                             verticalAlignment = Alignment.CenterVertically
@@ -185,7 +175,6 @@ fun ProfileScreen(
                             Column(
                                 modifier = Modifier.weight(1f)
                             ) {
-                                // 第一行：Backup & Restore + group 图标（水平排列）
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()
@@ -193,9 +182,9 @@ fun ProfileScreen(
                                     Text(
                                         text = stringResource(R.string.backup_amp_restore),
                                         fontSize = 16.sp,
-                                        fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                                        fontFamily = FontFamily(Font(R.font.montserrat_extrabold))
                                     )
-                                    Spacer(modifier = Modifier.width(5.dp)) // 间距 5dp
+                                    Spacer(modifier = Modifier.width(5.dp))
                                     Icon(
                                         painter = painterResource(id = R.drawable.group),
                                         contentDescription = null,
@@ -203,15 +192,13 @@ fun ProfileScreen(
                                         tint = Color.Unspecified
                                     )
                                 }
-                                // 第二行：同步文字（左对齐）
                                 Text(
                                     text = stringResource(R.string.synchronize_your_data),
                                     fontSize = 14.sp,
-                                    fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                                    fontFamily = FontFamily(Font(R.font.montserrat_regular))
                                 )
                             }
 
-                            // 导入图标（放在最右侧）
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_autorenew_black),
                                 contentDescription = "Import",
@@ -270,13 +257,11 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(R.string.language),
                             fontSize = 16.sp,
-                            fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                            fontFamily = FontFamily(Font(R.font.montserrat_regular))
                         )
-
                     }
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 0.dp),
                         color = Color(0xFFEEEEEE),
                         thickness = 1.dp
                     )
@@ -305,10 +290,12 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.weight(1f))
 
+                        // 直接使用 ViewModel 状态，不再维护本地 isSyncEnabled
                         CustomSwitch(
-                            checked = isSyncEnabled,
+                            checked = state.isSyncEnabled,
                             onCheckedChange = { isChecked ->
-                                isSyncEnabled = isChecked}
+                                viewModel.handleIntent(ProfileIntent.ToggleSync(isChecked))
+                            }
                         )
                     }
                 }
@@ -330,7 +317,6 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-                    // 移除广告
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -356,17 +342,15 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(R.string.remove_ads),
                             fontSize = 16.sp,
-                            fontFamily = FontFamily(Font(R.font.montserrat_regular)),
+                            fontFamily = FontFamily(Font(R.font.montserrat_regular))
                         )
                     }
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 0.dp),
                         thickness = 1.dp,
                         color = Color(0xFFEEEEEE)
                     )
 
-                    // Rate Us
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -402,12 +386,10 @@ fun ProfileScreen(
                     }
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 0.dp),
                         thickness = 1.dp,
                         color = Color(0xFFEEEEEE)
                     )
 
-                    // Feedback
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -443,12 +425,10 @@ fun ProfileScreen(
                     }
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 0.dp),
                         thickness = 1.dp,
                         color = Color(0xFFEEEEEE)
                     )
 
-                    // 隐私政策
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -483,7 +463,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 版本号
             Text(
                 text = stringResource(R.string.version_1_0_0),
                 fontSize = 14.sp,
@@ -493,12 +472,10 @@ fun ProfileScreen(
             )
         }
 
-        // Banner 覆盖层
-        CommonBanner.BannerHost(
+        // Banner 覆盖层（新版）
+        Banner(
             state = bannerState,
-            onDismiss = {
-                bannerState = CommonBanner.hideBanner(bannerState)
-            }
+            modifier = Modifier.align(Alignment.TopCenter)
         )
     }
 }

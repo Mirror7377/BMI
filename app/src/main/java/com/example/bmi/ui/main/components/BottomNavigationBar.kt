@@ -1,4 +1,4 @@
-package com.example.bmi.ui.components
+package com.example.bmi.ui.main.components
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bmi.R
-import com.example.bmi.ui.navigation.Screen
+import com.example.bmi.data.enums.Screen
 
 @Composable
 fun BottomNavigationBar(
