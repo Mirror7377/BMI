@@ -51,7 +51,6 @@ import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.ui.home.components.AgePicker
 import com.example.bmi.ui.home.components.DatePickerSheet
 import com.example.bmi.ui.home.components.TimePickerSheet
-import com.example.bmi.ui.profile.ProfileActivity
 import com.example.bmi.utils.Banner
 import com.example.bmi.utils.rememberBannerState
 import java.text.SimpleDateFormat
@@ -61,7 +60,8 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToResult: ((BmiRecord) -> Unit)? = null,
+    onNavigateToResult: ((String) -> Unit)? = null,
+    onNavigateToProfile: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val focusManager = LocalFocusManager.current
@@ -112,7 +112,7 @@ fun HomeScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToResult -> {
-                    onNavigateToResult?.invoke(effect.record)
+                    onNavigateToResult?.invoke(effect.recordJson)  // 传 JSON 字符串
                 }
             }
         }
@@ -172,7 +172,7 @@ fun HomeScreen(
                             indication = null,
                             interactionSource = noRippleInteractionSource
                         ) {
-                            context.startActivity(Intent(context, ProfileActivity::class.java))
+                            onNavigateToProfile()
                         }
                 )
             }

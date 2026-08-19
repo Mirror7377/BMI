@@ -48,12 +48,10 @@ class WeightChartConfig : ChartConfig<DayWeightData> {
         }
     }
 
-    // 对应原 WeightChartView.drawDots() 选中状态：白色实心圆 4.5dp
     override fun DrawScope.drawSelectedDot(point: Offset, value: Float) {
         drawCircle(Color.Companion.White, radius = selectedDotRadiusDp.dp.toPx(), center = point)
     }
 
-    // 对应原 WeightChartView.drawDots() 普通状态
     override fun DrawScope.drawNormalDot(point: Offset) {
         drawCircle(Color.Companion.White, radius = normalDotRadiusDp.dp.toPx(), center = point)
     }

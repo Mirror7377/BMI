@@ -5,12 +5,6 @@ import com.example.bmi.R
 import com.example.bmi.data.enums.Gender
 
 
-enum class ChildCategory {
-    UNDERWEIGHT,
-    NORMAL,
-    OVERWEIGHT,
-    OBESE_CLASS_I
-}
 
 object BmiClassifier {
     fun classifyAdult(bmi: Double): BmiLevel {
@@ -36,7 +30,7 @@ object BmiClassifier {
         val table = if (gender == Gender.MALE) maleTable else femaleTable
         return table[age] ?: table[age.coerceIn(2, 20)] ?: error("Age out of range")
     }
-    // 新增：获取特定年龄性别的正常 BMI 范围（下限=underweight，上限=normal）
+    // 获取特定年龄性别的正常 BMI 范围（下限=underweight，上限=normal）
     fun getNormalBmiRange(age: Int, gender: Gender): Pair<Double, Double> {
         val row = getChildRow(age, gender)
         return Pair(row.underweight, row.normal)

@@ -18,34 +18,37 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 import com.example.bmi.ui.profile.components.CustomSwitch
+import com.example.bmi.ui.profile.components.LoginDialog
+import com.example.bmi.ui.profile.components.LogoutDialog
 import com.example.bmi.utils.Banner
 import com.example.bmi.utils.rememberBannerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel,
+    viewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToLanguage: () -> Unit,
     onNavigateToFeedback: () -> Unit,
-    onShowLoginDialog: () -> Unit,
-    onShowUserInfoDialog: () -> Unit,
     onNavigateBack: () -> Unit,
     onRateUs: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    // Banner 状态（新版）
     val bannerState = rememberBannerState()
+
+    // Dialog 状态从 Activity 移入 Screen
+    var showLoginDialog by remember { mutableStateOf(false) }
+    var showUserInfoDialog by remember { mutableStateOf(false) }
 
     // 监听 Effect
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is ProfileEffect.ShowLoginDialog -> onShowLoginDialog()
-                is ProfileEffect.ShowUserInfoDialog -> onShowUserInfoDialog()
+                is ProfileEffect.ShowLoginDialog -> showLoginDialog = true
+                is ProfileEffect.ShowUserInfoDialog -> showUserInfoDialog = true
                 is ProfileEffect.ImportSuccess -> {
                     bannerState.show(
                         iconRes = R.drawable.check_circle,
@@ -65,6 +68,20 @@ fun ProfileScreen(
                     )
                 }
             }
+        }
+    }
+
+    // onResume 逻辑：检查反馈内容
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.checkFeedbackContent()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
@@ -290,7 +307,6 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        // 直接使用 ViewModel 状态，不再维护本地 isSyncEnabled
                         CustomSwitch(
                             checked = state.isSyncEnabled,
                             onCheckedChange = { isChecked ->
@@ -355,7 +371,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(
-                                onClick = onRateUs,
+                                onClick = { onRateUs() },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }
                             )
@@ -472,10 +488,30 @@ fun ProfileScreen(
             )
         }
 
-        // Banner 覆盖层（新版）
         Banner(
             state = bannerState,
             modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+
+    // ===== Dialogs（从 Activity 移入）=====
+    if (showLoginDialog) {
+        LoginDialog(
+            onDismiss = { showLoginDialog = false },
+            onLogin = {
+                showLoginDialog = false
+                viewModel.handleIntent(ProfileIntent.Login)
+            }
+        )
+    }
+
+    if (showUserInfoDialog) {
+        LogoutDialog(
+            onDismiss = { showUserInfoDialog = false },
+            onLogout = {
+                showUserInfoDialog = false
+                viewModel.handleIntent(ProfileIntent.Logout)
+            }
         )
     }
 }

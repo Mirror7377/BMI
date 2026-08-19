@@ -17,13 +17,12 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.activity.compose.BackHandler
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 import com.example.bmi.ui.bmigauge.BmiConfigProvider
 import com.example.bmi.ui.bmigauge.BmiGauge
 import com.example.bmi.ui.common.AppRecommendations
-import com.example.bmi.ui.common.BmiLegend
 import com.example.bmi.ui.common.BmiLegendSheetContent
 import com.example.bmi.ui.common.DiscardConfirmDialog
 import com.example.bmi.ui.common.HealthTip
@@ -33,11 +32,16 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryDetailScreen(
-    viewModel: HistoryDetailViewModel,
+    recordId: Long, // 从路由参数接收
     onNavigateBack: () -> Unit,
     onNavigateToHome: () -> Unit,
-    showDeleteDialog: () -> Unit
+    viewModel: HistoryDetailViewModel = hiltViewModel()
 ) {
+    // 自动加载数据
+    LaunchedEffect(recordId) {
+        viewModel.handleIntent(HistoryDetailIntent.LoadRecord(recordId))
+    }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
     val record = state.record
 
@@ -55,8 +59,8 @@ fun HistoryDetailScreen(
             when (effect) {
                 is HistoryDetailEffect.NavigateBack -> onNavigateBack()
                 is HistoryDetailEffect.NavigateToHome -> onNavigateToHome()
-                is HistoryDetailEffect.ShowDeleteDialog -> showDeleteDialog()
                 is HistoryDetailEffect.ShowBmiLegend -> { showBmiLegendSheet = true }
+                is HistoryDetailEffect.ShowDeleteDialog -> { showDiscardDialog = true }
             }
         }
     }
@@ -70,9 +74,7 @@ fun HistoryDetailScreen(
             .background(bgWhite)
     ) {
         if (record == null) {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            )
+            Box(modifier = Modifier.fillMaxSize())
         } else {
             // ===== 顶部导航栏 =====
             Row(
@@ -111,7 +113,6 @@ fun HistoryDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 80.dp)
             ) {
-                // 仪表盘
                 val config = BmiConfigProvider.getConfig(record.age, record.gender)
                 BmiGauge(
                     config = config,
@@ -121,12 +122,11 @@ fun HistoryDetailScreen(
                         .height(200.dp)
                         .padding(horizontal = 16.dp),
                     showPointer = true,
-                    animate = false  // 无动画，直接显示
+                    animate = false
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // "Your BMI is" 标题
                 Text(
                     text = stringResource(R.string.your_bmi_is),
                     fontSize = 16.sp,
@@ -136,7 +136,6 @@ fun HistoryDetailScreen(
                         .offset(y = 10.dp),
                 )
 
-                // BMI 数值（直接显示，无动画）
                 Text(
                     text = String.format("%.1f", record.bmi),
                     fontSize = 64.sp,
@@ -146,7 +145,6 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 状态标签
                 Card(
                     modifier = Modifier
                         .wrapContentWidth()
@@ -169,7 +167,6 @@ fun HistoryDetailScreen(
                             fontSize = 19.sp,
                             fontFamily = FontFamily(Font(R.font.montserrat_extrabold))
                         )
-                        // 显示信息图标（有历史记录时，本页总有记录，所以显示）
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_info_outline),
@@ -182,8 +179,11 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // BMI 信息
-                val weightText = String.format("%.2f %s", record.weightInput, record.weightUnit.lowercase())
+                val weightText = String.format(
+                    "%.2f %s",
+                    record.weightInput,
+                    record.weightUnit.lowercase()
+                )
                 val heightText = if (record.heightUnit == "FT_IN") {
                     "${record.feetInput ?: 0} ft ${record.inchesInput ?: 0} in"
                 } else {
@@ -206,14 +206,11 @@ fun HistoryDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 健康建议
                 HealthTip(
                     bmiLevel = state.bmiLevel,
                     record = record
                 )
 
-
-                // 格式化日期
                 val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
                 val dateStr = dateFormat.format(record.timestamp)
                 val dateTime = "$dateStr ${record.timeOfDay}"
@@ -228,7 +225,6 @@ fun HistoryDetailScreen(
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            // ===== 删除确认对话框 =====
             if (showDiscardDialog) {
                 DiscardConfirmDialog(
                     onDismiss = { showDiscardDialog = false },
@@ -239,7 +235,6 @@ fun HistoryDetailScreen(
                 )
             }
 
-            // ===== BMI 图例弹窗 =====
             if (showBmiLegendSheet) {
                 ModalBottomSheet(
                     onDismissRequest = { showBmiLegendSheet = false },

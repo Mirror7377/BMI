@@ -34,7 +34,6 @@ class BmiChartConfig : ChartConfig<DayBmiData> {
         return yPaddingTop + drawableHeight * (1 - ratio)
     }
 
-    // 对应原 BmiChartView.getBmiColor()
     override fun getDotColor(value: Float): Color {
         return when {
             value < 16f -> Color(0xFF4343B8)
@@ -60,13 +59,13 @@ class BmiChartConfig : ChartConfig<DayBmiData> {
         }
     }
 
-    // 对应原 BmiChartView.drawDots() 选中状态：外圈白 5dp，内圈彩色 4dp
+    //  选中状态：外圈白 5dp，内圈彩色 4dp
     override fun DrawScope.drawSelectedDot(point: Offset, value: Float) {
         drawCircle(Color.Companion.White, radius = selectedDotRadiusDp.dp.toPx(), center = point)
         drawCircle(getDotColor(value), radius = 4f.dp.toPx(), center = point)
     }
 
-    // 对应原 BaseChartView.drawDots() 普通状态（白色实心圆）
+    //  普通状态（白色实心圆）
     override fun DrawScope.drawNormalDot(point: Offset) {
         drawCircle(Color.Companion.White, radius = normalDotRadiusDp.dp.toPx(), center = point)
     }

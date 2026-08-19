@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt)
     id("kotlin-parcelize")
     alias(libs.plugins.kotlin.compose)
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -103,4 +104,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 }

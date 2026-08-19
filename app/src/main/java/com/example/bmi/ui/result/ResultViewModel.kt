@@ -1,14 +1,12 @@
 package com.example.bmi.ui.result
 
-import android.os.Bundle
-import androidx.core.os.BundleCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.bmigauge.BmiClassifier
 import com.example.bmi.utils.RecommendationUtils
-import com.example.bmi.utils.UnitConverter
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,15 +31,18 @@ class ResultViewModel @Inject constructor(
 
     fun handleIntent(intent: ResultIntent) {
         when (intent) {
-            is ResultIntent.Init -> initData(intent.bundle)
+            is ResultIntent.Init -> initData(intent.recordJson)  // 改传 JSON
             is ResultIntent.SaveRecord -> saveRecord()
         }
     }
 
-    private fun initData(bundle: Bundle?) {
-        if (bundle == null) return
-
-        val record = BundleCompat.getParcelable(bundle, "BMI_RECORD", BmiRecord::class.java) ?: return
+    private fun initData(recordJson: String) {
+        // 解析 JSON
+        val record = try {
+            Gson().fromJson(recordJson, BmiRecord::class.java)
+        } catch (e: Exception) {
+            null
+        } ?: return
 
         val bmiLevel = if (record.age > 20) {
             BmiClassifier.classifyAdult(record.bmi)
@@ -70,11 +71,8 @@ class ResultViewModel @Inject constructor(
         val record = currentState.record ?: return
 
         viewModelScope.launch {
-            val countBefore = repository.getRecordCount()
-            val isFirstSave = countBefore == 0
-
             repository.saveRecord(record)
-            _effect.emit(ResultEffect.NavigateToHome(isFirstSave))
+            _effect.emit(ResultEffect.NavigateToHome)
         }
     }
 }

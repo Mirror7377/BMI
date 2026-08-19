@@ -27,7 +27,6 @@ import com.example.bmi.ui.common.BmiLegend
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisplayScreen(
     viewModel: DisplayViewModel = hiltViewModel(),
@@ -37,7 +36,7 @@ fun DisplayScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val record = state.record
 
-    // 在 UI 层直接计算 bmiLevel（与原始 DisplayFragment 逻辑一致）
+    // 在 UI 层直接计算 bmiLevel
     val bmiLevel = if (record != null) {
         if (record.age <= 20) {
             BmiConfigProvider.classifyChild(record.age, record.gender, record.bmi)
@@ -153,7 +152,7 @@ fun DisplayScreen(
                 )
 
 
-                // 状态标签（与原始 DisplayFragment 一致，无信息图标）
+                // 状态标签
                 Card(
                     modifier = Modifier
                         .wrapContentWidth()

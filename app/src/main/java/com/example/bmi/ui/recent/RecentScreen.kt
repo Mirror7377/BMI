@@ -118,7 +118,7 @@ private fun RecentItem(
     record: BmiRecord,
     onClick: () -> Unit
 ) {
-    // 根据年龄判断 BMI 等级（与原生逻辑一致）
+    // 根据年龄判断 BMI 等级
     val bmiLevel = if (record.age > 20) {
         BmiClassifier.classifyAdult(record.bmi)
     } else {
@@ -154,11 +154,6 @@ private fun RecentItem(
                 )
         ) {
 
-            // ============================================================
-            // 左侧：BMI + 状态
-            // 正常占据左侧区域
-            // 但是状态文字允许视觉上超出这个区域
-            // ============================================================
 
             Column(
                 modifier = Modifier.align(Alignment.CenterStart)
@@ -212,12 +207,6 @@ private fun RecentItem(
                 }
             }
 
-
-            // ============================================================
-            // 右侧：日期 + 时段 + 箭头
-            //
-            // 独立定位，不受左侧状态文字长度影响
-            // ============================================================
 
             Row(
                 modifier = Modifier.align(

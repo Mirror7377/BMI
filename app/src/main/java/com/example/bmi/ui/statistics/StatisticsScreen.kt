@@ -45,16 +45,6 @@ import com.example.bmi.ui.statistics.components.StatisticsChart
 import com.example.bmi.ui.statistics.components.StatisticsPeriodSwitcher
 import com.example.bmi.ui.statistics.components.WeightChartConfig
 
-/**
- * 使用示例（在 MainActivity 的 Scaffold content 中）：
- *
- * when (currentScreen) {
- *     Screen.Statistics -> StatisticsScreen(
- *         modifier = Modifier.padding(innerPadding),
- *         onNavigateToHome = { mainViewModel.navigateTo(Screen.Home) }
- *     )
- * }
- */
 @Composable
 fun StatisticsScreen(
     modifier: Modifier = Modifier,
@@ -70,7 +60,7 @@ fun StatisticsScreen(
     val regularFont = FontFamily(Font(R.font.montserrat_regular))
     val noRippleInteractionSource = remember { MutableInteractionSource() }
 
-    // 对应原 StatisticsFragment.onResume()：页面重新可见时刷新数据
+    // 页面重新可见时刷新数据
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -101,7 +91,7 @@ fun StatisticsScreen(
             fontSize = 24.sp,
             fontFamily = boldFont,
             color = textBlack,
-            modifier = Modifier.padding(top = 40.dp)
+            modifier = Modifier.padding(top = 20.dp)
         )
 
         // ---- Period Switcher ----
@@ -146,7 +136,7 @@ fun StatisticsScreen(
             )
         }
 
-        // BMI 图表容器（修复：使用 Compose background 替代 shape drawable）
+        // BMI 图表容器
         Box(
             modifier = Modifier
                 .padding(top = 10.dp)
@@ -191,7 +181,7 @@ fun StatisticsScreen(
             )
         }
 
-        // Weight 图表容器（修复：使用 Compose background 替代 shape drawable）
+        // Weight 图表容器
         Box(
             modifier = Modifier
                 .padding(top = 10.dp)
@@ -213,7 +203,6 @@ fun StatisticsScreen(
         Spacer(modifier = Modifier.height(30.dp))
     }
 }
-// 放在 StatisticsScreen.kt 底部，或单独文件
 fun Modifier.statisticsCardBackground(): Modifier = this
     .clip(RoundedCornerShape(12.dp))
     .background(

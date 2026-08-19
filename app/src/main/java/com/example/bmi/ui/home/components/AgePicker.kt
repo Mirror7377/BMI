@@ -129,10 +129,6 @@ fun AgePicker(
         isUserScrolling = false
     }
 
-    // ============================================================
-    // 统一计算所有可见项的渐变参数
-    // 避免每个 item 独立读取 listState 导致多帧颜色不一致
-    // ============================================================
     val visibleItemEffects by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -153,10 +149,6 @@ fun AgePicker(
         }
     }
 
-    // ============================================================
-    // 布局就绪前的 fallback：根据与 initialIndex 的距离估算
-    // 保证第一帧就有正确的渐变，不会从全黑/全灰跳变
-    // ============================================================
     val fallbackEffects = remember(initialIndex) {
         val maxDistance = itemUnitPx * 2f
         ages.indices.associateWith { idx ->

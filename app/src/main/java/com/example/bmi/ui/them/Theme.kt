@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bmi.R
 
-// ===== 颜色定义 (保持不变) =====
+// ===== 颜色定义  =====
 val BmiLightColors = lightColorScheme(
     primary = Color(0xFF3659CF),
     onPrimary = Color.White,
@@ -41,7 +41,6 @@ val BmiDarkColors = darkColorScheme(
 )
 
 // ===== 字体 =====
-// ✅ 正确：不依赖 MaterialTheme.typography，直接创建 TextStyle
 val BmiTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),

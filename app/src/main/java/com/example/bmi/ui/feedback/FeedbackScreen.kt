@@ -101,7 +101,7 @@ fun FeedbackScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                // 输入框（占据剩余空间）
+                // 输入框
                 TextField(
                     value = state.feedbackText,
                     onValueChange = {

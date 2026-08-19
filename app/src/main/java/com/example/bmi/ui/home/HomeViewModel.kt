@@ -236,10 +236,11 @@ class HomeViewModel @Inject constructor(
             createTime = System.currentTimeMillis()
         )
 
-
+        // 生成 JSON，不保存数据库
+        val recordJson = com.google.gson.Gson().toJson(record)
 
         viewModelScope.launch {
-            _effect.emit(HomeEffect.NavigateToResult(record))
+            _effect.emit(HomeEffect.NavigateToResult(recordJson))
         }
     }
 

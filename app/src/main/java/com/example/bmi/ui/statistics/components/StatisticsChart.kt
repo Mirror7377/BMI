@@ -65,9 +65,7 @@ fun <T> StatisticsChart(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // ============================================================
-    // 🔥 无条件追加一个空白数据点，防止最后一个真实数据点的选中弹窗被截断
-    // ============================================================
+
     val displayData = remember(data, mode, config) {
         if (data.isEmpty()) {
             data
@@ -82,7 +80,6 @@ fun <T> StatisticsChart(
         }
     }
 
-    // ========== 布局常量（对应原 BaseChartView companion object） ==========
     val viewWidthPx = with(density) { 345.dp.toPx() }
     val viewHeightPx = with(density) { 237.5f.dp.toPx() }
     val yPaddingTopPx = with(density) { 29.5f.dp.toPx() }
@@ -125,9 +122,9 @@ fun <T> StatisticsChart(
     val yLabelRightX = yLabelLeftPx + maxLabelWidth
     val xStart = yLabelRightX + with(density) { 6f.dp.toPx() }
     val xAvailableWidth = viewWidthPx - xStart - xPaddingRightPx
-    val xInterval = if (8 > 1) xAvailableWidth / 7f else 0f
+    val xInterval = xAvailableWidth / 7f
 
-    // ========== 滚动状态（对应原 BaseChartView.scrollOffset） ==========
+    // ========== 滚动状态 ==========
     val scrollOffset = remember { Animatable(0f) }
     val minScrollX = remember(xInterval) { if (xInterval > 0) -xInterval / 2f else 0f }
     val maxScrollX = remember(displayData, xInterval) {
@@ -135,7 +132,7 @@ fun <T> StatisticsChart(
         else max(0f, (displayData.size - 1) * xInterval - 7 * xInterval)
     }
 
-    // 数据变化时重置到最右侧（对应原 setDataDay/setDataWeek/setDataMonth）
+    // 数据变化时重置到最右侧
     LaunchedEffect(displayData, xInterval, minScrollX, maxScrollX) {
         if (displayData.isNotEmpty() && xInterval > 0) {
             val targetStart = (displayData.size - 8).coerceAtLeast(0)
@@ -146,14 +143,14 @@ fun <T> StatisticsChart(
         }
     }
 
-    // ========== 选中状态（对应原 selectedDataIndex / selectedValue） ==========
+
     var selectedDataIndex by remember { mutableStateOf<Int?>(null) }
     var selectedValue by remember { mutableStateOf<Float?>(null) }
 
-    // ========== 月份锚点（对应原 BaseChartView.rebuildMonthAnchors） ==========
+
     val monthAnchors = remember(displayData, mode) { buildMonthAnchors(displayData, mode, config) }
 
-    // ========== 触摸与嵌套滚动（对应原 BaseChartView.onTouchEvent） ==========
+
     val chartModifier = Modifier
         .size(345.dp, 237.5.dp)
         .pointerInput(displayData, xInterval, minScrollX, maxScrollX, config) {
@@ -221,7 +218,7 @@ fun <T> StatisticsChart(
                         }
                     }
 
-                    // ---- 手指抬起后处理（对应原 ACTION_UP）----
+                    // ---- 手指抬起后处理 ----
                     if (isDragging && isHorizontal) {
                         val velocity = velocityTracker.calculateVelocity()
                         if (abs(velocity.x) > 500f) {
@@ -246,7 +243,7 @@ fun <T> StatisticsChart(
                             }
                         }
                     } else if (!isDragging) {
-                        // ---- 点击选中（对应原 handleClick）----
+                        // ---- 点击选中----
                         val dataX = down.position.x + scrollOffset.value
                         val radius = with(density) {
                             (config.selectedDotRadiusDp.dp.toPx() + 6f.dp.toPx())
@@ -284,7 +281,7 @@ fun <T> StatisticsChart(
             }
         }
 
-    // ========== Canvas 绘制（对应原 BaseChartView.onDraw） ==========
+    // ========== Canvas 绘制 ==========
     Box(modifier = modifier.then(chartModifier)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (displayData.isEmpty()) {
@@ -301,7 +298,7 @@ fun <T> StatisticsChart(
                 .coerceAtLeast(0)
             val visibleEnd = min(visibleStart + 8 + 1, displayData.size)
 
-            // ---- 1. Y 轴标签（在 clip 区域外左侧绘制） ----
+            // ---- 1. Y 轴标签 ----
             for (i in 0 until 6) {
                 val value = yMin + i * yStep
                 val y = yPaddingTopPx + (5 - i) * yInterval

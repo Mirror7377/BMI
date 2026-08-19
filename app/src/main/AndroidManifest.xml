@@ -13,10 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BMI">
 
-        <!-- 👇 MainActivity 现在成为启动页 -->
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
+            android:theme="@style/Theme.BMI.Splash"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,23 +24,6 @@
             </intent-filter>
         </activity>
 
-        <!-- 👇 SplashActivity 不再作为启动页 -->
-        <activity
-            android:name=".ui.splash.SplashActivity"
-            android:exported="false"
-            android:theme="@style/Theme.BMI.Splash" />
-
-        <activity android:name=".ui.result.ResultActivity" />
-        <activity android:name=".ui.recent.RecentActivity" />
-        <activity android:name=".ui.historydetai.HistoryDetailActivity" />
-        <activity android:name=".ui.profile.ProfileActivity" />
-
-        <activity
-            android:name=".ui.feedback.FeedbackActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity android:name=".ui.language.LanguageActivity" />
     </application>
 
     <queries>

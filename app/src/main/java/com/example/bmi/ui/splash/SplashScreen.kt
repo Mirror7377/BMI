@@ -85,7 +85,7 @@ fun SplashScreen(
             joinAll(move, alpha, rotate)
         }
 
-        // 第二段：45° → -45°（保持原有动画不变）
+        // 第二段：45° → -45°
         rotation.animateTo(
             -45f,
             tween(

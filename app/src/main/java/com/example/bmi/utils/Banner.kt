@@ -58,18 +58,11 @@ fun Banner(
     AnimatedVisibility(
         visible = state.visible,
         enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
-                scaleIn(
-                    initialScale = 0.9f,
-                    animationSpec = tween(durationMillis = 300)
-                ),
+                scaleIn(initialScale = 0.9f, animationSpec = tween(durationMillis = 300)),
         exit = fadeOut(animationSpec = tween(durationMillis = 300)) +
-                scaleOut(
-                    targetScale = 0.9f,
-                    animationSpec = tween(durationMillis = 300)
-                ),
+                scaleOut(targetScale = 0.9f, animationSpec = tween(durationMillis = 300)),
         modifier = modifier
     ) {
-        //数据显示时开启一个协程2s后自动隐藏
         LaunchedEffect(data) {
             delay(data.durationMillis)
             state.hide()
@@ -84,7 +77,9 @@ fun Banner(
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -97,9 +92,10 @@ fun Banner(
                 Text(
                     text = data.message,
                     color = Color.Black,
-                    fontSize = 14.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight()
                 )
             }
         }
