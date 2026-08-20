@@ -72,6 +72,7 @@ fun ResultScreen(
         confirmValueChange = { true }
     )
 
+    //拦截系统返回键
     BackHandler(enabled = true) {
         showDiscardDialog = true
     }
@@ -94,16 +95,7 @@ fun ResultScreen(
             .systemBarsPadding()
     ) {
         if (state.record == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No data available",
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.montserrat_regular))
-                )
-            }
+            Box(modifier = Modifier.fillMaxSize())
         } else {
             val record = state.record!!
 
@@ -163,7 +155,7 @@ fun ResultScreen(
                     animationProgress.animateTo(
                         targetValue = 1f,
                         animationSpec = tween(
-                            durationMillis = 1200,
+                            durationMillis = 1000,
                             easing = FastOutSlowInEasing
                         )
                     )

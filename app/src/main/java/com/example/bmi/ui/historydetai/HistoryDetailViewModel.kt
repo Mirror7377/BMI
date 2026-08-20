@@ -3,8 +3,10 @@ package com.example.bmi.ui.historydetai
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bmi.R
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.bmigauge.BmiClassifier
+import com.example.bmi.utils.AppEventBus
 import com.example.bmi.utils.RecommendationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoryDetailViewModel @Inject constructor(
-    private val repository: BmiRepository
+    private val repository: BmiRepository,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HistoryDetailState())
@@ -61,17 +64,19 @@ class HistoryDetailViewModel @Inject constructor(
         }
     }
 
-    private fun deleteRecord() {
+    fun deleteRecord() {
         viewModelScope.launch {
             val id = _state.value.record?.id ?: return@launch
             if (id != 0L) {
-                // 1. 执行删除
                 repository.deleteRecord(id)
-
-                // 2. 查询是否还有剩余记录
                 val remainingCount = repository.getRecordCount()
 
-                // 3. 根据结果发送不同 Effect
+                // 发送全局 Banner 事件
+                appEventBus.showBanner(
+                    R.drawable.check_circle,
+                    "Deleted successfully."
+                )
+
                 if (remainingCount == 0) {
                     _effect.emit(HistoryDetailEffect.NavigateToHome)
                 } else {

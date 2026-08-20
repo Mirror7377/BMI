@@ -92,12 +92,12 @@ fun <T> StatisticsChart(
     val dateLabelYPx = viewHeightPx - with(density) { 17.5f.dp.toPx() }
     val touchSlopPx = with(density) { 10f.dp.toPx() }
 
-    // ========== Y 轴计算（对应原 BaseChartView.updateYAxis） ==========
+    // ========== Y 轴计算 ==========
     val (yMin, yMax, yStep) = remember(displayData) { config.computeAxis(displayData) }
     val yAvailableHeight = viewHeightPx - yPaddingTopPx - yPaddingBottomPx
     val yInterval = yAvailableHeight / 5f
 
-    // ========== 文字画笔（对应原 BaseChartView.textPaint） ==========
+    // ========== 文字画笔 ==========
     val textPaint = remember(density, context) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.WHITE
@@ -107,7 +107,7 @@ fun <T> StatisticsChart(
         }
     }
 
-    // 计算最大 Y 标签宽度（对应原 BaseChartView.calculateMaxYLabelWidth）
+    // 计算最大 Y 标签宽度
     val maxLabelWidth = remember(yMin, yStep, textPaint) {
         var maxW = 0f
         for (i in 0 until 6) {
@@ -557,7 +557,6 @@ fun <T> StatisticsChart(
 
 /**
  * 构建月份锚点
- * 对应原 BaseChartView.rebuildMonthAnchors()
  */
 private fun <T> buildMonthAnchors(
     data: List<T>,

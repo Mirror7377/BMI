@@ -82,15 +82,12 @@ class StatisticsViewModel @Inject constructor(
                     //最终包含 53 个周一
                     mondays.add(monday)
                 }
-                //当前时间的下周一的占位符,不显示数据
-                val nextMonday = thisWeekMonday.clone() as Calendar
-                nextMonday.add(Calendar.DAY_OF_YEAR, 7)
-                mondays.add(nextMonday)
+
 
                 //取第一个数据，也就是52周前
                 val startTime = mondays.first().timeInMillis
                 //本周一
-                val lastMonday = mondays[mondays.size - 2]
+                val lastMonday = mondays[mondays.size - 1]
                 val endTime = lastMonday.clone() as Calendar
                 //把 endTime 从“本周一的 00:00:00.000”，改造成“本周日的 23:59:59.999”。
                 endTime.add(Calendar.DAY_OF_YEAR, 6)
@@ -115,16 +112,6 @@ class StatisticsViewModel @Inject constructor(
                 for (i in mondays.indices) {
                     //取出的是 本周一（2026-07-27）
                     val monday = mondays[i]
-                    //是否是最后一周   判断当前是不是最后一个元素
-                    val isPlaceholder = (i == mondays.size - 1)
-
-                    if (isPlaceholder) {
-                        //添加一个 BMI,体重 为 null 的数据
-                        weekBmiList.add(DayBmiData(monday.clone() as Calendar, null))
-                        weekWeightList.add(DayWeightData(monday.clone() as Calendar, null))
-                        continue
-                    }
-
                     //克隆一份当前周一
                     val weekEnd = monday.clone() as Calendar
                     //在克隆的副本上，加 6 天。
@@ -183,40 +170,40 @@ class StatisticsViewModel @Inject constructor(
 
     // ========== Month 模式加载 ==========
     private fun loadMonth() {
-
         viewModelScope.launch {
             try {
-                //获取当前系统时间（精确到毫秒）
                 val today = Calendar.getInstance()
-                //克隆一份 today
-                val endDate = today.clone() as Calendar
-                //变为本月1.1时分秒毫秒都为0
-                endDate.set(Calendar.DAY_OF_MONTH, 1)
-                endDate.add(Calendar.MONTH, 1)
-                endDate.set(Calendar.HOUR_OF_DAY, 0)
-                endDate.set(Calendar.MINUTE, 0)
-                endDate.set(Calendar.SECOND, 0)
-                endDate.set(Calendar.MILLISECOND, 0)
 
-                //以 endDate 为基准，往前推 5 年，得到 startDate。
+                // ---------- 1. 查询范围：5年前的本月1日 ～ 今天 23:59:59 ----------
+                val endDate = today.clone() as Calendar
+                endDate.set(Calendar.HOUR_OF_DAY, 23)
+                endDate.set(Calendar.MINUTE, 59)
+                endDate.set(Calendar.SECOND, 59)
+                endDate.set(Calendar.MILLISECOND, 999)
+
                 val startDate = endDate.clone() as Calendar
-                startDate.add(Calendar.YEAR, -5)
+                startDate.add(Calendar.YEAR, -5)          // 5年前的今天
+                startDate.set(Calendar.DAY_OF_MONTH, 1)   // 该月第一天
+                startDate.set(Calendar.HOUR_OF_DAY, 0)
+                startDate.set(Calendar.MINUTE, 0)
+                startDate.set(Calendar.SECOND, 0)
+                startDate.set(Calendar.MILLISECOND, 0)
 
                 val records = repository.getRecordsBetween(startDate.timeInMillis, endDate.timeInMillis)
 
-                // 按天分组取最后一条
+                // ---------- 2. 按天分组取最后一条 ----------
                 val latestPerDay = records.groupBy { record ->
                     val cal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
                     cal.get(Calendar.YEAR) to cal.get(Calendar.DAY_OF_YEAR)
                 }.mapValues { (_, list) -> list.maxByOrNull { it.timestamp } }
 
+                // ---------- 3. 按月聚合（平均值） ----------
                 val bmiMonthMap = mutableMapOf<Pair<Int, Int>, MutableList<Float>>()
                 val weightMonthMap = mutableMapOf<Pair<Int, Int>, MutableList<Float>>()
 
                 latestPerDay.values.forEach { record ->
                     record?.let {
                         val cal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-                        //从日历中提取 年份 和 月份,把所有同一年同一月的记录归到同一个“桶”里。
                         val key = cal.get(Calendar.YEAR) to cal.get(Calendar.MONTH)
                         it.bmi.toFloat().let { bmi ->
                             bmiMonthMap.getOrPut(key) { mutableListOf() }.add(bmi)
@@ -227,11 +214,12 @@ class StatisticsViewModel @Inject constructor(
                     }
                 }
 
+                // ---------- 4. 生成月份序列（从 startDate 到 today 所在的月份） ----------
                 val bmiResult = mutableListOf<DayBmiData>()
                 val weightResult = mutableListOf<DayWeightData>()
 
-                val current = startDate.clone() as Calendar
-                while (current <= endDate) {
+                val current = startDate.clone() as Calendar  // 5年前的本月1日
+                while (current <= today) {  // 包含本月（因为 today 在本月内，本月1日 <= today）
                     val year = current.get(Calendar.YEAR)
                     val month = current.get(Calendar.MONTH)
                     val key = year to month
@@ -242,16 +230,17 @@ class StatisticsViewModel @Inject constructor(
                     val weightList = weightMonthMap[key]
                     val avgWeight = if (weightList.isNullOrEmpty()) null else weightList.average().toFloat()
 
-                    //设置日期为当月1日
+                    // 使用当前月份的第一天作为日期
                     val date = current.clone() as Calendar
                     date.set(Calendar.DAY_OF_MONTH, 1)
 
                     bmiResult.add(DayBmiData(date, avgBmi))
                     weightResult.add(DayWeightData(date, avgWeight))
 
-                    current.add(Calendar.MONTH, 1)
+                    current.add(Calendar.MONTH, 1)  // 下个月
                 }
 
+                // ---------- 5. 更新 UI 状态 ----------
                 _state.update {
                     it.copy(
                         mode = ChartMode.MONTH,

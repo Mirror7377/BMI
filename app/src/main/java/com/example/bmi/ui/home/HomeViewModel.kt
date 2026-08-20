@@ -10,6 +10,7 @@ import com.example.bmi.data.enums.TimeOfDay
 import com.example.bmi.data.enums.WeightUnit
 import com.example.bmi.data.repository.BmiRepository
 import com.example.bmi.ui.bmigauge.BmiClassifier
+import com.example.bmi.utils.AppEventBus
 import com.example.bmi.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val appEventBus: AppEventBus,
     private val repository: BmiRepository
 ) : ViewModel() {
 
@@ -36,6 +38,8 @@ class HomeViewModel @Inject constructor(
     // ---------- 副作用（导航事件） ----------
     private val _effect = MutableSharedFlow<HomeEffect>()
     val effect: SharedFlow<HomeEffect> = _effect.asSharedFlow()
+
+    val bannerEvent = appEventBus.bannerEvent
 
     // ---------- Intent 处理 ----------
     fun sendIntent(intent: HomeIntent) {

@@ -154,8 +154,18 @@ private fun BmiNavHost(
             )
         }
 
-        composable<HomeRoute> {
+        composable<HomeRoute> { backStackEntry ->
+            // 读取 ResultScreen 返回时设置的标记
+            val showDeleteSuccess by backStackEntry.savedStateHandle
+                .getStateFlow("show_delete_success", false)
+                .collectAsStateWithLifecycle()
+
             HomeScreen(
+                showDeleteSuccess = showDeleteSuccess,
+                onConsumeDeleteSuccess = {
+                    // 消费掉，防止重组时重复显示
+                    backStackEntry.savedStateHandle.remove<Boolean>("show_delete_success")
+                },
                 onNavigateToResult = { recordJson ->
                     navController.navigate(ResultRoute(recordJson))
                 },
@@ -188,6 +198,11 @@ private fun BmiNavHost(
             ResultScreen(
                 recordJson = route.recordJson,
                 onNavigateBack = {
+                    //获取当前页面回退栈中的上一级条目
+                    navController.previousBackStackEntry
+                        //安全地获取该上一级页面的 SavedStateHandle
+                        ?.savedStateHandle
+                        ?.set("show_delete_success", true)
                     navController.popBackStack()
                 },
                 onNavigateToMain = {
@@ -205,7 +220,7 @@ private fun BmiNavHost(
                     navController.navigate(HistoryDetailRoute(recordId))
                 },
                 onNavigateBack = {
-                    navController.navigateUp()
+                    navController.navigateUp()//回到当前页面的逻辑上一级
                 }
             )
         }
@@ -219,7 +234,7 @@ private fun BmiNavHost(
                 },
                 onNavigateToHome = {
                     navController.navigate(HomeRoute) {
-                        popUpTo(HomeRoute) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )

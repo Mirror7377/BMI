@@ -1,6 +1,7 @@
 package com.example.bmi.ui.main.components
 
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,7 +27,9 @@ fun BottomNavigationBar(
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 0.dp,
-        modifier = Modifier.height(60.dp)
+        modifier = Modifier
+            .navigationBarsPadding()
+            .height(60.dp),
     ) {
         val items = listOf(
             Triple(HomeRoute, R.drawable.ic_home, R.string.calculator),

@@ -1,6 +1,5 @@
 package com.example.bmi.ui.recent
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,9 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
 import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.ui.bmigauge.BmiClassifier
-import com.example.bmi.ui.bmigauge.BmiLevel
-import com.example.bmi.ui.feedback.FeedbackIntent
-import kotlinx.coroutines.delay
+import com.example.bmi.utils.Banner
+import com.example.bmi.utils.rememberBannerState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -49,6 +47,15 @@ fun RecentScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val records = state.records
 
+    val bannerState = rememberBannerState()
+
+    // 收集全局事件
+    LaunchedEffect(Unit) {
+        viewModel.bannerEvent.collect { data ->
+            bannerState.show(data.iconRes, data.message)
+        }
+    }
+
     // 首次加载时触发数据加载
     LaunchedEffect(Unit) {
         viewModel.handleIntent(RecentIntent.LoadRecords)
@@ -56,57 +63,62 @@ fun RecentScreen(
 
     val bgGray = Color(0xFFEAEAEE)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(bgGray)
-    ) {
-        // ---- 顶部导航栏 ----
-        Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 原有内容
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 15.dp)
-                .padding(vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .background(bgGray)
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.arrow_left),
-                contentDescription = "Back",
+            // ---- 顶部导航栏 ----
+            Row(
                 modifier = Modifier
-                    .size(24.dp)
-                    .clickable { onNavigateBack() },
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-                text = stringResource(R.string.recent),
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
-            )
-        }
-
-        if (records.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize())
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)// 项间距
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 15.dp)
+                    .padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(
-                    items = records,
-                    key = { it.id }
-                ) { record ->
-                    RecentItem(
-                        record = record,
-                        onClick = { onRecordClick(record.id) }
-                    )
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow_left),
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { onNavigateBack() },
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Text(
+                    text = stringResource(R.string.recent),
+                    fontSize = 20.sp,
+                    fontFamily = FontFamily(Font(R.font.montserrat_extrabold)),
+                )
+            }
+
+            // 列表或空状态
+            if (records.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize())
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 18.dp),
+                    contentPadding = PaddingValues(vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(records, key = { it.id }) { record ->
+                        RecentItem(record = record, onClick = { onRecordClick(record.id) })
+                    }
                 }
             }
         }
+
+        // Banner 悬浮在顶层，覆盖所有内容
+        Banner(
+            state = bannerState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 
@@ -194,13 +206,10 @@ private fun RecentItem(
                         fontFamily = FontFamily(
                             Font(R.font.montserrat_regular)
                         ),
-
                         // 只允许一行
                         maxLines = 1,
-
                         // 禁止自动换行
                         softWrap = false,
-
                         // 超出自己的布局范围后继续绘制
                         overflow = TextOverflow.Visible
                     )

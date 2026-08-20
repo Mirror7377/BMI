@@ -59,9 +59,10 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
-    onNavigateToResult: ((String) -> Unit)? = null,
-    onNavigateToProfile: () -> Unit = {},
+    showDeleteSuccess: Boolean = false,
+    onConsumeDeleteSuccess: () -> Unit = {},
+    onNavigateToResult: (String) -> Unit,
+    onNavigateToProfile: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val focusManager = LocalFocusManager.current
@@ -72,9 +73,6 @@ fun HomeScreen(
     val errorMsgFull =stringResource(R.string.error_height_full_invalid)
     val errorMsgFeet = stringResource(R.string.error_height_ft_invalid)
     val errorMsgWeight = stringResource(R.string.error_weight_invalid)
-
-    // ---- Banner 状态 ----
-    val bannerState = rememberBannerState()
 
     // ---- 体重输入框状态 ----
     var weightText by remember { mutableStateOf(String.format("%.2f", state.weightInput)) }
@@ -105,14 +103,34 @@ fun HomeScreen(
     LaunchedEffect(state.inchesInput) {
         inchesText = state.inchesInput.toString()
     }
+
     LaunchedEffect(state.heightCm) { cmText = String.format("%.1f", state.heightCm) }
+
+    val bannerState = rememberBannerState()
+
+    LaunchedEffect(Unit) {
+        viewModel.bannerEvent.collect { data ->
+            bannerState.show(data.iconRes, data.message)
+        }
+    }
+
+    // 监听删除成功标记
+    LaunchedEffect(showDeleteSuccess) {
+        if (showDeleteSuccess) {
+            bannerState.show(
+                iconRes = R.drawable.check_circle,
+                message = "Deleted successfully."
+            )
+            onConsumeDeleteSuccess() // 消费掉，防止重组时重复显示
+        }
+    }
 
     // ---- 监听导航事件 ----
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToResult -> {
-                    onNavigateToResult?.invoke(effect.recordJson)  // 传 JSON 字符串
+                    onNavigateToResult.invoke(effect.recordJson)  // 传 JSON 字符串
                 }
             }
         }
@@ -136,7 +154,7 @@ fun HomeScreen(
     val context = LocalContext.current
 
     // ---- 主布局 ----
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

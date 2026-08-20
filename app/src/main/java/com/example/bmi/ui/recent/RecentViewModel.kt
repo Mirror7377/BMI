@@ -3,6 +3,7 @@ package com.example.bmi.ui.recent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bmi.data.repository.BmiRepository
+import com.example.bmi.utils.AppEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecentViewModel @Inject constructor(
-    private val repository: BmiRepository
+    private val repository: BmiRepository,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
+
+    val bannerEvent = appEventBus.bannerEvent
 
     private val _state = MutableStateFlow(RecentState())
     val state: StateFlow<RecentState> = _state.asStateFlow()
