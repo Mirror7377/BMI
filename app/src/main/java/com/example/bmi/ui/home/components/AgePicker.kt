@@ -53,6 +53,7 @@ fun AgePicker(
 
     val focusManager = LocalFocusManager.current
     val ages = remember { (2..99).toList() }
+    //获取一个与当前 Composable 生命周期绑定的协程作用域
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
 
@@ -75,7 +76,9 @@ fun AgePicker(
 
 
     LaunchedEffect(selectedAge) {
+        //todo 实验
         if (isUserScrolling) return@LaunchedEffect
+        //新值和上次记录的 lastSelectedAge 一样，说明滚轮已经停在正确位置了，直接返回，不再浪费性能去执行重复动画。
         if (selectedAge == lastSelectedAge) return@LaunchedEffect
 
         val targetIndex = (selectedAge - 2).coerceIn(0, ages.lastIndex)
@@ -101,6 +104,7 @@ fun AgePicker(
         }
 
         val center = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+        //在所有可见的数字中，找出距离中心最近的那个
         val centerItem = visibleItems.minByOrNull { item ->
             abs(item.offset + item.size / 2 - center)
         }
@@ -113,7 +117,7 @@ fun AgePicker(
             }
 
             // 吸附后再精确取一次中心项，确保回调正确
-            val finalInfo = listState.layoutInfo
+            val finalInfo = listState.layoutInfo//它不是一个“实时动态指针”，而是调用那一刻的“物理快照”
             val finalCenter = (finalInfo.viewportStartOffset + finalInfo.viewportEndOffset) / 2
             val finalItem = finalInfo.visibleItemsInfo.minByOrNull {
                 abs(it.offset + it.size / 2 - finalCenter)
@@ -130,7 +134,7 @@ fun AgePicker(
     }
 
     val visibleItemEffects by remember {
-        derivedStateOf {
+        derivedStateOf {//Compose 专门为“高频触发、但仅在结果变化时才更新 UI”的场景设计的。
             val layoutInfo = listState.layoutInfo
             val visible = layoutInfo.visibleItemsInfo
             if (visible.isEmpty()) return@derivedStateOf emptyMap<Int, Pair<Float, Color>>()
@@ -183,11 +187,12 @@ fun AgePicker(
                         .fillMaxWidth()
                         .height(39.dp),
                     horizontalArrangement = Arrangement.spacedBy(itemSpace),
+                    //把整个 LazyRow 的“内容起点”向右硬生生推了 130.dp
                     contentPadding = PaddingValues(horizontal = 130.dp)
                 ) {
                     itemsIndexed(
                         items = ages,
-                        key = { _, age -> age }
+                        key = { _, age -> age }//用年龄数字本身作为每个卡片的唯一身份证
                     ) { index, age ->
                         // 优先使用精确计算，未就绪时使用 fallback，彻底避免闪烁
                         val (alpha, textColor) = visibleItemEffects[index]

@@ -16,10 +16,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.bmi.R
-import com.example.bmi.data.database.BmiRecord
 import com.example.bmi.data.enums.Gender
 import com.example.bmi.data.enums.HeightUnit
 import com.example.bmi.data.enums.WeightUnit
@@ -67,7 +68,11 @@ fun HomeScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val onAgeSelected = remember { { age: Int -> viewModel.sendIntent(HomeIntent.AgeChanged(age)) } }
+
+    val onAgeSelected = { age: Int ->
+        viewModel.sendIntent(HomeIntent.AgeChanged(age))
+    }
+
     val errorMsgHeight = stringResource(R.string.error_height_invalid)
     val errorMsgInches = stringResource(R.string.error_height_inches_invalid)
     val errorMsgFull =stringResource(R.string.error_height_full_invalid)
@@ -198,8 +203,9 @@ fun HomeScreen(
             Column {
                 // ---- 体重 / 身高 标签 ----
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 15.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 15.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.weight),
@@ -221,7 +227,9 @@ fun HomeScreen(
 
                 // ---- 体重 + 身高卡片 ----
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally)
                 ) {
                     // ========== 体重卡片（可编辑） ==========
@@ -293,7 +301,7 @@ fun HomeScreen(
                             modifier = Modifier
                                 .width(160.dp)
                                 .height(68.dp),
-                            horizontalArrangement = Arrangement.spacedBy(0.dp)
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             // 英尺卡片（占 72dp）
                             Card(
@@ -365,7 +373,6 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.width(5.dp))
 
                             // 英寸卡片（占 83dp）
                             Card(
@@ -511,7 +518,7 @@ fun HomeScreen(
                 ) {
                     UnitSwitch(
                         modifier = Modifier.width(160.dp),
-                        options = listOf("lb", "kg"),
+                        options = listOf(stringResource(R.string.lb), stringResource(R.string.kg)),
                         selectedIndex = if (state.weightUnit == WeightUnit.LB) 0 else 1,
                         onOptionSelected = { index ->
                             val unit = if (index == 0) WeightUnit.LB else WeightUnit.KG
@@ -520,7 +527,7 @@ fun HomeScreen(
                     )
                     UnitSwitch(
                         modifier = Modifier.width(160.dp),
-                        options = listOf("ft·in", "cm"),
+                        options = listOf(stringResource(R.string.ft_in), stringResource(R.string.cm)),
                         selectedIndex = if (state.heightUnit == HeightUnit.FT_IN) 0 else 1,
                         onOptionSelected = { index ->
                             val unit = if (index == 0) HeightUnit.FT_IN else HeightUnit.CM
